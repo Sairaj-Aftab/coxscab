@@ -1,0 +1,100 @@
+.header {
+}
+.header .top-bar {
+  background-color: var(--primary-color);
+  padding: 5px 0;
+}
+.top-bar .wrap {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.top-bar .contact-info {
+  display: flex;
+  align-items: center;
+  gap: 1.3rem;
+}
+.top-bar .contact-info a {
+  color: var(--white-8);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.9rem;
+  font-weight: 400;
+}
+.top-bar .contact-info a span:hover {
+  text-decoration: underline;
+}
+.top-bar .social-info {
+  display: flex;
+  gap: 0.6rem;
+}
+.top-bar .social-info a {
+  color: var(--white-8);
+  font-size: 1rem;
+}
+/* --------------------Main Header------------------ */
+.header .main-header {
+  background-color: var(--white);
+}
+.main-header .wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.main-header .logo img {
+  max-width: 70px;
+  height: auto;
+}
+.main-header .menu {
+  display: none;
+  /* display: flex; */
+  align-items: center;
+  gap: 1.5rem;
+}
+.main-header .menu a {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--primary-color);
+}
+.main-header .menu li {
+  position: relative;
+}
+.main-header .menu a:hover {
+  text-decoration: underline;
+}
+.main-header .menu li:hover .inner-menu {
+  visibility: visible;
+  opacity: 100%;
+}
+.main-header .inner-menu {
+  z-index: 999;
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--white);
+  width: 300px;
+  border-radius: 0 0 6px 6px;
+  padding: 8px;
+  box-shadow: var(--shadow-2);
+}
+.main-header .inner-menu a {
+  padding: 10px 0;
+}
+
+/* SM */
+@media (min-width: 640px) {
+}
+/* MD */
+@media (min-width: 768px) {
+}
+/* LG */
+@media (min-width: 1024px) {
+}
+/* XL */
+@media (min-width: 1280px) {
+}
