@@ -1,6 +1,7 @@
 import Image from "next/image";
 import logo from "@/public/images/logo.png";
 import "@/app/styles/header.css";
+import Link from "next/link";
 
 const menuItem = [
   {
@@ -73,7 +74,7 @@ const Header = () => {
       <div className="main-header">
         <div className="container">
           <div className="wrap">
-            <div className="logo">
+            <Link href="/" className="logo">
               <Image
                 src={logo}
                 alt="CoxsCab"
@@ -81,7 +82,7 @@ const Header = () => {
                 height={0}
                 sizes="100vw"
               />
-            </div>
+            </Link>
             <ul className="menu">
               {menuItem?.map((data, index) => (
                 <li key={index}>

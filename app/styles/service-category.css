@@ -4,7 +4,7 @@
 }
 .service-category .wrap {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: auto;
   gap: 1.3rem;
 }
 .service-category .wrap a {
@@ -30,4 +30,29 @@
 .service-category .wrap a .text {
   font-size: 1.1rem;
   font-weight: 600;
+}
+
+/* SM */
+@media (min-width: 640px) {
+  .service-category .wrap {
+    grid-template-columns: auto auto;
+  }
+}
+/* MD */
+@media (min-width: 768px) {
+  .service-category .wrap {
+    grid-template-columns: auto auto auto;
+  }
+}
+/* LG */
+@media (min-width: 1024px) {
+  .service-category .wrap {
+    grid-template-columns: auto auto auto auto;
+  }
+}
+/* XL */
+@media (min-width: 1280px) {
+}
+/* 2XL */
+@media (min-width: 1536px) {
 }

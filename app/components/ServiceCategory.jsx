@@ -7,7 +7,7 @@ const ServiceCategory = () => {
       <div className="container">
         <Title title1="What we get here!" />
         <div className="wrap">
-          <Link href="/">
+          <Link href="/bus-schedules-booking">
             <div className="icon">🚌</div>
             <div className="text">
               Online Bus Terminal
