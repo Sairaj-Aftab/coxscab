@@ -1,0 +1,33 @@
+.service-category {
+  background-color: var(--white);
+  padding: 2.5rem 0;
+}
+.service-category .wrap {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.3rem;
+}
+.service-category .wrap a {
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: var(--shadow-3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.3rem;
+  text-align: center;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.service-category .wrap a:hover {
+  transform: translateY(-10px);
+  box-shadow: var(--shadow-4);
+}
+.service-category .wrap a .icon {
+  font-size: 40px;
+  margin-bottom: 10px;
+}
+.service-category .wrap a .text {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
