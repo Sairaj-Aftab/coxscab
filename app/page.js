@@ -12,7 +12,7 @@ export default function Home() {
       <Headline />
       <AboutSection />
       <ServiceCategory />
-      <GallerySection />
+      <GallerySection showNumber={8} />
     </main>
   );
 }

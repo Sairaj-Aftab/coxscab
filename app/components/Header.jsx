@@ -1,7 +1,10 @@
+"use client";
 import Image from "next/image";
 import logo from "@/public/images/logo.png";
-import "@/app/styles/header.css";
 import Link from "next/link";
+import { useState } from "react";
+import { usePathname } from "next/navigation";
+import "@/app/styles/components/header.css";
 
 const menuItem = [
   {
@@ -10,22 +13,46 @@ const menuItem = [
   },
   {
     name: "Gallery",
-    path: "/",
+    path: "/gallery",
   },
   {
     name: "About",
-    path: "/",
+    path: "/about",
   },
   {
-    name: "More",
-    path: "/",
+    name: "Get services",
+    path: "#",
     item: [
       {
-        name: "Admin",
+        name: "Online Bus Terminal (Schedule & Booking)",
         path: "/admin",
       },
       {
-        name: "Admin",
+        name: "CoxsCar (Rent-A-Car)",
+        path: "/admin",
+      },
+      {
+        name: "Tourist Bus Entry Permission",
+        path: "/admin",
+      },
+      {
+        name: "Hotel & Resorts",
+        path: "/admin",
+      },
+      {
+        name: "Cafe & Restaurants",
+        path: "/admin",
+      },
+      {
+        name: "Tourist Spot & Park",
+        path: "/admin",
+      },
+      {
+        name: "Tours and Travels Operators",
+        path: "/admin",
+      },
+      {
+        name: "Transport Fare Chart",
         path: "/admin",
       },
       {
@@ -37,6 +64,8 @@ const menuItem = [
 ];
 
 const Header = () => {
+  const path = usePathname();
+  const [moMenu, setMoMenu] = useState(false);
   return (
     <header className="header">
       <div className="top-bar">
@@ -86,39 +115,65 @@ const Header = () => {
             <ul className="menu">
               {menuItem?.map((data, index) => (
                 <li key={index}>
-                  <a href={`${data.path}`}>{data.name}</a>
+                  <Link
+                    href={`${data.path}`}
+                    className={`${path == data.path && "active"}`}
+                  >
+                    {data.name}
+                  </Link>
+                  {data?.item && <i className="fi fi-rr-caret-down"></i>}
                   {data?.item && (
                     <ul className="inner-menu">
                       {data?.item?.map((data, index) => (
                         <li key={index}>
-                          <a href={`${data.path}`}>{data.name}</a>
+                          <Link
+                            href={`${data.path}`}
+                            className={`${path == data.path && "active"}`}
+                          >
+                            {data.name}
+                          </Link>
                         </li>
                       ))}
                     </ul>
                   )}
                 </li>
               ))}
-              {/* <li>
-                <a href="/">Gallery</a>
-              </li>
-              <li>
-                <a href="/">More---</a>
+            </ul>
+            {/* Mobile Menu */}
+            {moMenu ? (
+              <i
+                className="fi fi-br-cross"
+                onClick={() => {
+                  setMoMenu(!moMenu);
+                }}
+              ></i>
+            ) : (
+              <i
+                className="fi fi-br-menu-burger"
+                onClick={() => {
+                  setMoMenu(!moMenu);
+                }}
+              ></i>
+            )}
+            <ul className={`mobile-menu ${moMenu && "active"}`}>
+              {menuItem?.map((data, index) => (
+                <li key={index}>
+                  <Link href={`${data.path}`}>
+                    {data.name}{" "}
+                    {data?.item && <i className="fi fi-rr-caret-down"></i>}
+                  </Link>
 
-                <ul className="inner-menu">
-                  <li>
-                    <a href="/">admin</a>
-                  </li>
-                  <li>
-                    <a href="/">admin</a>
-                  </li>
-                  <li>
-                    <a href="/">admin</a>
-                  </li>
-                  <li>
-                    <a href="/">admin</a>
-                  </li>
-                </ul>
-              </li> */}
+                  {data?.item && (
+                    <ul className="mobile-inner-menu">
+                      {data?.item?.map((data, index) => (
+                        <li key={index}>
+                          <Link href={`${data.path}`}>{data.name}</Link>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </li>
+              ))}
             </ul>
           </div>
         </div>

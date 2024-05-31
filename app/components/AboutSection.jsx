@@ -1,4 +1,4 @@
-import "@/app/styles/about-section.css";
+import "@/app/styles/components/about-section.css";
 
 const AboutSection = () => {
   return (
@@ -18,7 +18,11 @@ const AboutSection = () => {
             </p>
           </div>
           <div className="flex-1" style={{ textAlign: "center" }}>
-            <iframe
+            <video autoPlay controls>
+              <source src="/coxscab.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+            {/* <iframe
               src="https://drive.google.com/file/d/1-CTlCQKXLtWXovaWYmQb71ZwP5-KdBkQ/preview"
               width="100%"
               height="315"
@@ -27,7 +31,7 @@ const AboutSection = () => {
               allow="autoplay"
               referrerPolicy="strict-origin-when-cross-origin"
               allowFullScreen
-            ></iframe>
+            ></iframe> */}
           </div>
         </div>
       </div>

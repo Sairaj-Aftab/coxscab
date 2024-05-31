@@ -1,5 +1,3 @@
-import React from "react";
-
 const Title = ({ title1, title2 }) => {
   return (
     <div className="title">

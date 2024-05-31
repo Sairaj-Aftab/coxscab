@@ -1,6 +1,6 @@
-import "@/app/styles/service-category.css";
 import Title from "./Title";
 import Link from "next/link";
+import "@/app/styles/components/service-category.css";
 const ServiceCategory = () => {
   return (
     <div className="service-category">

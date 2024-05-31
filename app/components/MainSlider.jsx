@@ -5,7 +5,7 @@ import img2 from "@/public/images/bg_2.jpg";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
 import "swiper/css/pagination";
-import "@/app/styles/main-slider.css";
+import "@/app/styles/components/main-slider.css";
 
 const MainSlider = () => {
   return (
