@@ -13,9 +13,32 @@
   display: block;
   width: 100%;
 }
+.about-section .wrap .flex-1:last-child {
+  display: flex;
+  justify-content: flex-end;
+}
+.about-section .wrap .flex-1 .video {
+  width: 100%;
+  height: auto;
+  position: relative;
+}
 .about-section .wrap .flex-1 video {
   width: 100%;
   height: auto;
+}
+.about-section .wrap .flex-1 .fi-tr-play-circle {
+  font-size: 60px;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 999999999;
+  color: var(--white);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
 }
 .about-section h1 {
   font-size: 2rem;
@@ -33,6 +56,9 @@
 /* SM */
 @media (min-width: 640px) {
   .about-section .wrap .flex-1 iframe {
+    width: 560px;
+  }
+  .about-section .wrap .flex-1 .video {
     width: 560px;
   }
   .about-section .wrap .flex-1 video {

@@ -1,6 +1,15 @@
+"use client";
+import { useRef } from "react";
 import "@/app/styles/components/about-section.css";
 
 const AboutSection = () => {
+  const videoRef = useRef(null);
+  const playVideo = (e) => {
+    e.preventDefault();
+    if (videoRef.current) {
+      videoRef.current.play();
+    }
+  };
   return (
     <div className="about-section">
       <div className="container">
@@ -18,10 +27,15 @@ const AboutSection = () => {
             </p>
           </div>
           <div className="flex-1" style={{ textAlign: "center" }}>
-            <video autoPlay controls>
-              <source src="/coxscab.mp4" type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
+            <div className="video">
+              <video ref={videoRef} controls>
+                <source src="/coxscab.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+              {/* {!videoRef.current && (
+                <i onClick={playVideo} className="fi fi-tr-play-circle"></i>
+              )} */}
+            </div>
             {/* <iframe
               src="https://drive.google.com/file/d/1-CTlCQKXLtWXovaWYmQb71ZwP5-KdBkQ/preview"
               width="100%"
