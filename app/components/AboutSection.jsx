@@ -1,9 +1,10 @@
 "use client";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import "@/app/styles/components/about-section.css";
 
 const AboutSection = () => {
   const videoRef = useRef(null);
+  const [showPlayIcon, setShowPlayIcon] = useState(true);
   const playVideo = (e) => {
     e.preventDefault();
     if (videoRef.current) {
@@ -28,13 +29,19 @@ const AboutSection = () => {
           </div>
           <div className="flex-1" style={{ textAlign: "center" }}>
             <div className="video">
-              <video ref={videoRef} controls>
+              <video
+                ref={videoRef}
+                controls
+                onPlay={(e) => e.type == "play" && setShowPlayIcon(false)}
+                onPause={(e) => e.type == "pause" && setShowPlayIcon(true)}
+                onEnded={(e) => e.type == "ended" && setShowPlayIcon(true)}
+              >
                 <source src="/coxscab.mp4" type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
-              {/* {!videoRef.current && (
+              {showPlayIcon && (
                 <i onClick={playVideo} className="fi fi-tr-play-circle"></i>
-              )} */}
+              )}
             </div>
             {/* <iframe
               src="https://drive.google.com/file/d/1-CTlCQKXLtWXovaWYmQb71ZwP5-KdBkQ/preview"
