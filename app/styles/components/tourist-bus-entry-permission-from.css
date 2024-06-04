@@ -1,0 +1,89 @@
+.tourist-bus-entry-permission {
+  padding: 2rem 0;
+}
+.tourist-bus-entry-permission .wrap {
+  background-color: #fff;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+.tourist-bus-entry-permission h1 {
+  font-size: 1.2rem;
+  font-weight: 500;
+  text-align: center;
+  margin-bottom: 1.3rem;
+  color: var(--primary-color);
+}
+.tourist-bus-entry-permission form {
+}
+.tourist-bus-entry-permission form .form-group {
+  margin-bottom: 0.8rem;
+}
+.tourist-bus-entry-permission form .form-group label {
+  font-size: 0.9rem;
+  font-weight: 400;
+  display: block;
+  margin-bottom: 5px;
+  color: #555;
+}
+.tourist-bus-entry-permission .form-group input,
+.tourist-bus-entry-permission .form-group textarea {
+  font-size: 0.9rem;
+  font-weight: 500;
+  width: 100%;
+  padding: 7px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  outline-color: var(--primary-color);
+}
+.tourist-bus-entry-permission .form-group textarea {
+  resize: vertical;
+  height: 100px;
+}
+.tourist-bus-entry-permission .form-group input[type="checkbox"] {
+  width: auto;
+  margin-right: 10px;
+  margin-top: 5px;
+}
+.tourist-bus-entry-permission .terms-condition {
+  display: flex;
+  align-items: flex-start;
+}
+.tourist-bus-entry-permission .terms-condition li {
+  font-size: 0.9rem;
+  font-weight: 400;
+  display: block;
+  margin-bottom: 3px;
+  color: #555;
+}
+.tourist-bus-entry-permission button {
+  width: 100%;
+  border: none;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--white);
+  padding: 5px 0;
+  background-color: var(--primary-color);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* SM */
+@media (min-width: 600px) {
+  .tourist-bus-entry-permission .wrap {
+    padding: 20px 40px;
+  }
+  .tourist-bus-entry-permission h1 {
+    font-size: 1.8rem;
+  }
+  .tourist-bus-entry-permission form .form-group label {
+    font-size: 1rem;
+  }
+  .tourist-bus-entry-permission .terms-condition li {
+    font-size: 1rem;
+  }
+}

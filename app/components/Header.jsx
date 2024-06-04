@@ -33,7 +33,7 @@ const menuItem = [
       },
       {
         name: "Tourist Bus Entry Permission",
-        path: "/admin",
+        path: "/tourist-bus-entry-permission",
       },
       {
         name: "Hotel & Resorts",

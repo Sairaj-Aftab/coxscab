@@ -1,6 +1,7 @@
 import Title from "./Title";
 import Link from "next/link";
 import "@/app/styles/components/service-category.css";
+
 const ServiceCategory = () => {
   return (
     <div className="service-category">
@@ -15,7 +16,7 @@ const ServiceCategory = () => {
               (Schedule & Booking)
             </div>
           </Link>
-          <Link href="/">
+          <Link href="/tourist-bus-entry-permission">
             <div className="icon">🚍</div>
             <div className="text">Tourist Bus Entry Permission</div>
           </Link>
