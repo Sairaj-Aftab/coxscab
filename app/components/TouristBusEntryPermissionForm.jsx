@@ -7,7 +7,9 @@ const TouristBusEntryPermissionForm = () => {
           <h1>Tourist Bus Entry Permission</h1>
           <form action="">
             <div className="form-group">
-              <label for="applicantName">Applicant Name (আবেদনকারীর নাম)</label>
+              <label htmlFor="applicantName">
+                Applicant Name (আবেদনকারীর নাম)
+              </label>
               <input
                 type="text"
                 id="applicantName"
@@ -16,14 +18,14 @@ const TouristBusEntryPermissionForm = () => {
               />
             </div>
             <div className="form-group">
-              <label for="phone">
+              <label htmlFor="phone">
                 Mobile No (মোবাইল নাম্বার উদাহরণস্বরূপ: 01320108413)
               </label>
               <input type="text" id="phone" name="phone" required />
             </div>
 
             <div className="form-group">
-              <label for="institutionName">
+              <label htmlFor="institutionName">
                 Institution Name (প্রতিষ্ঠানের নাম)
               </label>
               <textarea
@@ -35,7 +37,7 @@ const TouristBusEntryPermissionForm = () => {
               ></textarea>
             </div>
             <div className="form-group">
-              <label for="arrivalPlace">Arrival Place (আগমনের স্থান)</label>
+              <label htmlFor="arrivalPlace">Arrival Place (আগমনের স্থান)</label>
               <textarea
                 name="arrivalPlace"
                 id="arrivalPlace"
@@ -45,15 +47,17 @@ const TouristBusEntryPermissionForm = () => {
               ></textarea>
             </div>
             <div className="form-group">
-              <label for="arrivalDate">Arrival Date (আগমনের তারিখ)</label>
+              <label htmlFor="arrivalDate">Arrival Date (আগমনের তারিখ)</label>
               <input type="date" id="arrivalDate" name="arrivalDate" required />
             </div>
             <div className="form-group">
-              <label for="arrivalTime">Arrival Time(আগমনের সময়)</label>
+              <label htmlFor="arrivalTime">Arrival Time(আগমনের সময়)</label>
               <input type="text" id="arrivalTime" name="arrivalTime" required />
             </div>
             <div className="form-group">
-              <label for="numberTourist">No of Tourists(পর্যটকের সংখ্যা)</label>
+              <label htmlFor="numberTourist">
+                No of Tourists(পর্যটকের সংখ্যা)
+              </label>
               <input
                 type="number"
                 id="numberTourist"
@@ -62,11 +66,11 @@ const TouristBusEntryPermissionForm = () => {
               />
             </div>
             <div className="form-group">
-              <label for="numberBus">No of Bus(বাসের সংখ্যা)</label>
+              <label htmlFor="numberBus">No of Bus(বাসের সংখ্যা)</label>
               <input type="number" id="numberBus" name="numberBus" required />
             </div>
             <div className="form-group">
-              <label for="vehicleRegNo">Reg No of Vehicle(গাড়ির নং)</label>
+              <label htmlFor="vehicleRegNo">Reg No of Vehicle(গাড়ির নং)</label>
               <input
                 type="text"
                 id="vehicleRegNo"
@@ -75,7 +79,9 @@ const TouristBusEntryPermissionForm = () => {
               />
             </div>
             <div className="form-group">
-              <label for="TransportName">Name of Transport(পরিবহনের নাম)</label>
+              <label htmlFor="TransportName">
+                Name of Transport(পরিবহনের নাম)
+              </label>
               <input
                 type="text"
                 id="TransportName"
@@ -84,7 +90,7 @@ const TouristBusEntryPermissionForm = () => {
               />
             </div>
             <div className="form-group">
-              <label for="destinationName">Destination (হোটেলের নাম)</label>
+              <label htmlFor="destinationName">Destination (হোটেলের নাম)</label>
               <input
                 type="text"
                 id="destinationName"
@@ -93,7 +99,9 @@ const TouristBusEntryPermissionForm = () => {
               />
             </div>
             <div className="form-group">
-              <label for="parkingPlace">Parking Place(পার্কিং এর স্থান)</label>
+              <label htmlFor="parkingPlace">
+                Parking Place(পার্কিং এর স্থান)
+              </label>
               <input
                 type="text"
                 id="parkingPlace"
@@ -102,15 +110,15 @@ const TouristBusEntryPermissionForm = () => {
               />
             </div>
             <div className="form-group">
-              <label for="returnDate">Return Date (প্রস্থানের তারিখ)</label>
+              <label htmlFor="returnDate">Return Date (প্রস্থানের তারিখ)</label>
               <input type="date" id="returnDate" name="returnDate" required />
             </div>
             <div className="form-group">
-              <label for="returnTime">Return Time(প্রস্থানের সময়)</label>
+              <label htmlFor="returnTime">Return Time(প্রস্থানের সময়)</label>
               <input type="text" id="returnTime" name="returnTime" required />
             </div>
             <div className="form-group">
-              <label for="description">Description (Optional)</label>
+              <label htmlFor="description">Description (Optional)</label>
               <textarea
                 name="description"
                 id="description"
@@ -121,7 +129,7 @@ const TouristBusEntryPermissionForm = () => {
             <div className="form-group terms-condition">
               <input type="checkbox" id="agree" name="agree" required />
               <ul>
-                <label for="agree">Terms & Condition (অবশ্যই পালনীয়)</label>
+                <label htmlFor="agree">Terms & Condition (অবশ্যই পালনীয়)</label>
                 <li>১) আবেদনকারীকে অবশ্যই গাড়িতে থাকতে হবে।</li>
                 <li>২) ট্রাফিক আইন মেনে চলতে হবে।</li>
                 <li>

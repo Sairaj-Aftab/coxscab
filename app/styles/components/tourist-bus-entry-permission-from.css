@@ -1,5 +1,5 @@
 .tourist-bus-entry-permission {
-  padding: 2rem 0;
+  padding: 20px 0 40px 0;
 }
 .tourist-bus-entry-permission .wrap {
   background-color: #fff;
@@ -42,7 +42,6 @@
 }
 .tourist-bus-entry-permission .form-group textarea {
   resize: vertical;
-  height: 100px;
 }
 .tourist-bus-entry-permission .form-group input[type="checkbox"] {
   width: auto;
