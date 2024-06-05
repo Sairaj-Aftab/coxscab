@@ -32,7 +32,7 @@ const ServiceCategory = () => {
             <div className="icon">🚗</div>
             <div className="text">CoxsCar (Rent-A-Car)</div>
           </Link>
-          <Link href="/">
+          <Link href="/hotel-resorts">
             <div className="icon">🏨</div>
             <div className="text">Hotel & Resorts</div>
           </Link>

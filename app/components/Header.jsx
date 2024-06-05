@@ -37,7 +37,7 @@ const menuItem = [
       },
       {
         name: "Hotel & Resorts",
-        path: "/admin",
+        path: "/hotel-resorts",
       },
       {
         name: "Cafe & Restaurants",
