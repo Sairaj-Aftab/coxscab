@@ -22,7 +22,7 @@ const ServiceCategory = () => {
           </Link>
           <Link href="/">
             <div className="icon">☕</div>
-            <div className="text">Cafe & Restaurants</div>
+            <div className="text">Top Rated Cafe & Restaurants</div>
           </Link>
           <Link href="/">
             <div className="icon">🛫</div>
@@ -34,7 +34,7 @@ const ServiceCategory = () => {
           </Link>
           <Link href="/hotel-resorts">
             <div className="icon">🏨</div>
-            <div className="text">Hotel & Resorts</div>
+            <div className="text">Top Rated Hotels & Resorts</div>
           </Link>
           <Link href="/">
             <div className="icon">🏞</div>

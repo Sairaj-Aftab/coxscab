@@ -11,16 +11,20 @@ const menuItem = [
     name: "Home",
     path: "/",
   },
-  {
-    name: "Gallery",
-    path: "/gallery",
-  },
+  // {
+  //   name: "Gallery",
+  //   path: "/gallery",
+  // },
   {
     name: "About",
     path: "/about",
   },
   {
-    name: "Get services",
+    name: "Login",
+    path: "/login",
+  },
+  {
+    name: "Services",
     path: "#",
     item: [
       {
@@ -36,11 +40,11 @@ const menuItem = [
         path: "/tourist-bus-entry-permission",
       },
       {
-        name: "Hotel & Resorts",
+        name: "Top Rated Hotels & Resorts",
         path: "/hotel-resorts",
       },
       {
-        name: "Cafe & Restaurants",
+        name: "Top Rated Cafe & Restaurants",
         path: "/admin",
       },
       {
