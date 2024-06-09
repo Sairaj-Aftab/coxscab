@@ -5,6 +5,9 @@
   --shadow-3: 0 4px 8px rgba(0, 0, 0, 0.1);
   --shadow-4: 0 8px 16px rgba(0, 0, 0, 0.2);
   --primary-color: #0f0a70;
+  --primary-color-3: rgb(15, 10, 112, 0.3);
+  --primary-color-4: rgb(15, 10, 112, 0.4);
+  --primary-color-5: rgb(15, 10, 112, 0.5);
   --secondary-primary-color: #00a653;
   --white: #ffffff;
   --white-3: rgb(255, 255, 255, 0.3);
@@ -31,7 +34,7 @@
 html,
 body {
   max-width: 100%;
-  /* overflow-x: hidden; */
+  overflow-x: hidden;
   background-color: #f0f0f0;
 }
 img {

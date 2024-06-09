@@ -1,0 +1,50 @@
+.modal-slider {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 9999999;
+  background-color: var(--primary-color-5);
+
+  display: flex;
+  align-items: center;
+}
+.modal-slider .fi-br-cross {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  color: var(--white);
+  z-index: 99999999;
+  background-color: var(--primary-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  font-size: 15px;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+}
+.modal-slider .swiper {
+  width: 100%;
+  max-width: 600px;
+}
+.modal-slider img {
+  width: 100%;
+  max-width: 600px;
+  height: auto;
+}
+.modal-slider .swiper-button-prev,
+.modal-slider .swiper-button-next {
+  width: 30px;
+  height: 30px;
+  background-color: var(--primary-color);
+  border-radius: 50%;
+}
+.modal-slider .swiper-button-prev::after,
+.modal-slider .swiper-button-next::after {
+  color: var(--white);
+  font-size: 18px;
+}

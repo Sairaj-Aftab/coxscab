@@ -29,7 +29,7 @@ const menuItem = [
     item: [
       {
         name: "Online Bus Terminal (Schedule & Booking)",
-        path: "/admin",
+        path: "/bus-schedules-booking",
       },
       {
         name: "CoxsCar (Rent-A-Car)",
@@ -45,11 +45,11 @@ const menuItem = [
       },
       {
         name: "Top Rated Cafe & Restaurants",
-        path: "/admin",
+        path: "/cafe-restaurants",
       },
       {
-        name: "Tourist Spot & Park",
-        path: "/admin",
+        name: "Popular Tourist Spot",
+        path: "/tourist-spot-park",
       },
       {
         name: "Tours and Travels Operators",
@@ -57,7 +57,7 @@ const menuItem = [
       },
       {
         name: "Transport Fare Chart",
-        path: "/admin",
+        path: "/fare-chart",
       },
       {
         name: "Admin",

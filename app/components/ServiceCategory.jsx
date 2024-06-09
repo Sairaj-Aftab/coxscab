@@ -21,28 +21,28 @@ const ServiceCategory = () => {
             <div className="text">Tourist Bus Entry Permission</div>
           </Link>
           <Link href="/">
-            <div className="icon">☕</div>
-            <div className="text">Top Rated Cafe & Restaurants</div>
-          </Link>
-          <Link href="/">
-            <div className="icon">🛫</div>
-            <div className="text">Tours and Travels Operators</div>
-          </Link>
-          <Link href="/">
             <div className="icon">🚗</div>
             <div className="text">CoxsCar (Rent-A-Car)</div>
+          </Link>
+          <Link href="/fare-chart">
+            <div className="icon">💵</div>
+            <div className="text">Transport Fare Chart</div>
           </Link>
           <Link href="/hotel-resorts">
             <div className="icon">🏨</div>
             <div className="text">Top Rated Hotels & Resorts</div>
           </Link>
-          <Link href="/">
+          <Link href="/cafe-restaurants">
+            <div className="icon">☕</div>
+            <div className="text">Top Rated Cafe & Restaurants</div>
+          </Link>
+          <Link href="/tourist-spot-park">
             <div className="icon">🏞</div>
-            <div className="text">Tourist Spot & Park</div>
+            <div className="text">Popular Tourist Spot</div>
           </Link>
           <Link href="/">
-            <div className="icon">💵</div>
-            <div className="text">Transport Fare Chart</div>
+            <div className="icon">🛫</div>
+            <div className="text">Tours and Travels Operators</div>
           </Link>
         </div>
       </div>

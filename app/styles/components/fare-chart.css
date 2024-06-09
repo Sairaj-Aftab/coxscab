@@ -1,0 +1,47 @@
+.fare-chart-table {
+  padding-top: 20px;
+  padding-bottom: 40px;
+}
+.fare-chart-table .wrap {
+  background-color: var(--white);
+  border: 1px solid #ccc;
+  box-shadow: var(--shadow-2);
+  border-radius: 6px;
+}
+.fare-chart-table .header {
+  background-color: var(--primary-color);
+  color: var(--white);
+  padding: 10px;
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+.fare-chart-table table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0;
+}
+.fare-chart-table th,
+.fare-chart-table td {
+  padding: 10px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+}
+
+.fare-chart-table th {
+  font-weight: 0.9rem;
+  color: var(--primary-color);
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+.fare-chart-table td {
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+.fare-chart-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.fare-chart-table tr:hover {
+  background-color: #f1f1f1;
+}

@@ -1,12 +1,16 @@
 .hotel-resorts {
-  padding: 20px 0;
+  padding-top: 20px;
+  padding-bottom: 40px;
 }
 .hotel-resorts .wrap {
   display: grid;
-  grid-template-columns: auto auto auto auto;
+  grid-template-columns: 1fr;
+  place-items: center;
   gap: 20px;
+  width: 100%;
 }
 .hotel-resorts .wrap .card {
+  width: 300px;
   background-color: var(--white);
   border-radius: 0 0 8px 8px;
   box-shadow: var(--shadow-2);
@@ -24,20 +28,31 @@
   font-size: 1.1rem;
   font-weight: 500;
   color: var(--primary-color);
+  /* text-align: center; */
 }
 .hotel-resorts .card .button-group {
   margin-top: 10px;
   display: flex;
   gap: 10px;
-  justify-content: flex-end;
+  /* justify-content: center; */
 }
 .hotel-resorts .card .button-group a {
-  background-color: var(--primary-color);
-  padding: 5px 10px;
-  border-radius: 8px;
-  color: var(--white);
-  font-size: 0.9rem;
-  font-weight: 500;
+  background-color: var(--white);
+  border: 1px solid var(--primary-color);
+  padding: 5px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.hotel-resorts .card .button-group a:hover {
+  background-color: var(--secondary-primary-color);
+}
+.hotel-resorts .card .button-group a img {
+  /* width: 27px; */
+  height: 25px;
+  object-fit: cover;
+  object-position: center;
 }
 .hotel-resorts .card .swiper-button-next,
 .hotel-resorts .card .swiper-button-prev {
@@ -54,16 +69,46 @@
 }
 
 /* SM */
+@media (min-width: 360px) {
+  .hotel-resorts .wrap {
+    grid-template-columns: auto;
+  }
+  .hotel-resorts .wrap .card {
+    width: 330px;
+  }
+}
+/* SM */
+@media (min-width: 412px) {
+  .hotel-resorts .wrap {
+    grid-template-columns: auto;
+  }
+  .hotel-resorts .wrap .card {
+    width: 382px;
+  }
+}
+/* SM */
 @media (min-width: 640px) {
+  .hotel-resorts .wrap {
+    grid-template-columns: auto auto;
+  }
+  .hotel-resorts .wrap .card {
+    width: 300px;
+  }
 }
 /* MD */
 @media (min-width: 768px) {
 }
 /* LG */
 @media (min-width: 1024px) {
+  .hotel-resorts .wrap {
+    grid-template-columns: auto auto auto;
+  }
 }
 /* XL */
 @media (min-width: 1280px) {
+  .hotel-resorts .wrap {
+    grid-template-columns: auto auto auto auto;
+  }
 }
 /* 2XL */
 @media (min-width: 1536px) {
