@@ -52,7 +52,7 @@ const TouristBusEntryPermissionForm = () => {
             </div>
             <div className="form-group">
               <label htmlFor="arrivalTime">Arrival Time(আগমনের সময়)</label>
-              <input type="text" id="arrivalTime" name="arrivalTime" required />
+              <input type="time" id="arrivalTime" name="arrivalTime" required />
             </div>
             <div className="form-group">
               <label htmlFor="numberTourist">
@@ -115,7 +115,7 @@ const TouristBusEntryPermissionForm = () => {
             </div>
             <div className="form-group">
               <label htmlFor="returnTime">Return Time(প্রস্থানের সময়)</label>
-              <input type="text" id="returnTime" name="returnTime" required />
+              <input type="time" id="returnTime" name="returnTime" required />
             </div>
             <div className="form-group">
               <label htmlFor="description">Description (Optional)</label>
