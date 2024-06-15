@@ -16,15 +16,23 @@ const AboutSection = () => {
       <div className="container">
         <div className="wrap">
           <div className="flex-1">
-            <h1>কক্সবাজারে নিরাপদ ও আনন্দময় ভ্রমণ</h1>
-            <p>
-              কক্সবাজারের সৌন্দর্য উপভোগ করতে এসে নিরাপত্তা ও সুশৃঙ্খলতা বজায়
-              রাখুন। ট্রাফিক পুলিশের নির্দেশনা মেনে চলুন এবং অন্যদের জন্য উদাহরণ
-              তৈরি করুন। নিরাপদ ভ্রমণই সবার জন্য আনন্দময় অভিজ্ঞতা নিশ্চিত করতে
-              পারে।
+            <h1>Have a Wonderful and Secure Journey to Cox's Bazar</h1>
+            <p style={{ marginTop: "3px" }}>
+              Welcome to Cox's Bazar, home of the world's longest sandy beach
+              where the sun, sand, sea and hills await you.
             </p>
-            <p style={{ marginTop: "3px", fontWeight: "500" }}>
-              আনন্দময় ও নিরাপদ কক্সবাজার ভ্রমণের জন্য সবাইকে শুভেচ্ছা!
+            <p>
+              COXSCAB is an initiative by Coxsbazar District Police to make a
+              safe and tourism-friendly traffic management in tourist area.
+            </p>
+            <p>
+              Explore our website to unlock valuable safety information and
+              essential guidelines to help you navigate various destinations
+              with confidence.
+            </p>
+            <p>
+              Your safety is our priority. Thank you for choosing Safe Travels.
+              We wish you a secure and wonderful journey ahead!
             </p>
           </div>
           <div className="flex-1" style={{ textAlign: "center" }}>

@@ -20,7 +20,7 @@ const ServiceCategory = () => {
             <div className="icon">🚍</div>
             <div className="text">Tourist Bus Entry Permission</div>
           </Link>
-          <Link href="/">
+          <Link href="/rent-a-car">
             <div className="icon">🚗</div>
             <div className="text">CoxsCar (Rent-A-Car)</div>
           </Link>
@@ -42,7 +42,7 @@ const ServiceCategory = () => {
           </Link>
           <Link href="/">
             <div className="icon">🛫</div>
-            <div className="text">Tours and Travels Operators</div>
+            <div className="text">Tourist Trail Map</div>
           </Link>
         </div>
       </div>

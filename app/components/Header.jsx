@@ -20,8 +20,8 @@ const menuItem = [
     path: "/about",
   },
   {
-    name: "Login",
-    path: "/login",
+    name: "Admin",
+    path: "/admin",
   },
   {
     name: "Services",
@@ -33,7 +33,7 @@ const menuItem = [
       },
       {
         name: "CoxsCar (Rent-A-Car)",
-        path: "/admin",
+        path: "/rent-a-car",
       },
       {
         name: "Tourist Bus Entry Permission",
@@ -52,16 +52,12 @@ const menuItem = [
         path: "/tourist-spot-park",
       },
       {
-        name: "Tours and Travels Operators",
+        name: "Tourist Trail Map",
         path: "/admin",
       },
       {
         name: "Transport Fare Chart",
         path: "/fare-chart",
-      },
-      {
-        name: "Admin",
-        path: "/admin",
       },
     ],
   },

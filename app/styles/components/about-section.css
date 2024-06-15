@@ -41,16 +41,18 @@
   cursor: pointer;
 }
 .about-section h1 {
-  font-size: 2rem;
+  font-size: 1.6rem;
   font-weight: 500;
   color: var(--primary-color);
   margin-bottom: 5px;
+  text-align: center;
 }
 .about-section p {
   font-size: 1rem;
-  font-weight: 400;
+  font-weight: 500;
   color: var(--black-9);
   line-height: 1.6;
+  margin-bottom: 3px;
 }
 
 /* SM */
