@@ -24,8 +24,6 @@ const AboutSection = () => {
             <p>
               COXSCAB is an initiative by Coxsbazar District Police to make a
               safe and tourism-friendly traffic management in tourist area.
-            </p>
-            <p>
               Explore our website to unlock valuable safety information and
               essential guidelines to help you navigate various destinations
               with confidence.

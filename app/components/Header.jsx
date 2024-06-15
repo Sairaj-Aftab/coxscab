@@ -48,7 +48,7 @@ const menuItem = [
         path: "/cafe-restaurants",
       },
       {
-        name: "Popular Tourist Spot",
+        name: "Popular Tourist Spots",
         path: "/tourist-spot-park",
       },
       {

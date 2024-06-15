@@ -1,0 +1,96 @@
+/* .rent-car-page .container {
+  overflow: hidden;
+} */
+.rent-car-page .wrap {
+  margin-top: 10px;
+  margin-bottom: 30px;
+  background-color: #fff;
+  padding: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  overflow: auto;
+}
+.rent-car-page header {
+  text-align: center;
+  margin-bottom: 5px;
+}
+
+.rent-car-page header h1 {
+  font-size: 1.3rem;
+  color: var(--primary-color);
+}
+
+.rent-car-page header p {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: bold;
+}
+.rent-car-page table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.rent-car-page table th {
+  font-size: 0.8rem;
+  padding: 5px;
+  border: 1px solid #ddd;
+  text-align: center;
+}
+.rent-car-page table td {
+  font-size: 0.8rem;
+  text-align: center;
+  border: 1px solid #ddd;
+}
+
+.rent-car-page table th {
+  background-color: var(--primary-color);
+  color: #fff;
+}
+
+.rent-car-page table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.rent-car-page table img {
+  max-width: 100px;
+  height: auto;
+}
+
+.rent-car-page .status {
+  font-weight: bold;
+  padding: 5px;
+  border-radius: 5px;
+}
+
+.rent-car-page .status.available {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.rent-car-page .status.booked {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* SM */
+@media (min-width: 640px) {
+  .rent-car-page .wrap {
+    margin-bottom: 40px;
+    padding: 10px;
+  }
+  .rent-car-page header {
+    margin-bottom: 10px;
+  }
+}
+/* MD */
+@media (min-width: 768px) {
+}
+/* LG */
+@media (min-width: 1024px) {
+}
+/* XL */
+@media (min-width: 1280px) {
+}
+/* 2XL */
+@media (min-width: 1536px) {
+}

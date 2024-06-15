@@ -38,7 +38,7 @@ const ServiceCategory = () => {
           </Link>
           <Link href="/tourist-spot-park">
             <div className="icon">🏞</div>
-            <div className="text">Popular Tourist Spot</div>
+            <div className="text">Popular Tourist Spots</div>
           </Link>
           <Link href="/">
             <div className="icon">🛫</div>
