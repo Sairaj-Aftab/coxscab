@@ -1,0 +1,55 @@
+.admin-login .container {
+  height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.admin-login .wrap {
+  max-width: 500px;
+  width: 100%;
+  background-color: var(--white);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 10px;
+  border-radius: 12px;
+  box-shadow: var(--shadow-2);
+}
+.admin-login .wrap img {
+  width: 150px;
+  height: auto;
+}
+.admin-login .wrap form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+.admin-login .wrap form input {
+  border: 1px solid #ccc;
+  height: 40px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0 10px;
+  outline-color: blue;
+  border-radius: 6px;
+}
+.admin-login button {
+  background-color: var(--primary-color);
+  border: none;
+  font-size: 1rem;
+  font-weight: bold;
+  color: var(--white);
+  padding: 10px 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* SM */
+@media (min-width: 640px) {
+  .admin-login .wrap {
+    padding: 20px;
+  }
+}

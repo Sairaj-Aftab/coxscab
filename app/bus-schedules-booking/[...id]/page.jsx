@@ -1,7 +1,11 @@
-import React from "react";
+import BusSchedulesTableList from "@/app/components/BusSchedulesTableList";
 
 const BusSchedulesBookingInner = () => {
-  return <div>BusSchedulesBookingInner</div>;
+  return (
+    <div>
+      <BusSchedulesTableList />
+    </div>
+  );
 };
 
 export default BusSchedulesBookingInner;

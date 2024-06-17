@@ -21,7 +21,7 @@ const menuItem = [
   },
   {
     name: "Admin",
-    path: "/admin",
+    path: "/admin-login",
   },
   {
     name: "Services",

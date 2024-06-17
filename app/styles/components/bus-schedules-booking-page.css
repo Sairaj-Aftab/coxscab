@@ -1,4 +1,53 @@
 .bus-schedule-booking {
+  padding: 20px 0;
 }
 .bus-schedule-booking .wrap {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 15px;
+}
+.bus-schedule-booking .card {
+  background-color: var(--white);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: var(--shadow-3);
+  transition: transform 0.3s, box-shadow 0.3s;
+  /* border: 0.5px solid var(--primary-color); */
+}
+.bus-schedule-booking .card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-4);
+}
+.bus-schedule-booking .card h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  text-align: center;
+}
+.bus-schedule-booking .card .fi-ts-bus {
+  font-size: 40px;
+  color: var(--primary-color);
+}
+
+/* SM */
+@media (min-width: 640px) {
+  .bus-schedule-booking .wrap {
+    grid-template-columns: auto auto auto;
+  }
+}
+/* MD */
+@media (min-width: 768px) {
+  .bus-schedule-booking .wrap {
+    grid-template-columns: auto auto auto auto;
+  }
+}
+/* XL */
+@media (min-width: 1280px) {
+  .bus-schedule-booking .wrap {
+    grid-template-columns: auto auto auto auto auto;
+    gap: 20px;
+  }
 }
