@@ -1,0 +1,186 @@
+
+datasource db {
+    provider = "mongodb"
+    url = env("DATABASE_URL")
+}
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+model AuthUser {
+    id String @id @default(auto()) @map("_id") @db.ObjectId
+    userName String @unique
+    phone String?
+    role Role? @relation(fields: [roleId], references: [id], onDelete: Cascade)
+    roleId String @db.ObjectId
+    password String
+    lastLoginTime DateTime? @default(now())
+    lastLoginIp String?
+    status Boolean @default(true)
+    trash Boolean @default(false)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+
+model Role {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  name        String       @unique
+  slug        String       @unique
+  status      Boolean      @default(true)
+  trash       Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  authUser    AuthUser[]
+  permissions Permission[] @relation(fields: [permissionId], references: [id])
+  permissionId String[] @db.ObjectId
+}
+
+model Permission {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  name        String           @unique
+  slug        String           @unique
+  status      Boolean          @default(true)
+  trash       Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  roles       Role[] @relation(fields: [roleId], references: [id])
+  roleId String[] @db.ObjectId
+}
+
+model VehicleType {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name String
+  slug String
+  vehicles Vehicle[]
+  status      Boolean          @default(true)
+  trash       Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+model VehicleCondition {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name String
+  slug String
+  vehicles Vehicle[]
+  status      Boolean          @default(true)
+  trash       Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model Vehicle {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  vehicleType         VehicleType @relation(fields: [vehicleTypeId], references: [id], onDelete: Cascade)
+  vehicleTypeId       String @db.ObjectId
+  vehicleCondition    VehicleCondition @relation(fields: [vehicleConditionId], references: [id], onDelete: Cascade)
+  vehicleConditionId  String @db.ObjectId
+  registrationNo      String
+  engineChassisNo     String?
+  qrCode              String?
+  ownerName           String?
+  ownerMobileNo       String?
+  ownerNidNo          String?
+  ownerNidDob         String?
+  fatherName          String?
+  ownerAddress        String?
+  vehicleImage        String[]
+  followUpByAuthority String?
+  driver              Driver? @relation(fields: [driverId], references: [id], onDelete: Cascade)
+  driverId            String? @db.ObjectId
+  garage              Garage? @relation("GarageVehicles", fields: [grageId], references: [id], onDelete: Cascade)
+  grageId             String? @db.ObjectId @unique
+  status              Boolean   @default(true)
+  trash               Boolean   @default(false)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  
+}
+
+model DriverActivities {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name                String
+  driver              Driver[]
+  status              Boolean   @default(true)
+  trash               Boolean   @default(false)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+}
+
+model DriverStatus {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name                String
+  driver              Driver[]
+  status              Boolean   @default(true)
+  trash               Boolean   @default(false)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+}
+
+model Driver {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name                   String
+  nameBn                 String
+  fatherName             String?
+  motherName             String?
+  picture                String?
+  nidNo                  String?
+  nidDob                 DateTime?
+  mobileNo               String?
+  drivingLicenseNo       String?
+  bloodGroup             String?
+  educationalQualification String?
+  qrCode                 String?
+  perVillage             String?
+  perPostOffice          String?
+  perThana               String?
+  perDistrict            String?
+  perHoldingNo           String?
+  perWardNo              String?
+  curVillage             String?
+  curPostOffice          String?
+  curThana               String?
+  curDistrict            String?
+  curHoldingNo           String?
+  curWardNo              String?
+  note                   String?
+  driverActivities       DriverActivities? @relation(fields: [driverActivitiesId], references: [id], onDelete: Cascade)
+  driverActivitiesId     String? @db.ObjectId
+  driverStatus           DriverStatus? @relation(fields: [driverStatusId], references: [id], onDelete: Cascade)
+  driverStatusId         String? @db.ObjectId
+  status                 Boolean   @default(true)
+  trash                  Boolean   @default(false)
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  vehicle Vehicle[]
+}
+
+model Garage {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  ownerName          String
+  mobileNo           String?
+  managerName        String?
+  managerMobileNo    String?
+  garageAddress       String?
+  numberOfVehicles   Int?
+  vehicles           Vehicle[] @relation("GarageVehicles")
+  note               String?
+  status                 Boolean   @default(true)
+  trash                  Boolean   @default(false)
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+}
+
+
+
+model VisitorCount {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  date        DateTime @default(now()) @unique
+  dailyCount  Int      @default(0)
+  monthlyCount Int     @default(0)
+  yearlyCount  Int     @default(0)
+  totalCount   Int     @default(0)
+}

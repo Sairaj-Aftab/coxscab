@@ -1,4 +1,4 @@
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useLocation } from "react-router-dom";
 import { BiAlignLeft, BiSolidBell } from "react-icons/bi";
 import {
   FaTachometerAlt,
@@ -10,90 +10,152 @@ import {
   FaChartBar,
   FaCog,
 } from "react-icons/fa";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { logoutAuthUser } from "@/features/auth/authApiSlice";
+import { setLogoutUser } from "@/features/auth/authSlice";
 
 const SideBar = () => {
-  const [open, setOpen] = useState(false);
-  const [open2, setOpen2] = useState(true);
+  const dispatch = useDispatch();
+  const { pathname } = useLocation();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const handleLogOut = () => {
+    dispatch(logoutAuthUser());
+    dispatch(setLogoutUser());
+  };
+
+  // Close the sidebar when a nav item is clicked
+  const handleNavItemClick = () => {
+    if (window.innerWidth < 1024) {
+      setIsSidebarOpen(false); // Close sidebar on small screens
+    }
+  };
   return (
     <>
       {/* Header Section */}
-      <div className="fixed top-0 left-0 w-full z-[99999] flex pr-3">
-        <div
-          className={`${
-            open ? "basis-0 w-0" : "basis-2/12"
-          } hidden lg:flex bg-primary py-1 justify-center items-center`}
-        >
-          <h1 className="text-2xl text-white font-bold">Sairaj's</h1>
+      <div className="fixed top-0 left-0 w-full z-[99999] flex items-center justify-between bg-white shadow-md py-1 px-3">
+        <div className="flex items-center">
+          <button
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="text-2xl md:hidden text-black"
+          >
+            <BiAlignLeft />
+          </button>
+          <h1 className="text-xl font-bold hidden md:block text-gray-800">
+            Coxscab
+          </h1>
+          <input
+            type="text"
+            aria-label="Search"
+            placeholder="Search"
+            className="hidden md:block border border-gray-300 rounded-full py-1 px-3 ml-3 outline-none"
+            style={{ minWidth: "200px" }} // Ensure the search bar has a minimum width
+          />
         </div>
-        <div
-          className={`${
-            open ? "w-full" : "w-full lg:basis-10/12"
-          } pl-3 shadow-lg flex justify-between items-center py-1`}
-        >
-          <div className="flex gap-5 items-center">
-            <BiAlignLeft
-              onClick={() => setOpen(!open)}
-              className="text-xl text-black cursor-pointer"
-            />
-            <input
-              type="text"
-              placeholder="Search"
-              className="border border-gray-300 rounded-full py-1 px-3 outline-none"
-            />
-          </div>
-          <div className="flex gap-5 items-center">
-            <BiSolidBell className="text-xl text-black cursor-pointer" />
-            <div>
+        <div className="flex items-center">
+          <BiSolidBell className="text-xl text-black cursor-pointer mr-4" />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
               <img
                 src="https://picsum.photos/200"
-                alt=""
+                alt="Profile"
                 className="w-10 h-10 rounded-full object-cover cursor-pointer"
               />
-            </div>
-          </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>Profile</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogOut}>
+                Log out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
       {/* Sidebar Section */}
-      <div className={`flex`}>
+      <div className="flex mt-[48px] h-[calc(100vh-48px)]">
         <nav
-          style={{ height: "calc(100vh - 48px)" }}
-          className={`${
-            open ? "basis-0" : "w-0 lg:basis-2/12"
-          } mt-12 bg-[#3d464d] overflow-auto space-y-2`}
+          // style={{ height: "calc(100vh - 48px)" }}
+          className={`bg-[#3d464d] text-gray-100 w-64 lg:w-1/6 h-full fixed top-[48px] left-0 lg:static z-50 transform ${
+            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } transition-transform lg:translate-x-0 lg:overflow-y-auto`}
         >
           <Link
             to="/"
-            className="flex items-center text-sm font-medium text-gray-100 hover:bg-gray-600 hover:text-white px-3 py-2"
+            onClick={handleNavItemClick}
+            className={`flex items-center text-sm font-medium text-gray-100 ${
+              pathname === "/" && "bg-gray-600"
+            } hover:bg-gray-600 hover:text-white px-3 py-3`}
           >
             <FaTachometerAlt className="mr-3" />
             Dashboard
           </Link>
           <Link
+            to="/vehicles"
+            onClick={handleNavItemClick}
+            className={`flex items-center text-sm font-medium text-gray-100 ${
+              pathname === "/vehicles" && "bg-gray-600"
+            } hover:bg-gray-600 hover:text-white px-3 py-3`}
+          >
+            <FaList className="mr-3" />
+            Vehicles
+          </Link>
+
+          <Link
+            to="/auth-users"
+            className={`flex items-center text-sm font-medium text-gray-100 ${
+              pathname === "/auth-users" && "bg-gray-600"
+            } hover:bg-gray-600 hover:text-white px-3 py-3`}
+          >
+            <FaList className="mr-3" />
+            Auth Users
+          </Link>
+          <Link
+            to="/roles"
+            className={`flex items-center text-sm font-medium text-gray-100 ${
+              pathname === "/roles" && "bg-gray-600"
+            } hover:bg-gray-600 hover:text-white px-3 py-3`}
+          >
+            <FaList className="mr-3" />
+            Roles
+          </Link>
+          <Link
+            to="/permissions"
+            className={`flex items-center text-sm font-medium text-gray-100 ${
+              pathname === "/permissions" && "bg-gray-600"
+            } hover:bg-gray-600 hover:text-white px-3 py-3`}
+          >
+            <FaList className="mr-3" />
+            Permissions
+          </Link>
+          <Link
             to="/products"
-            className="flex items-center text-sm font-medium text-gray-100 hover:bg-gray-600 hover:text-white px-3 py-2"
+            className="flex items-center text-sm font-medium text-gray-100 hover:bg-gray-600 hover:text-white px-3 py-3"
           >
             <FaList className="mr-3" />
             Products
           </Link>
           <Link
             to="/categories"
-            className="flex items-center text-sm font-medium text-gray-100 hover:bg-gray-600 hover:text-white px-3 py-2"
+            className="flex items-center text-sm font-medium text-gray-100 hover:bg-gray-600 hover:text-white px-3 py-3"
           >
             <FaUsers className="mr-3" />
             Categories
           </Link>
-          <Link
-            to="/tags"
-            className="flex items-center text-sm font-medium text-gray-100 hover:bg-gray-600 hover:text-white px-3 py-2"
-          >
-            <FaUsers className="mr-3" />
-            Tags
-          </Link>
           <a
             href="#"
-            className="flex items-center text-sm font-medium text-gray-100 hover:bg-gray-600 hover:text-white px-3 py-2"
+            className="flex items-center text-sm font-medium text-gray-100 hover:bg-gray-600 hover:text-white px-3 py-3"
           >
             <FaUsers className="mr-3" />
             Customers
@@ -144,12 +206,17 @@ const SideBar = () => {
             Settings
           </a>
         </nav>
+        {/* Overlay for Sidebar on Small Screens */}
+        {isSidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black opacity-50 lg:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+          ></div>
+        )}
         {/* Content Section */}
         <div
-          style={{ height: "calc(100vh - 48px)" }}
-          className={`${
-            open ? "w-full" : "w-full lg:basis-10/12"
-          }  mt-12 px-5 pb-10 bg-[#f5f7fa] overflow-auto`}
+          // style={{ height: "calc(100vh - 48px)" }}
+          className={`flex-1 h-full overflow-y-auto bg-[#f5f7fa] px-3 pb-10 `}
         >
           <Outlet />
         </div>

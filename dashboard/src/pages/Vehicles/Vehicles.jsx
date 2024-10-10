@@ -80,15 +80,15 @@ const data = [
   // more products...
 ];
 
-const Products = () => {
+const Vehicles = () => {
   return (
     <div>
       <PageHeader
-        title1={"Dashboard/Products"}
-        title2={"Products"}
+        title1={"Dashboard/Vehicles"}
+        title2={"Vehicles"}
         button1={
-          <Link to="/products/add" className={buttonVariants({})}>
-            Add product
+          <Link to="/vehicle/add" className={buttonVariants({})}>
+            Add vehicle
           </Link>
         }
       />
@@ -113,4 +113,4 @@ const Products = () => {
   );
 };
 
-export default Products;
+export default Vehicles;

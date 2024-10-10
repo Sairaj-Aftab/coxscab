@@ -10,6 +10,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
+// eslint-disable-next-line react/prop-types
 const AlertDialogMessage = ({ button, action }) => {
   return (
     <>

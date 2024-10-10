@@ -8,17 +8,24 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 
-const DialogBox = ({ button, title, children, button2 }) => {
+const DialogBox = ({
+  open,
+  onOpenChange,
+  openButton,
+  title,
+  children,
+  button2,
+}) => {
   return (
     <>
-      <Dialog>
-        <DialogTrigger>{button}</DialogTrigger>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogTrigger>{openButton}</DialogTrigger>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
           </DialogHeader>
           <>{children}</>
-          <DialogFooter>{button2}</DialogFooter>
+          {button2 && <DialogFooter>{button2}</DialogFooter>}
         </DialogContent>
       </Dialog>
     </>
