@@ -1,19 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import createError from "../utils/createError.js";
 import { createSlug } from "../utils/slug.js";
-import QRCode from "qrcode";
-import { Jimp } from "jimp";
-import { readFile } from "fs/promises"; // Use the promises API for file reading
-
-import path from "path"; // Import path module
-import { fileURLToPath } from "url"; // Import for converting URL to path
-
-// Get the directory name from the current module's URL
-const __filename = fileURLToPath(import.meta.url); // Current file's path
-const __dirname = path.dirname(__filename); // Directory name of the current module
-
-// Define the path to your logo file
-const logoPath = path.join(__dirname, "..", "obt.png");
 const prisma = new PrismaClient();
 
 export const getPermission = async (req, res, next) => {
