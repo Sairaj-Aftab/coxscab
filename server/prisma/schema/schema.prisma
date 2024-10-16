@@ -6,6 +6,7 @@ datasource db {
 
 generator client {
     provider = "prisma-client-js"
+    previewFeatures = ["prismaSchemaFolder"]
 }
 
 model AuthUser {
@@ -49,55 +50,7 @@ model Permission {
   roleId String[] @db.ObjectId
 }
 
-model VehicleType {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  name String
-  slug String
-  vehicles Vehicle[]
-  status      Boolean          @default(true)
-  trash       Boolean          @default(false)
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-}
-model VehicleCondition {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  name String
-  slug String
-  vehicles Vehicle[]
-  status      Boolean          @default(true)
-  trash       Boolean          @default(false)
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-}
 
-model Vehicle {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  vehicleType         VehicleType @relation(fields: [vehicleTypeId], references: [id], onDelete: Cascade)
-  vehicleTypeId       String @db.ObjectId
-  vehicleCondition    VehicleCondition @relation(fields: [vehicleConditionId], references: [id], onDelete: Cascade)
-  vehicleConditionId  String @db.ObjectId
-  registrationNo      String
-  engineChassisNo     String?
-  qrCode              String?
-  ownerName           String?
-  ownerMobileNo       String?
-  ownerNidNo          String?
-  ownerNidDob         String?
-  fatherName          String?
-  ownerAddress        String?
-  vehicleImage        String[]
-  followUpByAuthority String?
-  driver              Driver? @relation(fields: [driverId], references: [id], onDelete: Cascade)
-  driverId            String? @db.ObjectId
-  garage              Garage? @relation("GarageVehicles", fields: [grageId], references: [id], onDelete: Cascade)
-  grageId             String? @db.ObjectId @unique
-  status              Boolean   @default(true)
-  trash               Boolean   @default(false)
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
-
-  
-}
 
 model DriverActivities {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId

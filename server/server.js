@@ -6,6 +6,8 @@ import cors from "cors";
 import { Server } from "socket.io";
 import { createServer } from "node:http";
 import authUser from "./routes/authUser.js";
+import vehicleType from "./routes/vehicleType.js";
+import vehicleCondition from "./routes/vehicleCondition.js";
 import permission from "./routes/permission.js";
 import role from "./routes/role.js";
 import visitor from "./routes/visitorCount.js";
@@ -51,6 +53,8 @@ app.use(
 );
 
 app.use("/api/v1/auth", authUser);
+app.use("/api/v1/vehicle-type", vehicleType);
+app.use("/api/v1/vehicle-condition", vehicleCondition);
 app.use("/api/v1/permission", permission);
 app.use("/api/v1/role", role);
 app.use("/api/v1/visitorcount", visitor);

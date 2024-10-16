@@ -122,6 +122,15 @@ const SideBar = () => {
             Auth Users
           </Link>
           <Link
+            to="/required-categories"
+            className={`flex items-center text-sm font-medium text-gray-100 ${
+              pathname === "/required-categories" && "bg-gray-600"
+            } hover:bg-gray-600 hover:text-white px-3 py-3`}
+          >
+            <FaList className="mr-3" />
+            Required Categories
+          </Link>
+          <Link
             to="/roles"
             className={`flex items-center text-sm font-medium text-gray-100 ${
               pathname === "/roles" && "bg-gray-600"
@@ -130,6 +139,7 @@ const SideBar = () => {
             <FaList className="mr-3" />
             Roles
           </Link>
+
           <Link
             to="/permissions"
             className={`flex items-center text-sm font-medium text-gray-100 ${

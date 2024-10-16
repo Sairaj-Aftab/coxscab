@@ -3,19 +3,21 @@ import createError from "../utils/createError.js";
 import { createSlug } from "../utils/slug.js";
 const prisma = new PrismaClient();
 
-export const createVehicleType = async (req, res, next) => {
+export const createVehicleCondition = async (req, res, next) => {
   try {
     const { name } = req.body;
 
-    const existing = await prisma.vehicleType.findFirst({ where: { name } });
+    const existing = await prisma.vehicleCondition.findFirst({
+      where: { name: name.toUpperCase() },
+    });
 
     if (existing) {
       return next(createError(400, "Already exist!"));
     }
 
-    const vehicle = await prisma.vehicleType.create({
+    const vehicle = await prisma.vehicleCondition.create({
       data: {
-        name,
+        name: name.toUpperCase(),
         slug: createSlug(name),
       },
     });
@@ -29,9 +31,9 @@ export const createVehicleType = async (req, res, next) => {
   }
 };
 
-export const getVehicleTypes = async (req, res, next) => {
+export const getVehicleConditions = async (req, res, next) => {
   try {
-    const vehicles = await prisma.vehicleType.findMany();
+    const vehicles = await prisma.vehicleCondition.findMany();
     if (vehicles.length < 1) {
       return next(createError(400, "Cannot find any!"));
     }

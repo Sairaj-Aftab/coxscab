@@ -6,6 +6,7 @@ import Roles from "@/pages/Roles/Roles";
 import VehicleAdd from "@/pages/VehicleAdd/VehicleAdd";
 import Vehicles from "@/pages/Vehicles/Vehicles";
 import PrivateRouteGird from "./PrivateRouteGrid";
+import RequiredCategories from "@/pages/RequiredCategories/RequiredCategories";
 
 const privateRoutes = [
   {
@@ -25,6 +26,10 @@ const privateRoutes = [
           {
             path: "/vehicle/add",
             element: <VehicleAdd />,
+          },
+          {
+            path: "/required-categories",
+            element: <RequiredCategories />,
           },
           {
             path: "/roles",
