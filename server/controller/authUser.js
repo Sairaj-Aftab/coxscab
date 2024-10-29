@@ -7,6 +7,7 @@ const prisma = new PrismaClient();
 export const login = async (req, res, next) => {
   try {
     const { userName, password } = req.body;
+
     const user = await prisma.authUser.findUnique({
       where: {
         userName,
@@ -41,16 +42,18 @@ export const login = async (req, res, next) => {
     });
 
     const token = createToken({ id: user.id }, "1d");
+
     res.cookie("auth_token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "Development" ? false : true,
-      sameSite: "strict",
+      sameSite: process.env.NODE_ENV === "Development" ? "lax" : "strict",
       path: "/",
     });
 
     return res.status(200).json({
       message: "Login successfully",
       user: updatedUser,
+      success: true,
     });
   } catch (error) {
     return next(error);
@@ -62,6 +65,7 @@ export const logedInUser = async (req, res, next) => {
     if (!req.me) {
       return next(createError(404, "User not found"));
     }
+
     res.status(200).json(req.me);
   } catch (error) {
     return next(error);
@@ -86,6 +90,7 @@ export const logout = async (req, res, next) => {
 export const register = async (req, res, next) => {
   try {
     const { userName, phone, password, roleId } = req.body;
+
     const existingUser = await prisma.authUser.findUnique({
       where: {
         userName,

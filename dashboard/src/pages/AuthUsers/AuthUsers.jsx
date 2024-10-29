@@ -31,18 +31,23 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { useDispatch, useSelector } from "react-redux";
-import { getRoles } from "@/features/roles/rolesSlice";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { getAuthUsers, setMessageEmpty } from "@/features/user/userSlice";
-import { createAuthUser, updateAuthUser } from "@/features/user/userApiSllice";
 import { formatDateTime } from "@/utils/timeAgo";
+import {
+  useCreateAuthMutation,
+  useGetAuthUsersQuery,
+  useUpdateAuthMutation,
+} from "@/app/services/authUsersApi";
+import LoadingComponent from "@/components/LoadingComponents/LoadingComponent";
+import { useSelector } from "react-redux";
+import { getRolesData } from "@/features/rolesSlice";
 
 const FormSchema = z.object({
   userName: z.string().min(2, {
     message: "User name is required.",
   }),
+  phone: z.string().optional(),
   password: z.string().min(2, {
     message: "Password is required.",
   }),
@@ -52,9 +57,13 @@ const FormSchema = z.object({
 });
 
 const AuthUsers = () => {
-  const dispatch = useDispatch();
-  const { authUsers, message, error, loader } = useSelector(getAuthUsers);
-  const { roles } = useSelector(getRoles);
+  const { roles } = useSelector(getRolesData);
+  const { data: authUsers, isLoading } = useGetAuthUsersQuery();
+  const [createAuth, { isLoading: createLoading, isSuccess: createSuccess }] =
+    useCreateAuthMutation();
+  const [updateAuth, { isLoading: updateLoading, isSuccess: updateSuccess }] =
+    useUpdateAuthMutation();
+
   // State to track if editing mode is active
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -68,10 +77,10 @@ const AuthUsers = () => {
       roleId: [],
     },
   });
-  function onSubmit(data) {
+  async function onSubmit(data) {
     if (isEditing) {
-      dispatch(
-        updateAuthUser({
+      try {
+        await updateAuth({
           id: currentAuth.id,
           data: {
             userName: data.userName,
@@ -79,10 +88,22 @@ const AuthUsers = () => {
             password: data.password,
             roleId: data.roleId,
           },
-        })
-      );
+        }).unwrap();
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          title: `${error?.data?.message}`,
+        });
+      }
     } else {
-      dispatch(createAuthUser(data));
+      try {
+        await createAuth(data).unwrap();
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          title: `${error?.data?.message}`,
+        });
+      }
     }
   }
 
@@ -100,26 +121,12 @@ const AuthUsers = () => {
   };
 
   useEffect(() => {
-    if (message) {
+    if (createSuccess || updateSuccess) {
       setIsDialogOpen(false);
-      toast({
-        title: `${message}`,
-      });
       setIsEditing(false);
       form.reset();
     }
-    if (error) {
-      console.log(error);
-
-      toast({
-        variant: "destructive",
-        title: `${error}`,
-      });
-    }
-    if (message || error) {
-      dispatch(setMessageEmpty());
-    }
-  }, [dispatch, error, form, message]);
+  }, [createSuccess, form, updateSuccess]);
 
   const createAuthUserDialogComponent = () => {
     return (
@@ -148,13 +155,14 @@ const AuthUsers = () => {
                 <FormItem>
                   <FormLabel
                     className={`${
-                      loader && "cursor-not-allowed text-gray-400"
+                      (createLoading || updateLoading) &&
+                      "cursor-not-allowed text-gray-400"
                     }`}
                   >
                     User name
                   </FormLabel>
                   <FormControl>
-                    <Input {...field} disabled={loader} />
+                    <Input {...field} disabled={createLoading} />
                   </FormControl>
 
                   {/* <FormMessage /> */}
@@ -168,13 +176,13 @@ const AuthUsers = () => {
                 <FormItem>
                   <FormLabel
                     className={`${
-                      loader && "cursor-not-allowed text-gray-400"
+                      createLoading && "cursor-not-allowed text-gray-400"
                     }`}
                   >
                     Phone
                   </FormLabel>
                   <FormControl>
-                    <Input {...field} disabled={loader} />
+                    <Input {...field} disabled={createLoading} />
                   </FormControl>
 
                   {/* <FormMessage /> */}
@@ -188,13 +196,17 @@ const AuthUsers = () => {
                 <FormItem>
                   <FormLabel
                     className={`${
-                      loader && "cursor-not-allowed text-gray-400"
+                      createLoading && "cursor-not-allowed text-gray-400"
                     }`}
                   >
                     Password
                   </FormLabel>
                   <FormControl>
-                    <Input type="password" {...field} disabled={loader} />
+                    <Input
+                      type="password"
+                      {...field}
+                      disabled={createLoading}
+                    />
                   </FormControl>
 
                   {/* <FormMessage /> */}
@@ -226,51 +238,9 @@ const AuthUsers = () => {
                 </FormItem>
               )}
             />
-            {/* <FormField
-              control={form.control}
-              name="permissions"
-              render={() => (
-                <FormItem>
-                  <FormLabel>Permissions*</FormLabel>
-                  {permissions?.map((item) => (
-                    <FormField
-                      key={item.id}
-                      control={form.control}
-                      name="permissions"
-                      render={({ field }) => {
-                        return (
-                          <FormItem
-                            key={item.id}
-                            className="flex flex-row items-start space-x-3 space-y-0"
-                          >
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value?.includes(item.id)}
-                                onCheckedChange={(checked) => {
-                                  return checked
-                                    ? field.onChange([...field.value, item.id])
-                                    : field.onChange(
-                                        field.value?.filter(
-                                          (value) => value !== item.id
-                                        )
-                                      );
-                                }}
-                              />
-                            </FormControl>
-                            <FormLabel className="font-normal">
-                              {item.name}
-                            </FormLabel>
-                          </FormItem>
-                        );
-                      }}
-                    />
-                  ))}
-                  <FormMessage />
-                </FormItem>
-              )}
-            /> */}
-            <Button type="submit" disabled={loader}>
-              {loader ? (
+
+            <Button type="submit" disabled={createLoading || updateLoading}>
+              {createLoading || updateLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please
                   wait...
@@ -304,54 +274,76 @@ const AuthUsers = () => {
               <TableHead>Last login</TableHead>
               <TableHead>Last login IP</TableHead>
               <TableHead>Phone</TableHead>
-              <TableHead>Password</TableHead>
+              {/* <TableHead>Password</TableHead> */}
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {authUsers?.map((data, index) => (
-              <TableRow key={data.id}>
-                <TableCell className="font-medium">{index + 1}</TableCell>
-                <TableCell>{data.userName}</TableCell>
-                <TableCell>{data.role?.name}</TableCell>
-                <TableCell>{formatDateTime(data.lastLoginTime)}</TableCell>
-                <TableCell>{data.lastLoginIp}</TableCell>
-                <TableCell>{data.phone}</TableCell>
-                <TableCell>{data.password}</TableCell>
-                <TableCell className="flex gap-2 items-center">
-                  <BiEditAlt
-                    className="text-primary text-xl cursor-pointer"
-                    onClick={() => handleEdit(data)}
-                  />
-                  {/* <BiTrash className="text-red-500 text-xl cursor-pointer" /> */}
-                </TableCell>
-              </TableRow>
-            ))}
+            {authUsers?.users
+              ?.filter((data) => data.role?.name !== "SUPER-ADMIN")
+              ?.map((data, index) => (
+                <TableRow key={data.id}>
+                  <TableCell className="font-medium">{index + 1}</TableCell>
+                  <TableCell>{data.userName}</TableCell>
+                  <TableCell>{data.role?.name}</TableCell>
+                  <TableCell>{formatDateTime(data.lastLoginTime)}</TableCell>
+                  <TableCell>{data.lastLoginIp}</TableCell>
+                  <TableCell>{data.phone}</TableCell>
+                  {/* <TableCell>{data.password}</TableCell> */}
+                  <TableCell className="flex gap-2 items-center">
+                    <BiEditAlt
+                      className="text-primary text-xl cursor-pointer"
+                      onClick={() => handleEdit(data)}
+                    />
+                    {/* <BiTrash className="text-red-500 text-xl cursor-pointer" /> */}
+                  </TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
-        <Table className="bg-white rounded-md">
+
+        <Table className="bg-white p-3 shadow-md rounded-md table-auto min-w-max">
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[100px]">#</TableHead>
+              <TableHead className="w-[50px]">#</TableHead>
               <TableHead>User name</TableHead>
               <TableHead>Role</TableHead>
               <TableHead>Last login</TableHead>
               <TableHead>Last login IP</TableHead>
               <TableHead>Phone</TableHead>
-              <TableHead>Password</TableHead>
+              {/* <TableHead>Password</TableHead> */}
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {/* {permissions?.map((data, index) => (
-              <TableRow key={data.id}>
-                <TableCell className="font-medium">{index + 1}</TableCell>
-                <TableCell>{data.name}</TableCell>
-              </TableRow>
-            ))} */}
+            {authUsers?.users
+              ?.filter((data) => data.role?.name === "SUPER-ADMIN")
+              ?.map((data, index) => (
+                <TableRow key={data.id}>
+                  <TableCell className="font-medium">{index + 1}</TableCell>
+                  <TableCell>{data.userName}</TableCell>
+                  <TableCell>{data.role?.name}</TableCell>
+                  <TableCell>{formatDateTime(data.lastLoginTime)}</TableCell>
+                  <TableCell>{data.lastLoginIp}</TableCell>
+                  <TableCell>{data.phone}</TableCell>
+                  {/* <TableCell>{data.password}</TableCell> */}
+                  <TableCell className="flex gap-2 items-center">
+                    <BiEditAlt
+                      className="text-primary text-xl cursor-pointer"
+                      onClick={() => handleEdit(data)}
+                    />
+                    {/* <BiTrash className="text-red-500 text-xl cursor-pointer" /> */}
+                  </TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </div>
+      {isLoading && (
+        <div className="h-[50vh] flex items-center justify-center">
+          <LoadingComponent loader={isLoading} />
+        </div>
+      )}
     </div>
   );
 };

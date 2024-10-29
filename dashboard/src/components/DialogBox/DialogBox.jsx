@@ -1,7 +1,7 @@
+/* eslint-disable react/prop-types */
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -15,12 +15,18 @@ const DialogBox = ({
   title,
   children,
   button2,
+  onPointerDownOutside,
+  onInteractOutside,
 }) => {
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogTrigger>{openButton}</DialogTrigger>
-        <DialogContent>
+        <DialogTrigger asChild>{openButton}</DialogTrigger>
+        <DialogContent
+          className="max-h-[95vh] overflow-y-auto"
+          onPointerDownOutside={onPointerDownOutside}
+          onInteractOutside={onInteractOutside}
+        >
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
           </DialogHeader>

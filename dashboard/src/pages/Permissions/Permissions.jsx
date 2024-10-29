@@ -1,4 +1,6 @@
+import { useCreatePermissionMutation } from "@/app/services/permissionsApi";
 import { useToast } from "@/components/hooks/use-toast";
+import LoadingComponent from "@/components/LoadingComponents/LoadingComponent";
 import PageHeader from "@/components/PageHeader/PageHeader";
 import { Button } from "@/components/ui/Button";
 import {
@@ -9,22 +11,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { createPermission } from "@/features/permissions/permissionsApiSlice";
-import {
-  getPermissions,
-  setMessageEmpty,
-} from "@/features/permissions/permissionsSlice";
+import { getPermissionsData } from "@/features/permissionsSlice";
+import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast as hotToast } from "react-hot-toast";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 
 const Permissions = () => {
-  const dispatch = useDispatch();
-  const { permissions, error, message, success } = useSelector(getPermissions);
+  const { permissions, loader } = useSelector(getPermissionsData);
+  const [createPermission, { isLoading, isSuccess }] =
+    useCreatePermissionMutation();
+
   const [name, setName] = useState("");
   const { toast } = useToast();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name) {
       toast({
@@ -32,26 +33,26 @@ const Permissions = () => {
         title: "The field is required!",
       });
     } else {
-      dispatch(createPermission(name));
-
-      dispatch(setMessageEmpty());
+      try {
+        const res = await createPermission({ name }).unwrap();
+        if (res?.message) {
+          hotToast.success(res.message);
+        }
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          title: `${error?.data?.message}`,
+        });
+      }
     }
   };
 
   useEffect(() => {
-    if (error) {
-      toast({
-        variant: "destructive",
-        title: `${error}`,
-      });
+    if (isSuccess) {
+      setName("");
     }
-    if (message) {
-      hotToast.success(message);
-    }
-    if (message || error || success) {
-      dispatch(setMessageEmpty());
-    }
-  }, [dispatch, error, message, success, toast]);
+  }, [isSuccess]);
+
   return (
     <div>
       {/* <Toaster /> */}
@@ -65,8 +66,17 @@ const Permissions = () => {
             onChange={(e) => setName(e.target.value)}
             className="w-full px-3 py-1 rounded-md border border-gray-300 outline-gray-400 text-base text-gray-800"
           />
-          <Button type="submit">Sumbit</Button>
+          <Button type="submit">
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please wait...
+              </>
+            ) : (
+              "Submit"
+            )}
+          </Button>
         </form>
+
         <Table className="table-auto min-w-max">
           <TableHeader>
             <TableRow>
@@ -74,6 +84,7 @@ const Permissions = () => {
               <TableHead>Name</TableHead>
             </TableRow>
           </TableHeader>
+
           <TableBody>
             {permissions?.map((data, index) => (
               <TableRow key={data.id}>
@@ -83,6 +94,11 @@ const Permissions = () => {
             ))}
           </TableBody>
         </Table>
+        {loader && (
+          <div className="h-[50vh] flex items-center justify-center">
+            <LoadingComponent loader={loader} />
+          </div>
+        )}
       </div>
     </div>
   );

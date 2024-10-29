@@ -32,12 +32,16 @@ import {
 } from "@/components/ui/select";
 import DialogBox from "@/components/DialogBox/DialogBox";
 import { Input } from "@/components/ui/input";
-import { useDispatch, useSelector } from "react-redux";
-import { getPermissions } from "@/features/permissions/permissionsSlice";
-import { getRoles, setMessageEmpty } from "@/features/roles/rolesSlice";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { createRole, editRole } from "@/features/roles/rolesApiSlice";
+import {
+  useCreateRoleMutation,
+  useUpdateRoleMutation,
+} from "@/app/services/rolesApi";
+import { useSelector } from "react-redux";
+import { getRolesData } from "@/features/rolesSlice";
+import LoadingComponent from "@/components/LoadingComponents/LoadingComponent";
+import { getPermissionsData } from "@/features/permissionsSlice";
 
 const FormSchema = z.object({
   name: z.string().min(2, {
@@ -51,9 +55,13 @@ const FormSchema = z.object({
 });
 
 const Roles = () => {
-  const dispatch = useDispatch();
-  const { permissions } = useSelector(getPermissions);
-  const { roles, message, error, loader } = useSelector(getRoles);
+  const { roles, loader } = useSelector(getRolesData);
+  const { permissions } = useSelector(getPermissionsData);
+  const [createRole, { isLoading: createLoading, isSuccess }] =
+    useCreateRoleMutation();
+  const [updateRole, { isLoading: updateLoading, isSuccess: updateSuccess }] =
+    useUpdateRoleMutation();
+
   // State to track if editing mode is active
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -66,41 +74,36 @@ const Roles = () => {
     },
   });
 
-  function onSubmit(data) {
+  async function onSubmit(data) {
     if (isEditing) {
       // Dispatch update action when editing a role
-      dispatch(
-        editRole({
+      try {
+        await updateRole({
           id: currentRole.id,
           name: data.name,
           permissions: data.permissions,
-        })
-      );
+        }).unwrap();
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          title: `${error?.data?.message}`,
+        });
+      }
     } else {
-      // Dispatch create action when creating a new role
-      dispatch(createRole({ name: data.name, permissions: data.permissions }));
+      try {
+        await createRole({
+          name: data.name,
+          permissions: data.permissions,
+        }).unwrap();
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          title: `${error?.data?.message}`,
+        });
+      }
     }
   }
 
-  useEffect(() => {
-    if (message) {
-      setIsDialogOpen(false);
-      toast({
-        title: `${message}`,
-      });
-      setIsEditing(false);
-      form.reset();
-    }
-    if (error) {
-      toast({
-        variant: "destructive",
-        title: `${error}`,
-      });
-    }
-    if (message || error || loader) {
-      dispatch(setMessageEmpty());
-    }
-  }, [dispatch, error, form, loader, message]);
   // Function to open the dialog for editing a role
   const handleEditRole = (role) => {
     setIsEditing(true);
@@ -115,6 +118,12 @@ const Roles = () => {
 
     setIsDialogOpen(true);
   };
+
+  useEffect(() => {
+    if (isSuccess || updateSuccess) {
+      setIsDialogOpen(false);
+    }
+  }, [isSuccess, updateSuccess]);
   const createRoleDialogComponent = () => {
     return (
       <DialogBox
@@ -201,8 +210,8 @@ const Roles = () => {
                 </FormItem>
               )}
             />
-            <Button type="submit" disabled={loader}>
-              {loader ? (
+            <Button type="submit" disabled={createLoading || updateLoading}>
+              {createLoading || updateLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please
                   wait...
@@ -237,7 +246,7 @@ const Roles = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {[...roles].reverse().map((data, index) => (
+            {roles?.map((data, index) => (
               <TableRow key={data.id}>
                 <TableCell className="font-medium">{index + 1}</TableCell>
                 <TableCell>{data.name}</TableCell>
@@ -259,6 +268,11 @@ const Roles = () => {
             ))}
           </TableBody>
         </Table>
+        {loader && (
+          <div className="h-[50vh] flex items-center justify-center">
+            <LoadingComponent loader={loader} />
+          </div>
+        )}
       </div>
     </div>
   );

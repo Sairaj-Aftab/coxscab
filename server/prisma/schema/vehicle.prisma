@@ -1,8 +1,9 @@
 model VehicleType {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  id                          String   @id @default(auto()) @map("_id") @db.ObjectId
   name String
   slug String
-  vehicles Vehicle[]
+  vehicles                     Vehicle[]
+  driver                       Driver[]
   status      Boolean          @default(true)
   trash       Boolean          @default(false)
   createdAt   DateTime         @default(now())
@@ -23,8 +24,8 @@ model Vehicle {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   vehicleType         VehicleType @relation(fields: [vehicleTypeId], references: [id], onDelete: Cascade)
   vehicleTypeId       String @db.ObjectId
-  vehicleCondition    VehicleCondition @relation(fields: [vehicleConditionId], references: [id], onDelete: Cascade)
-  vehicleConditionId  String @db.ObjectId
+  vehicleCondition    VehicleCondition? @relation(fields: [vehicleConditionId], references: [id], onDelete: Cascade)
+  vehicleConditionId  String? @db.ObjectId
   registrationNo      String
   engineChassisNo     String?
   qrCode              String?
@@ -33,13 +34,12 @@ model Vehicle {
   ownerNidNo          String?
   ownerNidDob         String?
   fatherName          String?
-  ownerAddress        String?
+  ownerAddress        Json?
   vehicleImage        String[]
   followUpByAuthority String?
-  driver              Driver? @relation(fields: [driverId], references: [id], onDelete: Cascade)
-  driverId            String? @db.ObjectId
-  garage              Garage? @relation("GarageVehicles", fields: [grageId], references: [id], onDelete: Cascade)
-  grageId             String? @db.ObjectId @unique
+  garage              Garage? @relation("GarageVehicles", fields: [garageId], references: [id], onDelete: Cascade)
+  garageId            String? @db.ObjectId
+  drivers             Driver[]
   status              Boolean   @default(true)
   trash               Boolean   @default(false)
   createdAt           DateTime  @default(now())

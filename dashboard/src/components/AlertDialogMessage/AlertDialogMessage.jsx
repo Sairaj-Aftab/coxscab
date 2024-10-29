@@ -15,7 +15,7 @@ const AlertDialogMessage = ({ button, action }) => {
   return (
     <>
       <AlertDialog>
-        <AlertDialogTrigger>{button}</AlertDialogTrigger>
+        <AlertDialogTrigger asChild>{button}</AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>

@@ -19,12 +19,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { logoutAuthUser } from "@/features/auth/authApiSlice";
 import { setLogoutUser } from "@/features/auth/authSlice";
+import { getVehicleTypeData } from "@/features/vehicleTypeSlice";
 
 const SideBar = () => {
   const dispatch = useDispatch();
+  const { types } = useSelector(getVehicleTypeData);
   const { pathname } = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -102,7 +104,9 @@ const SideBar = () => {
             Dashboard
           </Link>
           <Link
-            to="/vehicles"
+            to={`/vehicles/${
+              types?.find((type) => type.name === "TOMTOM")?.id || ""
+            }`}
             onClick={handleNavItemClick}
             className={`flex items-center text-sm font-medium text-gray-100 ${
               pathname === "/vehicles" && "bg-gray-600"
@@ -110,6 +114,30 @@ const SideBar = () => {
           >
             <FaList className="mr-3" />
             Vehicles
+          </Link>
+          <Link
+            to={`/drivers/${
+              types?.find((type) => type.name === "TOMTOM")?.id || ""
+            }`}
+            onClick={handleNavItemClick}
+            className={`flex items-center text-sm font-medium text-gray-100 ${
+              pathname === "/drivers" && "bg-gray-600"
+            } hover:bg-gray-600 hover:text-white px-3 py-3`}
+          >
+            <FaList className="mr-3" />
+            Drivers
+          </Link>
+          <Link
+            to={`/garage/${
+              types?.find((type) => type.name === "TOMTOM")?.id || ""
+            }`}
+            onClick={handleNavItemClick}
+            className={`flex items-center text-sm font-medium text-gray-100 ${
+              pathname === "/garage" && "bg-gray-600"
+            } hover:bg-gray-600 hover:text-white px-3 py-3`}
+          >
+            <FaList className="mr-3" />
+            Garage
           </Link>
 
           <Link
@@ -149,7 +177,7 @@ const SideBar = () => {
             <FaList className="mr-3" />
             Permissions
           </Link>
-          <Link
+          {/* <Link
             to="/products"
             className="flex items-center text-sm font-medium text-gray-100 hover:bg-gray-600 hover:text-white px-3 py-3"
           >
@@ -214,7 +242,7 @@ const SideBar = () => {
           >
             <FaCog className="mr-3" />
             Settings
-          </a>
+          </a> */}
         </nav>
         {/* Overlay for Sidebar on Small Screens */}
         {isSidebarOpen && (

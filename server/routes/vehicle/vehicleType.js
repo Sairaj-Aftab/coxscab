@@ -2,7 +2,7 @@ import express from "express";
 import {
   createVehicleType,
   getVehicleTypes,
-} from "../controller/vehicleType.js";
+} from "../../controller/vehicle/vehicleType.js";
 
 const router = express.Router();
 

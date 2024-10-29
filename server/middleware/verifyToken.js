@@ -4,6 +4,7 @@ const prisma = new PrismaClient();
 
 const verifyToken = async (req, res, next) => {
   // const authHeader = req.headers.authorization || req.headers.Authorization;
+
   const auth_token = req.cookies.auth_token;
 
   if (!auth_token) {

@@ -5,12 +5,34 @@ import SalesByTrafficSource from "@/components/SalesByTrafficSource/SalesByTraff
 import RecentOrdersTable from "@/components/RecentOrdersTable/RecentOrdersTable";
 import RecentReviewTable from "@/components/RecentReviewTable/RecentReviewTable";
 import PageHeader from "@/components/PageHeader/PageHeader";
+import { useGetChartsQuery } from "@/app/services/chartApi";
+import LoadingComponent from "@/components/LoadingComponents/LoadingComponent";
 
 const Dashboard = () => {
+  const { data, isLoading, error } = useGetChartsQuery();
+
+  // if (isLoading)
+  //   return (
+  //     <div className="h-[90vh] flex items-center justify-center">
+  //       <LoadingComponent loader={isLoading} />
+  //     </div>
+  //   );
+  if (error) return <div>Error: {error.message}</div>;
+
+  // Prepare data for the Pie chart
+  const vehicleTypes = data?.vehicleTypeCounts?.map((type) => type.type);
+  const vehicleCounts = data?.vehicleTypeCounts?.map((type) => type.count);
+  // Prepare data for the Pie chart
+  const vehicleConditions = data?.vehicleConditionCounts?.map(
+    (type) => type.condition
+  );
+  const vehicleCountsConditions = data?.vehicleConditionCounts?.map(
+    (type) => type.count
+  );
   return (
-    <div className="flex flex-col gap-5">
+    <div>
       <PageHeader title2={"Dashboard"} />
-      <div className="flex gap-5">
+      {/* <div className="flex gap-5">
         <div className="basis-4/12 bg-white shadow-md rounded-md p-3">
           <p className="text-sm font-normal text-gray-500">Total sells</p>
           <div className="flex flex-col items-center">
@@ -53,24 +75,24 @@ const Dashboard = () => {
             </p>
           </div>
         </div>
-      </div>
-      {/* Active users And Income Statistics */}
-      <div className="flex gap-5">
-        {/* Active users */}
-        <div className="basis-4/12 bg-white rounded-md p-3 shadow-md">
-          <ActiveUsers />
+      </div> */}
+      {isLoading && (
+        <div className="h-[90vh] flex items-center justify-center">
+          <LoadingComponent loader={isLoading} />
         </div>
-        {/* Income statistics */}
-        <div className="basis-8/12 bg-white rounded-md p-3 shadow-md">
-          <IncomeStatisticChart />
-        </div>
+      )}
+      <div className="grid grid-cols-4 gap-3">
+        <IncomeStatisticChart
+          title={"Vehicle Types"}
+          labels={vehicleTypes}
+          data={vehicleCounts}
+        />
+        <IncomeStatisticChart
+          title={"Vehicle Conditions"}
+          labels={vehicleConditions}
+          data={vehicleCountsConditions}
+        />
       </div>
-      {/* Recent Orders Table */}
-      <RecentOrdersTable />
-      {/* Sales by traffic sources */}
-      <SalesByTrafficSource />
-      {/* Recent Review Table */}
-      <RecentReviewTable />
     </div>
   );
 };

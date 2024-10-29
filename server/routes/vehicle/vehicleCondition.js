@@ -2,7 +2,7 @@ import express from "express";
 import {
   createVehicleCondition,
   getVehicleConditions,
-} from "../controller/vehicleCondition.js";
+} from "../../controller/vehicle/vehicleCondition.js";
 
 const router = express.Router();
 

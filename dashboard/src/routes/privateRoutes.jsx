@@ -3,10 +3,11 @@ import AuthUsers from "@/pages/AuthUsers/AuthUsers";
 import Dashboard from "@/pages/Dashboard/Dashboard";
 import Permissions from "@/pages/Permissions/Permissions";
 import Roles from "@/pages/Roles/Roles";
-import VehicleAdd from "@/pages/VehicleAdd/VehicleAdd";
 import Vehicles from "@/pages/Vehicles/Vehicles";
 import PrivateRouteGird from "./PrivateRouteGrid";
 import RequiredCategories from "@/pages/RequiredCategories/RequiredCategories";
+import Drivers from "@/pages/Drivers/Drivers";
+import Garage from "@/pages/Garage/Garage";
 
 const privateRoutes = [
   {
@@ -20,12 +21,16 @@ const privateRoutes = [
             element: <Dashboard />,
           },
           {
-            path: "/vehicles",
+            path: "/vehicles/:id",
             element: <Vehicles />,
           },
           {
-            path: "/vehicle/add",
-            element: <VehicleAdd />,
+            path: "/drivers/:id",
+            element: <Drivers />,
+          },
+          {
+            path: "/garage/:id",
+            element: <Garage />,
           },
           {
             path: "/required-categories",

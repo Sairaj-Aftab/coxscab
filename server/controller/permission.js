@@ -5,9 +5,9 @@ const prisma = new PrismaClient();
 
 export const getPermission = async (req, res, next) => {
   try {
-    const permission = await prisma.permission.findMany();
+    const permissions = await prisma.permission.findMany();
 
-    return res.status(200).json({ permission });
+    return res.status(200).json({ permissions });
   } catch (error) {
     return next(error);
   }
@@ -16,12 +16,13 @@ export const getPermission = async (req, res, next) => {
 export const createPermission = async (req, res, next) => {
   try {
     const { name } = req.body;
+
     if (!name) {
       return next(createError(400, "The field is required!"));
     }
     const existingPermission = await prisma.permission.findFirst({
       where: {
-        name,
+        name: name.toUpperCase(),
       },
     });
 
@@ -30,11 +31,16 @@ export const createPermission = async (req, res, next) => {
     }
     const permission = await prisma.permission.create({
       data: {
-        name,
+        name: name.toUpperCase(),
         slug: createSlug(name),
       },
     });
-    return res.status(200).json({ permission });
+    if (!permission) {
+      return next(createError(400, "Please try again!"));
+    }
+    return res
+      .status(200)
+      .json({ permission, message: "Successfully created!" });
   } catch (error) {
     console.log(error);
 

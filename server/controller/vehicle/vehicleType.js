@@ -1,29 +1,33 @@
 import { PrismaClient } from "@prisma/client";
-import createError from "../utils/createError.js";
-import { createSlug } from "../utils/slug.js";
+import createError from "../../utils/createError.js";
+import { createSlug } from "../../utils/slug.js";
 const prisma = new PrismaClient();
 
 export const createVehicleType = async (req, res, next) => {
   try {
     const { name } = req.body;
 
-    const existing = await prisma.vehicleType.findFirst({ where: { name } });
+    const existing = await prisma.vehicleType.findFirst({
+      where: { name: name.toUpperCase() },
+    });
 
     if (existing) {
       return next(createError(400, "Already exist!"));
     }
 
-    const vehicle = await prisma.vehicleType.create({
+    const type = await prisma.vehicleType.create({
       data: {
-        name,
+        name: name.toUpperCase(),
         slug: createSlug(name),
       },
     });
 
-    if (!vehicle) {
+    if (!type) {
       return next(createError(400, "Please try again!"));
     }
-    return res.status(200).json({ vehicle, message: "Successfully created!" });
+    return res
+      .status(200)
+      .json({ type, success: true, message: "Successfully created!" });
   } catch (error) {
     return next(error);
   }
@@ -31,11 +35,11 @@ export const createVehicleType = async (req, res, next) => {
 
 export const getVehicleTypes = async (req, res, next) => {
   try {
-    const vehicles = await prisma.vehicleType.findMany();
-    if (vehicles.length < 1) {
+    const types = await prisma.vehicleType.findMany();
+    if (types.length < 1) {
       return next(createError(400, "Cannot find any!"));
     }
-    return res.status(200).json({ vehicles });
+    return res.status(200).json({ types, success: true });
   } catch (error) {
     return next(error);
   }

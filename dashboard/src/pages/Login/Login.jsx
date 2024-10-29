@@ -16,12 +16,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { authData, setMessageEmpty } from "@/features/auth/authSlice";
 import { loginAuthUser } from "@/features/auth/authApiSlice";
 import { useEffect } from "react";
-import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
 
 const formSchema = z.object({
   userName: z.string().min(3, {
@@ -33,9 +33,10 @@ const formSchema = z.object({
 });
 
 const Login = () => {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { auth, success, message, error, loader } = useSelector(authData);
+  const { error, loader, success, message } = useSelector(authData);
+  const navigate = useNavigate();
+
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -49,20 +50,20 @@ const Login = () => {
       loginAuthUser({ userName: data.userName, password: data.password })
     );
   };
+
   useEffect(() => {
     if (error) {
       toast.error(error);
     }
-    if (message) {
+    if (success) {
       form.reset();
-    }
-    if (auth) {
       navigate("/");
     }
-    if (error || message || success) {
+    if (error || success || message) {
       dispatch(setMessageEmpty());
     }
-  }, [auth, dispatch, error, form, message, navigate, success]);
+  }, [error, message, success, dispatch, navigate, form]);
+
   return (
     <div className="py-5 flex justify-center items-center h-screen">
       <Card className={cn("w-[95%] sm:w-[480px]")}>

@@ -1,0 +1,15 @@
+model Garage {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  ownerName          String
+  mobileNo           String?
+  managerName        String?
+  managerMobileNo    String?
+  garageAddress      Json?
+  numberOfVehicles   Int?
+  vehicles           Vehicle[] @relation("GarageVehicles")
+  note               String?
+  status                 Boolean   @default(true)
+  trash                  Boolean   @default(false)
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+}

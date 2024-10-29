@@ -1,8 +1,10 @@
+import { authData } from "@/features/auth/authSlice";
 import { useSelector } from "react-redux";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 
 const PrivateRouteGird = () => {
-  const { auth } = useSelector((state) => state.auth);
+  const { auth } = useSelector(authData);
+
   const location = useLocation();
 
   // Define routes that only super-admin can access

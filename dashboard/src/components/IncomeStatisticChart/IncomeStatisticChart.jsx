@@ -2,47 +2,62 @@ import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
-  BarElement,
+  ArcElement,
   Tooltip,
   Legend,
 } from "chart.js";
-import { Bar } from "react-chartjs-2";
-import { faker } from "@faker-js/faker";
+import { Pie } from "react-chartjs-2";
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
+// Register the required components for the Pie chart
+ChartJS.register(CategoryScale, LinearScale, ArcElement, Tooltip, Legend);
 
-const labels = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-];
+// eslint-disable-next-line react/prop-types
+const IncomeStatisticChart = ({ title, labels, data }) => {
+  const chartData = {
+    labels: labels, //it's array
+    datasets: [
+      {
+        label: "Value",
+        data: data, //it's array number
+        backgroundColor: [
+          "rgb(255, 99, 132)",
+          "rgb(54, 162, 235)",
+          "rgb(255, 205, 86)",
+          "rgb(165,42,42)",
+        ],
+        hoverOffset: 5,
+      },
+    ],
+  };
 
-export const data = {
-  labels,
-  datasets: [
-    {
-      data: labels.map(() => faker.datatype.number({ min: 0, max: 1000 })),
-      backgroundColor: "rgba(53, 162, 235, 0.5)",
+  const options = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "top",
+        labels: {
+          color: "rgba(0, 0, 0, 0.70)", // Customize legend label color
+          font: {
+            size: 12, // Customize font size
+            family: "'Helvetica Neue', 'Arial', sans-serif", // Customize font family
+            weight: "600", // Customize font weight
+          },
+          boxWidth: 10, // Adjust width of the color box (legend badge)
+          boxHeight: 10, // Adjust height of the color box (legend badge)
+          padding: 8, // Space between the legend labels and boxes
+          usePointStyle: true, // Makes badge circular (optional)
+        },
+      },
+      afterFit: (legend) => {
+        legend.height = 100; // Set the width of the legend
+      },
     },
-  ],
-};
-const IncomeStatisticChart = () => {
+  };
   return (
-    <>
-      <h3 className="text-base font-medium text-gray_text mb-3">
-        Income statistics
-      </h3>
-      <Bar data={data} />
-    </>
+    <div className="bg-white rounded-md p-1 shadow-md">
+      <h3 className="text-base font-medium text-gray_text mb-3">{title}</h3>
+      <Pie data={chartData} options={options} />
+    </div>
   );
 };
 
