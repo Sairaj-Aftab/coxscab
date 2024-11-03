@@ -2,7 +2,6 @@ import { getDriver } from "@/lib/route";
 
 const DriverQrInfo = async ({ params }) => {
   const { id } = await params;
-
   const { driver } = await getDriver(id);
 
   return (
