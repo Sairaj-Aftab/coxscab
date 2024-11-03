@@ -245,12 +245,13 @@ const Drivers = () => {
     {
       name: "#",
       selector: (data, index) => calculateItemIndex(page, limit, index),
-      width: "60px",
+      width: "70px",
     },
     {
-      name: "Coxscab ID",
+      name: "ID",
       selector: (row) => row.coxscabId,
       sortable: true,
+      width: "70px",
     },
     {
       name: "QR",

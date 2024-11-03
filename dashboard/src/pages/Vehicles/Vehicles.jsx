@@ -345,7 +345,7 @@ const Vehicles = () => {
     {
       name: "#",
       selector: (data, index) => calculateItemIndex(page, limit, index),
-      width: "60px",
+      width: "70px",
     },
     {
       name: "QR",

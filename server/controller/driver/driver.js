@@ -192,6 +192,27 @@ export const getDrivers = async (req, res, next) => {
   }
 };
 
+export const getDriver = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const driver = await prisma.driver.findUnique({
+      where: { id },
+      include: {
+        vehicle: true,
+        vehicleType: true,
+        driverActivities: true,
+        driverStatus: true,
+      },
+    });
+    if (!driver) {
+      return next(createError(400, "Driver not found!"));
+    }
+    return res.status(200).json({ driver, success: true });
+  } catch (error) {
+    return next(error);
+  }
+};
+
 export const updateDriver = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -348,12 +369,12 @@ export const deleteDriver = async (req, res, next) => {
 };
 export const generateDriversFrom = async (req, res, next) => {
   try {
-    const totalDrivers = 200; // Total drivers you want to generate
-    const batchSize = 90; // Process 100 drivers in the first batch
+    const totalDrivers = 1000; // Total drivers you want to generate
+    const batchSize = 1000; // Process 100 drivers in the first batch
     const drivers = [];
 
     // Start generating drivers from 107 up to 107 + batchSize
-    for (let i = 110; i < 110 + batchSize; i++) {
+    for (let i = 4000; i < 4000 + batchSize; i++) {
       const coxscabId = String(i + 1).padStart(4, "0");
 
       drivers.push({
@@ -401,7 +422,7 @@ export const generateDriversFrom = async (req, res, next) => {
 
     return res.status(200).json({
       success: true,
-      message: `First ${batchSize} drivers starting from ID 107 generated successfully`,
+      message: `Success`,
     });
   } catch (error) {
     return next(error);
