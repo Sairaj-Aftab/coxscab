@@ -45,6 +45,8 @@ import { getVehicleTypeData } from "@/features/vehicleTypeSlice";
 import { getVehicleConditionData } from "@/features/vehicleConditionSlice";
 import { Label } from "@/components/ui/label";
 import { Link, useParams } from "react-router-dom";
+import { useGetGaragesQuery } from "@/app/services/garageApi";
+import { useGetDriversQuery } from "@/app/services/driverApi";
 
 const FormSchema = z.object({
   vehicleTypeId: z.string().min(2, {
@@ -67,16 +69,27 @@ const FormSchema = z.object({
   district: z.string().optional(),
   vehicleImage: z.array(z.instanceof(File)).optional(), // Optional field (array of strings)
   followUpByAuthority: z.string().optional(), // Optional field
-  driverId: z.string().optional(), // Optional field
+  driverIds: z.array(z.string()).optional(), // Optional field (array of strings).string().optional(), // Optional field
   garageId: z.string().optional(), // Optional field
 });
 
 const Vehicles = () => {
   const params = useParams();
   const dispatch = useDispatch();
+  // Vehicle State
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  // Garage State
+  const [searchGarage, setSearchGarage] = useState("");
+  const [pageGarage, setPageGarage] = useState(1);
+  const [limitGarage, setLimitGarage] = useState(10);
+  const [garage, setGarage] = useState({});
+  // Driver State
+  const [searchDriver, setSearchDriver] = useState("");
+  const [pageDriver, setPageDriver] = useState(1);
+  const [limitDriver, setLimitDriver] = useState(10);
+  const [driver, setDriver] = useState([]);
   // State to track if editing mode is active
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -89,6 +102,16 @@ const Vehicles = () => {
     page,
     limit,
   });
+  const { data: garages, isLoading: garageLoading } = useGetGaragesQuery({
+    search: searchGarage,
+    page: pageGarage,
+    limit: limitGarage,
+  });
+  const { data: drivers, isLoading: driversLoading } = useGetDriversQuery({
+    search: searchDriver,
+    page: pageDriver,
+    limit: limitDriver,
+  });
   const [createVehicle, { isLoading: createLoading }] =
     useCreateVehicleMutation();
   const [updateVehicle, { isLoading: updateLoading }] =
@@ -99,6 +122,7 @@ const Vehicles = () => {
   const [deleteVehicle] = useDeleteVehicleMutation();
 
   // Handle Search, pagination and filtering data using react table
+  // Vehicle
   const handlePageChange = (page) => {
     setPage(page);
   };
@@ -109,6 +133,52 @@ const Vehicles = () => {
 
   const handleSearchChange = (e) => {
     setSearch(e.target.value);
+  };
+
+  // Garage
+  const handlePageChangeGarage = (page) => {
+    setPageGarage(page);
+  };
+
+  const handlePerRowsChangeGarage = (newPerPage) => {
+    setLimitGarage(newPerPage);
+  };
+
+  const handleSearchChangeGarage = (e) => {
+    setSearchGarage(e.target.value);
+  };
+  // Driver
+  const handlePageChangeDriver = (page) => {
+    setPageDriver(page);
+  };
+
+  const handlePerRowsChangeDriver = (newPerPage) => {
+    setLimitDriver(newPerPage);
+  };
+
+  const handleSearchChangeDriver = (e) => {
+    setSearchDriver(e.target.value);
+  };
+
+  // Garage
+  const handleRowSelectedGarage = (selectedRows) => {
+    const id = selectedRows.selectedRows.map((row) => row.id);
+    form.setValue("garageId", id[0]);
+    setGarage({
+      coxscabId: selectedRows.selectedRows.map((row) => row.coxscabId)[0],
+      ownerName: selectedRows.selectedRows.map((row) => row.ownerName)[0],
+    });
+  };
+  // Driver
+  const handleRowSelectedDriver = (selectedRows) => {
+    const ids = selectedRows.selectedRows.map((row) => row.id);
+    form.setValue("driverIds", ids);
+    setDriver(
+      selectedRows.selectedRows.map((row) => ({
+        coxscabId: row.coxscabId,
+        name: row.name,
+      }))
+    );
   };
 
   const calculateItemIndex = (page, rowPage, index) => {
@@ -134,7 +204,7 @@ const Vehicles = () => {
       district: "",
       vehicleImage: [],
       followUpByAuthority: "",
-      driverId: "",
+      driverIds: [],
       garageId: "",
     },
   });
@@ -169,7 +239,18 @@ const Vehicles = () => {
     form.setValue("district", data?.ownerAddress?.district || "");
 
     // Set form values for related fields
-    form.setValue("garageId", data?.garageId || "");
+    form.setValue("garageId", data?.garage?.id || "");
+    setGarage({
+      coxscabId: data?.garage?.coxscabId || "",
+      ownerName: data?.garage?.ownerName || "",
+    });
+    form.setValue("driverIds", data?.drivers?.map((data) => data.id) || "");
+    setDriver(
+      data?.drivers?.map((data) => ({
+        coxscabId: data.coxscabId,
+        name: data.name,
+      }))
+    );
 
     // If images are provided, set them up in an array format
     form.setValue("vehicleImage", data.vehicleImage || []);
@@ -232,6 +313,33 @@ const Vehicles = () => {
       });
     }
   };
+
+  // Garage Columns
+  const garageColumns = [
+    {
+      name: "Coxscab ID",
+      selector: (row) => row.coxscabId,
+      sortable: true,
+    },
+    {
+      name: "Owner Name",
+      selector: (row) => row.ownerName,
+      sortable: true,
+    },
+  ];
+  // Driver Columns
+  const driverColumns = [
+    {
+      name: "Coxscab ID",
+      selector: (row) => row.coxscabId,
+      sortable: true,
+    },
+    {
+      name: "Driver Name",
+      selector: (row) => row.name,
+      sortable: true,
+    },
+  ];
 
   const columns = [
     {
@@ -332,6 +440,8 @@ const Vehicles = () => {
               setIsEditing(false); // Reset editing mode
               form.reset(); // Reset form
               setIsDialogOpen(true);
+              setGarage({});
+              setDriver([]);
             }}
           >
             Create vehicle
@@ -689,52 +799,88 @@ const Vehicles = () => {
             </div>
             {/* GrageId and DriverId */}
             <div className="flex flex-col md:flex-row gap-2">
-              <FormField
-                control={form.control}
-                name="garageId"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel
-                      className={`${
-                        (createLoading || updateLoading) &&
-                        "cursor-not-allowed text-gray-400"
-                      }`}
-                    >
-                      Garage
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        disabled={createLoading || updateLoading}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="driverId"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel
-                      className={`${
-                        (createLoading || updateLoading) &&
-                        "cursor-not-allowed text-gray-400"
-                      }`}
-                    >
-                      Driver
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        disabled={createLoading || updateLoading}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* Garage Id */}
+              <Popover>
+                <PopoverTrigger className="flex-1 flex gap-2 flex-col justify-start">
+                  <Label htmlFor="garage">Garage</Label>
+                  <Input
+                    value={`${garage?.coxscabId || ""} ${
+                      garage?.ownerName || ""
+                    }`}
+                    readOnly
+                    disabled={createLoading || updateLoading}
+                  />
+                </PopoverTrigger>
+                <PopoverContent className="w-full">
+                  <input
+                    type="text"
+                    placeholder="Search garage"
+                    onChange={handleSearchChangeGarage}
+                    className="w-full px-3 py-1 rounded-md border border-gray-300 outline-gray-400 text-base text-gray-800"
+                  />
+                  <DataTable
+                    columns={garageColumns}
+                    data={garages?.garages}
+                    responsive
+                    progressPending={garageLoading}
+                    progressComponent={
+                      <div className="h-[50vh] flex items-center justify-center">
+                        <LoadingComponent loader={garageLoading} />
+                      </div>
+                    }
+                    selectableRowsSingle
+                    selectableRows
+                    onSelectedRowsChange={handleRowSelectedGarage}
+                    pagination
+                    paginationServer
+                    paginationTotalRows={garages?.totalGarage}
+                    onChangeRowsPerPage={handlePerRowsChangeGarage}
+                    onChangePage={handlePageChangeGarage}
+                    paginationRowsPerPageOptions={[10, 20, 50, 100]}
+                  />
+                </PopoverContent>
+              </Popover>
+              {/* Driver Id */}
+              <Popover>
+                <PopoverTrigger className="flex-1 flex gap-2 flex-col justify-start">
+                  <Label htmlFor="driver">Driver</Label>
+                  <Input
+                    value={`${driver[0]?.coxscabId || ""} ${
+                      driver[0]?.name || ""
+                    }`}
+                    readOnly
+                    disabled={createLoading || updateLoading}
+                  />
+                </PopoverTrigger>
+                <PopoverContent className="w-full">
+                  <input
+                    type="text"
+                    placeholder="Search driver"
+                    onChange={handleSearchChangeDriver}
+                    className="w-full px-3 py-1 rounded-md border border-gray-300 outline-gray-400 text-base text-gray-800"
+                  />
+                  <DataTable
+                    columns={driverColumns}
+                    data={drivers?.drivers}
+                    responsive
+                    progressPending={driversLoading}
+                    progressComponent={
+                      <div className="h-[50vh] flex items-center justify-center">
+                        <LoadingComponent loader={driversLoading} />
+                      </div>
+                    }
+                    selectableRowsSingle
+                    selectableRows
+                    onSelectedRowsChange={handleRowSelectedDriver}
+                    pagination
+                    paginationServer
+                    paginationTotalRows={drivers?.totalDriver}
+                    onChangeRowsPerPage={handlePerRowsChangeDriver}
+                    onChangePage={handlePageChangeDriver}
+                    paginationRowsPerPageOptions={[10, 20, 50, 100]}
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
             {/* Follow Up By Authority */}
             <div className="flex flex-col md:flex-row gap-2">

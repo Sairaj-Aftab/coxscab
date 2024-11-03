@@ -1,5 +1,6 @@
 model Garage {
   id String @id @default(auto()) @map("_id") @db.ObjectId
+  coxscabId          String @unique
   ownerName          String
   mobileNo           String?
   managerName        String?

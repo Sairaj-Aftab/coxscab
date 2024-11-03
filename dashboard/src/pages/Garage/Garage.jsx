@@ -45,6 +45,7 @@ import {
 import AlertDialogMessage from "@/components/AlertDialogMessage/AlertDialogMessage";
 
 const FormSchema = z.object({
+  coxscabId: z.string().nonempty("Coxscab ID is required"),
   ownerName: z.string().nonempty("Owner name is required"),
   mobileNo: z.string().optional(),
   managerName: z.string().optional(),
@@ -128,6 +129,7 @@ const Garage = () => {
   const form = useForm({
     resolver: zodResolver(FormSchema),
     defaultValues: {
+      coxscabId: "",
       ownerName: "",
       mobileNo: "",
       managerName: "",
@@ -237,6 +239,11 @@ const Garage = () => {
       },
     },
     {
+      name: "Coxscab ID",
+      selector: (row) => row.coxscabId,
+      sortable: true,
+    },
+    {
       name: "Owner Name",
       selector: (row) => row.ownerName,
       sortable: true,
@@ -333,6 +340,33 @@ const Garage = () => {
       >
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
+            {/* Coxscab ID */}
+            <div className="flex flex-col md:flex-row gap-2">
+              <FormField
+                control={form.control}
+                name="coxscabId"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel
+                      className={`${
+                        (createLoading || updateLoading) &&
+                        "cursor-not-allowed text-gray-400"
+                      }`}
+                    >
+                      Coxscab ID
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="number"
+                        disabled={createLoading || updateLoading}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             {/* Owner name and mobile number */}
             <div className="flex flex-col md:flex-row gap-2">
               <FormField

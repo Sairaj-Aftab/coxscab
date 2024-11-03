@@ -5,6 +5,7 @@ const prisma = new PrismaClient();
 export const createGarage = async (req, res, next) => {
   try {
     const {
+      coxscabId,
       ownerName,
       mobileNo,
       managerName,
@@ -16,12 +17,23 @@ export const createGarage = async (req, res, next) => {
       vehicleIds, // Array of vehicle IDs to link to this garage
     } = req.body;
 
+    const existing = await prisma.garage.findFirst({
+      where: {
+        coxscabId,
+      },
+    });
+
+    if (existing) {
+      return next(createError(400, "Already exist!"));
+    }
+
     // Prepare vehicle connection data
     const vehiclesToConnect = vehicleIds?.map((id) => ({ id })) || [];
 
     // Create the garage entry in the database
     const garage = await prisma.garage.create({
       data: {
+        coxscabId,
         ownerName,
         mobileNo,
         managerName,
@@ -58,12 +70,17 @@ export const getGarages = async (req, res, next) => {
 
   const filters = {
     ...(search && {
-      OR: [{ ownerName: { contains: search, mode: "insensitive" } }],
+      OR: [
+        { coxscabId: { contains: search, mode: "insensitive" } },
+        { ownerName: { contains: search, mode: "insensitive" } },
+        { mobileNo: { contains: search, mode: "insensitive" } },
+      ],
     }),
   };
   try {
     const garages = await prisma.garage.findMany({
       where: filters,
+      orderBy: { coxscabId: "asc" },
       skip: (page - 1) * limit, // For pagination
       take: parseInt(limit), // Limit results per page
       include: {

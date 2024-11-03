@@ -60,7 +60,7 @@ export const createVehicle = async (req, res, next) => {
       vehicleImage,
       followUpByAuthority,
       garageId,
-      driversId,
+      driverIds,
     } = req.body;
 
     const existing = await prisma.vehicle.findFirst({
@@ -108,9 +108,9 @@ export const createVehicle = async (req, res, next) => {
             }
           : undefined,
         drivers:
-          driversId && driversId.length > 0
+          driverIds && driverIds.length > 0
             ? {
-                connect: driversId.map((id) => ({ id })),
+                connect: driverIds.map((id) => ({ id })),
               }
             : undefined, // Skip if no drivers
       },
@@ -146,8 +146,6 @@ export const createVehicle = async (req, res, next) => {
       message: "Successfully created.",
     });
   } catch (error) {
-    console.log(error);
-
     return next(error);
   }
 };
@@ -174,8 +172,9 @@ export const updateVehicle = async (req, res, next) => {
       vehicleImage,
       followUpByAuthority,
       garageId,
-      driversId,
+      driverIds,
     } = req.body;
+    console.log(driverIds);
 
     let queryConditions = [];
 
@@ -232,9 +231,9 @@ export const updateVehicle = async (req, res, next) => {
         followUpByAuthority,
         garageId: garageId ? String(garageId) : null, // Foreign key to Garage (optional)
         drivers:
-          driversId && driversId.length > 0
+          driverIds && driverIds.length > 0
             ? {
-                connect: driversId.map((id) => ({ id })),
+                connect: driverIds.map((id) => ({ id })),
               }
             : undefined, // Skip if no drivers
       },
@@ -256,8 +255,6 @@ export const updateVehicle = async (req, res, next) => {
       message: "Successfully updated!",
     });
   } catch (error) {
-    console.log(error);
-
     return next(error);
   }
 };

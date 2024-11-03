@@ -109,19 +109,17 @@ const SideBar = () => {
             }`}
             onClick={handleNavItemClick}
             className={`flex items-center text-sm font-medium text-gray-100 ${
-              pathname === "/vehicles" && "bg-gray-600"
+              pathname.includes("/vehicles") && "bg-gray-600"
             } hover:bg-gray-600 hover:text-white px-3 py-3`}
           >
             <FaList className="mr-3" />
             Vehicles
           </Link>
           <Link
-            to={`/drivers/${
-              types?.find((type) => type.name === "TOMTOM")?.id || ""
-            }`}
+            to={`/drivers/all`}
             onClick={handleNavItemClick}
             className={`flex items-center text-sm font-medium text-gray-100 ${
-              pathname === "/drivers" && "bg-gray-600"
+              pathname.includes("/drivers") && "bg-gray-600"
             } hover:bg-gray-600 hover:text-white px-3 py-3`}
           >
             <FaList className="mr-3" />
@@ -133,7 +131,7 @@ const SideBar = () => {
             }`}
             onClick={handleNavItemClick}
             className={`flex items-center text-sm font-medium text-gray-100 ${
-              pathname === "/garage" && "bg-gray-600"
+              pathname.includes("/garage") && "bg-gray-600"
             } hover:bg-gray-600 hover:text-white px-3 py-3`}
           >
             <FaList className="mr-3" />

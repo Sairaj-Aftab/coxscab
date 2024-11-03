@@ -72,7 +72,7 @@ const FormSchema = z.object({
   note: z.string().optional(),
   driverActivitiesId: z.string().optional(),
   driverStatusId: z.string().optional(),
-  vehicleTypeId: z.string().nonempty("Vehicle type is required!"),
+  vehicleTypeId: z.string().optional(),
 });
 
 const Drivers = () => {
@@ -84,7 +84,7 @@ const Drivers = () => {
   const { status } = useSelector(getDriverStatusData);
   const { types } = useSelector(getVehicleTypeData);
   const { data: drivers, isLoading } = useGetDriversQuery({
-    typeId: params?.id,
+    typeId: params?.id !== "all" ? params?.id : undefined,
     search,
     page,
     limit,
@@ -248,6 +248,11 @@ const Drivers = () => {
       width: "60px",
     },
     {
+      name: "Coxscab ID",
+      selector: (row) => row.coxscabId,
+      sortable: true,
+    },
+    {
       name: "QR",
       selector: (row) => row,
       cell: (row) => (
@@ -256,6 +261,7 @@ const Drivers = () => {
         </div>
       ),
     },
+
     {
       name: "Name",
       selector: (row) => row.name,
@@ -950,6 +956,15 @@ const Drivers = () => {
       <div className="bg-white shadow-md rounded-md">
         <div className="p-1">
           <ul className="flex justify-center gap-3 items-center pb-2 text-sm font-semibold">
+            <li
+              className={`border border-primary rounded-md py-1 px-2 ${
+                params?.id === "all"
+                  ? "bg-primary text-white"
+                  : "bg-white text-primary"
+              }`}
+            >
+              <Link to={`/drivers/all`}>All</Link>
+            </li>
             {types?.map((type) => (
               <li
                 key={type.id}

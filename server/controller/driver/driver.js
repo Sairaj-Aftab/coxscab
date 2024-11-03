@@ -109,7 +109,7 @@ export const createDriver = async (req, res, next) => {
           ? String(driverActivitiesId)
           : null,
         driverStatusId: driverStatusId ? String(driverStatusId) : null,
-        vehicleTypeId: String(vehicleTypeId),
+        vehicleTypeId: vehicleTypeId ? String(vehicleTypeId) : null,
         vehicleId: vehicleId ? String(vehicleId) : null,
       },
     });
@@ -119,7 +119,7 @@ export const createDriver = async (req, res, next) => {
     }
 
     const qrCodeDataURL = await qr.toDataURL(
-      `https://coxscab.com/driver/qrinfo/${name}/${driver.id}/${vehicleTypeId}`,
+      `https://coxscab.com/driver/qrinfo/${driver.id}`,
       {
         width: 250,
         margin: 2,
@@ -154,6 +154,7 @@ export const getDrivers = async (req, res, next) => {
     ...(typeId && { vehicleType: { id: typeId } }),
     ...(search && {
       OR: [
+        { coxscabId: { contains: search, mode: "insensitive" } },
         { name: { contains: search, mode: "insensitive" } },
         { nidNo: { contains: search, mode: "insensitive" } },
         { fatherName: { contains: search, mode: "insensitive" } },
@@ -164,6 +165,7 @@ export const getDrivers = async (req, res, next) => {
   try {
     const drivers = await prisma.driver.findMany({
       where: filters,
+      orderBy: { coxscabId: "asc" },
       include: {
         vehicle: true,
         vehicleType: true,
@@ -173,6 +175,7 @@ export const getDrivers = async (req, res, next) => {
       skip: (page - 1) * limit, // For pagination
       take: parseInt(limit), // Limit results per page
     });
+
     // Count the total number of drivers matching the filters
     const totalDrivers = await prisma.driver.count({
       where: filters,
@@ -183,6 +186,8 @@ export const getDrivers = async (req, res, next) => {
       success: true,
     });
   } catch (error) {
+    console.log(error);
+
     return next(error);
   }
 };
@@ -297,7 +302,7 @@ export const updateDriver = async (req, res, next) => {
           ? String(driverActivitiesId)
           : null,
         driverStatusId: driverStatusId ? String(driverStatusId) : null,
-        vehicleTypeId: String(vehicleTypeId),
+        vehicleTypeId: vehicleTypeId ? String(vehicleTypeId) : null,
         vehicleId: vehicleId ? String(vehicleId) : null,
       },
       include: {
@@ -337,6 +342,67 @@ export const deleteDriver = async (req, res, next) => {
     return res
       .status(200)
       .json({ success: true, message: "Successfully deleted." });
+  } catch (error) {
+    return next(error);
+  }
+};
+export const generateDriversFrom = async (req, res, next) => {
+  try {
+    const totalDrivers = 200; // Total drivers you want to generate
+    const batchSize = 90; // Process 100 drivers in the first batch
+    const drivers = [];
+
+    // Start generating drivers from 107 up to 107 + batchSize
+    for (let i = 110; i < 110 + batchSize; i++) {
+      const coxscabId = String(i + 1).padStart(4, "0");
+
+      drivers.push({
+        coxscabId,
+        name: `Name${i + 1}`,
+        nameBn: `নাম${i + 1}`,
+        nidDob: null,
+        driverActivitiesId: null,
+        driverStatusId: null,
+        vehicleTypeId: null,
+        vehicleId: null,
+      });
+    }
+
+    // Insert the first batch of 100 drivers
+    await prisma.driver.createMany({ data: drivers });
+
+    // Retrieve the inserted drivers to generate QR codes
+    const insertedDrivers = await prisma.driver.findMany({
+      where: {
+        coxscabId: {
+          in: drivers.map((driver) => driver.coxscabId),
+        },
+      },
+      select: { id: true, coxscabId: true },
+      orderBy: { id: "asc" },
+    });
+
+    // Generate QR codes for the inserted drivers
+    for (const driver of insertedDrivers) {
+      const qrCodeDataURL = await qr.toDataURL(
+        `https://coxscab.com/driver/qrinfo/${driver.id}`,
+        {
+          width: 250,
+          margin: 2,
+        }
+      );
+
+      // Update each driver with the QR code URL
+      await prisma.driver.update({
+        where: { id: driver.id },
+        data: { qrCode: qrCodeDataURL },
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `First ${batchSize} drivers starting from ID 107 generated successfully`,
+    });
   } catch (error) {
     return next(error);
   }
