@@ -1,13 +1,18 @@
+import axios from "axios";
 import { notFound } from "next/navigation";
 
 export const getDriver = async (id) => {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API}/driver/getsingle/${id}`
-  );
+  try {
+    const { data } = await axios.get(
+      `${process.env.NEXT_PUBLIC_API}/driver/getsingle/${id}`,
+      { withCredentials: true }
+    );
+    console.log(data);
 
-  const data = await res.json();
-  console.log(data.driver);
+    return data;
+  } catch (error) {
+    console.log(error);
 
-  if (!res.ok) notFound();
-  return data;
+    // throw new Error(error.response.data.message);
+  }
 };

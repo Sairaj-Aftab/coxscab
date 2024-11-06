@@ -2,7 +2,6 @@ import express from "express";
 import {
   createDriver,
   deleteDriver,
-  generateDriversFrom,
   getDriver,
   getDrivers,
   updateDriver,
@@ -15,8 +14,5 @@ router.get("/", getDrivers);
 router.get("/getsingle/:id", getDriver);
 router.put("/:id", updateDriver);
 router.delete("/delete/:id", deleteDriver);
-
-// router.post("/generate", generateDrivers);
-router.post("/generate", generateDriversFrom);
 
 export default router;

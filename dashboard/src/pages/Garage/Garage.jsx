@@ -57,6 +57,20 @@ const FormSchema = z.object({
 });
 
 const Garage = () => {
+  const form = useForm({
+    resolver: zodResolver(FormSchema),
+    defaultValues: {
+      coxscabId: "",
+      ownerName: "",
+      mobileNo: "",
+      managerName: "",
+      managerMobileNo: "",
+      address1: "",
+      address2: "",
+      vehicleIds: [],
+      note: "",
+    },
+  });
   const params = useParams();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -71,17 +85,27 @@ const Garage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [currentData, setCurrentData] = useState(null);
 
-  const { data: vehicles, isLoading: vehiclesLoading } = useGetVehiclesQuery({
+  // Get Garages
+  const {
+    data: garages,
+    isLoading: getGarageLoading,
+    isFetching: garageFetching,
+  } = useGetGaragesQuery({
+    search: searchGarage,
+    page: pageGarage,
+    limit: limitGarage,
+  });
+
+  // Get Vehicles
+  const {
+    data: vehicles,
+    isLoading: vehiclesLoading,
+    isFetching: vehiclesFetching,
+  } = useGetVehiclesQuery({
     typeId: params?.id,
     search,
     page,
     limit,
-  });
-
-  const { data: garages, isLoading: getGarageLoading } = useGetGaragesQuery({
-    search: searchGarage,
-    page: pageGarage,
-    limit: limitGarage,
   });
 
   const [createGarage, { isLoading: createLoading }] =
@@ -125,21 +149,6 @@ const Garage = () => {
   const calculateItemIndex = (page, rowPage, index) => {
     return (page - 1) * rowPage + index + 1;
   };
-
-  const form = useForm({
-    resolver: zodResolver(FormSchema),
-    defaultValues: {
-      coxscabId: "",
-      ownerName: "",
-      mobileNo: "",
-      managerName: "",
-      managerMobileNo: "",
-      address1: "",
-      address2: "",
-      vehicleIds: [],
-      note: "",
-    },
-  });
 
   async function onSubmit(data) {
     if (isEditing) {
@@ -612,10 +621,10 @@ const Garage = () => {
         columns={garageColumns}
         data={garages?.garages}
         responsive
-        progressPending={getGarageLoading}
+        progressPending={getGarageLoading || garageFetching}
         progressComponent={
           <div className="h-[50vh] flex items-center justify-center">
-            <LoadingComponent loader={getGarageLoading} />
+            <LoadingComponent loader={getGarageLoading || garageFetching} />
           </div>
         }
         pagination

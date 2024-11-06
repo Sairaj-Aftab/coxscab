@@ -233,9 +233,9 @@ export const updateVehicle = async (req, res, next) => {
         drivers:
           driverIds && driverIds.length > 0
             ? {
-                connect: driverIds.map((id) => ({ id })),
+                set: driverIds.map((id) => ({ id })),
               }
-            : undefined, // Skip if no drivers
+            : { set: [] },
       },
       include: {
         vehicleType: true,
@@ -294,6 +294,63 @@ export const deleteVehicle = async (req, res, next) => {
     return res
       .status(200)
       .json({ success: true, message: "Successfully deleted." });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const generateVehicles = async (req, res, next) => {
+  try {
+    const totalVehicles = 1000; // Total vehicles to generate
+    const batchSize = 1000; // Number of vehicles to process in each batch
+    const vehicles = [];
+
+    // Loop to generate vehicles
+    for (let i = 2000; i < 2000 + batchSize; i++) {
+      const registrationNo = `TL${String(i + 1).padStart(4, "0")}`;
+
+      vehicles.push({
+        registrationNo,
+        vehicleTypeId: "6717b076cff8a7c02b72284d",
+        ownerNidDob: null,
+      });
+    }
+
+    // Insert the generated vehicles in a batch
+    await prisma.vehicle.createMany({ data: vehicles });
+
+    // Retrieve the inserted vehicles for QR code generation
+    const insertedVehicles = await prisma.vehicle.findMany({
+      where: {
+        registrationNo: {
+          in: vehicles.map((vehicle) => vehicle.registrationNo),
+        },
+      },
+      select: { id: true, registrationNo: true },
+      orderBy: { id: "asc" },
+    });
+
+    // Generate and update each vehicle with a QR code
+    for (const vehicle of insertedVehicles) {
+      const qrCodeDataURL = await qr.toDataURL(
+        `https://coxscab.com/vehicle/qrinfo/${vehicle.id}/${vehicle.registrationNo}`,
+        {
+          width: 250,
+          margin: 2,
+        }
+      );
+
+      // Update each vehicle with its QR code
+      await prisma.vehicle.update({
+        where: { id: vehicle.id },
+        data: { qrCode: qrCodeDataURL },
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Vehicles successfully created and QR codes generated.",
+    });
   } catch (error) {
     return next(error);
   }

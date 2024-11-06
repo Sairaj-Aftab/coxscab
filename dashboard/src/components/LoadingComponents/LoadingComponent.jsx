@@ -6,6 +6,7 @@ const override = {
   borderColor: "#0ea5e9",
 };
 
+// eslint-disable-next-line react/prop-types
 const LoadingComponent = ({ loader }) => {
   return (
     <div>
@@ -13,7 +14,7 @@ const LoadingComponent = ({ loader }) => {
         color="#0ea5e9"
         loading={loader}
         cssOverride={override}
-        size={50}
+        size={30}
         aria-label="Loading Spinner"
         data-testid="loader"
       />

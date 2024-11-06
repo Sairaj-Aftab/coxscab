@@ -24,6 +24,7 @@ const DialogBox = ({
         <DialogTrigger asChild>{openButton}</DialogTrigger>
         <DialogContent
           className="max-h-[95vh] overflow-y-auto"
+          // onClick={(e) => e.stopPropagation()}
           onPointerDownOutside={onPointerDownOutside}
           onInteractOutside={onInteractOutside}
         >

@@ -47,6 +47,7 @@ import { Label } from "@/components/ui/label";
 import { Link, useParams } from "react-router-dom";
 import { useGetGaragesQuery } from "@/app/services/garageApi";
 import { useGetDriversQuery } from "@/app/services/driverApi";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const FormSchema = z.object({
   vehicleTypeId: z.string().min(2, {
@@ -74,6 +75,29 @@ const FormSchema = z.object({
 });
 
 const Vehicles = () => {
+  const form = useForm({
+    resolver: zodResolver(FormSchema),
+    defaultValues: {
+      vehicleTypeId: "",
+      registrationNo: "",
+      vehicleConditionId: "",
+      engineChassisNo: "",
+      ownerName: "",
+      ownerMobileNo: "",
+      ownerNidNo: "",
+      ownerNidDob: "",
+      fatherName: "",
+      village: "",
+      wardNo: "",
+      holdingNo: "",
+      thana: "",
+      district: "",
+      vehicleImage: [],
+      followUpByAuthority: "",
+      driverIds: [],
+      garageId: "",
+    },
+  });
   const params = useParams();
   const dispatch = useDispatch();
   // Vehicle State
@@ -82,13 +106,9 @@ const Vehicles = () => {
   const [limit, setLimit] = useState(10);
   // Garage State
   const [searchGarage, setSearchGarage] = useState("");
-  const [pageGarage, setPageGarage] = useState(1);
-  const [limitGarage, setLimitGarage] = useState(10);
   const [garage, setGarage] = useState({});
   // Driver State
   const [searchDriver, setSearchDriver] = useState("");
-  const [pageDriver, setPageDriver] = useState(1);
-  const [limitDriver, setLimitDriver] = useState(10);
   const [driver, setDriver] = useState([]);
   // State to track if editing mode is active
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -96,22 +116,30 @@ const Vehicles = () => {
   const [currentData, setCurrentData] = useState(null);
   const { types } = useSelector(getVehicleTypeData);
   const { conditions } = useSelector(getVehicleConditionData);
-  const { data, isLoading } = useGetVehiclesQuery({
+  const { data, isLoading, isFetching } = useGetVehiclesQuery({
     typeId: params?.id,
     search,
     page,
     limit,
   });
-  const { data: garages, isLoading: garageLoading } = useGetGaragesQuery({
+  const {
+    data: garages,
+    isLoading: garageLoading,
+    isFetching: isFetchingGarage,
+  } = useGetGaragesQuery({
     search: searchGarage,
-    page: pageGarage,
-    limit: limitGarage,
+    limit: 5,
   });
-  const { data: drivers, isLoading: driversLoading } = useGetDriversQuery({
+  const {
+    data: drivers,
+    isLoading: driversLoading,
+    isFetching: isFetchingDrivers,
+  } = useGetDriversQuery({
+    typeId: params?.id,
     search: searchDriver,
-    page: pageDriver,
-    limit: limitDriver,
+    limit: 5,
   });
+
   const [createVehicle, { isLoading: createLoading }] =
     useCreateVehicleMutation();
   const [updateVehicle, { isLoading: updateLoading }] =
@@ -136,24 +164,9 @@ const Vehicles = () => {
   };
 
   // Garage
-  const handlePageChangeGarage = (page) => {
-    setPageGarage(page);
-  };
-
-  const handlePerRowsChangeGarage = (newPerPage) => {
-    setLimitGarage(newPerPage);
-  };
 
   const handleSearchChangeGarage = (e) => {
     setSearchGarage(e.target.value);
-  };
-  // Driver
-  const handlePageChangeDriver = (page) => {
-    setPageDriver(page);
-  };
-
-  const handlePerRowsChangeDriver = (newPerPage) => {
-    setLimitDriver(newPerPage);
   };
 
   const handleSearchChangeDriver = (e) => {
@@ -161,22 +174,30 @@ const Vehicles = () => {
   };
 
   // Garage
-  const handleRowSelectedGarage = (selectedRows) => {
-    const id = selectedRows.selectedRows.map((row) => row.id);
-    form.setValue("garageId", id[0]);
-    setGarage({
-      coxscabId: selectedRows.selectedRows.map((row) => row.coxscabId)[0],
-      ownerName: selectedRows.selectedRows.map((row) => row.ownerName)[0],
-    });
+  const handleSelectedGarage = (id) => {
+    const selectedGarage = garages?.garages?.find((garage) => garage.id === id);
+
+    if (selectedGarage) {
+      setGarage({
+        id: selectedGarage.id,
+        coxscabId: selectedGarage.coxscabId,
+        ownerName: selectedGarage.ownerName,
+      });
+    } else {
+      setGarage(null);
+    }
   };
   // Driver
-  const handleRowSelectedDriver = (selectedRows) => {
-    const ids = selectedRows.selectedRows.map((row) => row.id);
-    form.setValue("driverIds", ids);
+  const handleSelectedDriver = (ids) => {
+    const selectedDrivers = drivers?.drivers?.filter((driver) =>
+      ids.includes(driver.id)
+    );
+
     setDriver(
-      selectedRows.selectedRows.map((row) => ({
-        coxscabId: row.coxscabId,
-        name: row.name,
+      selectedDrivers?.map((driver) => ({
+        id: driver.id,
+        coxscabId: driver.coxscabId,
+        name: driver.name,
       }))
     );
   };
@@ -184,30 +205,6 @@ const Vehicles = () => {
   const calculateItemIndex = (page, rowPage, index) => {
     return (page - 1) * rowPage + index + 1;
   };
-
-  const form = useForm({
-    resolver: zodResolver(FormSchema),
-    defaultValues: {
-      vehicleTypeId: "",
-      registrationNo: "",
-      vehicleConditionId: "",
-      engineChassisNo: "",
-      ownerName: "",
-      ownerMobileNo: "",
-      ownerNidNo: "",
-      ownerNidDob: "",
-      fatherName: "",
-      village: "",
-      wardNo: "",
-      holdingNo: "",
-      thana: "",
-      district: "",
-      vehicleImage: [],
-      followUpByAuthority: "",
-      driverIds: [],
-      garageId: "",
-    },
-  });
 
   // Function to open the dialog for editing a role
   const handleEdit = (data) => {
@@ -241,12 +238,14 @@ const Vehicles = () => {
     // Set form values for related fields
     form.setValue("garageId", data?.garage?.id || "");
     setGarage({
+      id: data?.garage?.id || "",
       coxscabId: data?.garage?.coxscabId || "",
       ownerName: data?.garage?.ownerName || "",
     });
     form.setValue("driverIds", data?.drivers?.map((data) => data.id) || "");
     setDriver(
       data?.drivers?.map((data) => ({
+        id: data.id,
         coxscabId: data.coxscabId,
         name: data.name,
       }))
@@ -314,38 +313,29 @@ const Vehicles = () => {
     }
   };
 
-  // Garage Columns
-  const garageColumns = [
-    {
-      name: "Coxscab ID",
-      selector: (row) => row.coxscabId,
-      sortable: true,
-    },
-    {
-      name: "Owner Name",
-      selector: (row) => row.ownerName,
-      sortable: true,
-    },
-  ];
-  // Driver Columns
-  const driverColumns = [
-    {
-      name: "Coxscab ID",
-      selector: (row) => row.coxscabId,
-      sortable: true,
-    },
-    {
-      name: "Driver Name",
-      selector: (row) => row.name,
-      sortable: true,
-    },
-  ];
-
   const columns = [
     {
       name: "#",
       selector: (data, index) => calculateItemIndex(page, limit, index),
       width: "70px",
+    },
+    {
+      name: "Action",
+      selector: (row) => row,
+      cell: (row) => (
+        <div className="flex gap-2 items-center">
+          <BiEditAlt
+            onClick={() => handleEdit(row)}
+            className="text-primary text-xl cursor-pointer"
+          />
+        </div>
+      ),
+      width: "50px",
+    },
+    {
+      name: "Reg. No.",
+      selector: (row) => row.registrationNo,
+      sortable: true,
     },
     {
       name: "QR",
@@ -360,11 +350,7 @@ const Vehicles = () => {
         </div>
       ),
     },
-    {
-      name: "Reg. No.",
-      selector: (row) => row.registrationNo,
-      sortable: true,
-    },
+
     {
       name: "Eng. Chass. No.",
       selector: (row) => row.engineChassisNo,
@@ -811,32 +797,94 @@ const Vehicles = () => {
                     disabled={createLoading || updateLoading}
                   />
                 </PopoverTrigger>
-                <PopoverContent className="w-full">
+                <PopoverContent className="w-[360px] sm:w-[420px] p-2">
                   <input
                     type="text"
                     placeholder="Search garage"
                     onChange={handleSearchChangeGarage}
                     className="w-full px-3 py-1 rounded-md border border-gray-300 outline-gray-400 text-base text-gray-800"
                   />
-                  <DataTable
-                    columns={garageColumns}
-                    data={garages?.garages}
-                    responsive
-                    progressPending={garageLoading}
-                    progressComponent={
-                      <div className="h-[50vh] flex items-center justify-center">
-                        <LoadingComponent loader={garageLoading} />
-                      </div>
-                    }
-                    selectableRowsSingle
-                    selectableRows
-                    onSelectedRowsChange={handleRowSelectedGarage}
-                    pagination
-                    paginationServer
-                    paginationTotalRows={garages?.totalGarage}
-                    onChangeRowsPerPage={handlePerRowsChangeGarage}
-                    onChangePage={handlePageChangeGarage}
-                    paginationRowsPerPageOptions={[10, 20, 50, 100]}
+                  <FormField
+                    control={form.control}
+                    name="garageId"
+                    render={() => (
+                      <FormItem className="w-full mt-1">
+                        <div className="flex space-x-5 font-semibold text-sm">
+                          <span>#</span>
+                          <div className="flex w-full">
+                            <span className="w-2/12">ID</span>
+                            <span className="w-5/12">Owner Name</span>
+                            <span className="w-5/12">Manager Name</span>
+                          </div>
+                        </div>
+
+                        <div className="h-[120px] w-full">
+                          {garageLoading || isFetchingGarage ? (
+                            <div className="h-[150px] w-full flex items-center justify-center">
+                              <LoadingComponent
+                                loader={garageLoading || isFetchingGarage}
+                              />
+                            </div>
+                          ) : (
+                            garages?.garages?.map((item) => (
+                              <FormField
+                                key={item.id}
+                                control={form.control}
+                                name="garageId"
+                                render={({ field }) => {
+                                  const handleCheckboxChange = () => {
+                                    // If the selected ID is the same as the current ID, deselect it
+                                    const newValue =
+                                      field.value === item.id ? "" : item.id;
+
+                                    // Update the form field
+                                    field.onChange(newValue);
+
+                                    // Call handleSelectedGarage with the selected or deselected ID
+                                    handleSelectedGarage(newValue);
+                                  };
+
+                                  return (
+                                    <FormItem
+                                      key={item.id}
+                                      className="w-full flex space-x-3 space-y-0 mb-2"
+                                    >
+                                      <FormControl>
+                                        <Checkbox
+                                          checked={field.value === item.id}
+                                          onCheckedChange={handleCheckboxChange}
+                                        />
+                                      </FormControl>
+
+                                      <FormLabel className="font-normal w-full flex">
+                                        <span className="w-2/12">
+                                          {item.coxscabId}
+                                        </span>
+                                        <span className="w-5/12">
+                                          {item?.ownerName}
+                                        </span>
+                                        <span className="w-5/12">
+                                          {item?.managerName}
+                                        </span>
+                                      </FormLabel>
+                                    </FormItem>
+                                  );
+                                }}
+                              />
+                            ))
+                          )}
+                          {!isFetchingGarage &&
+                            !garageLoading &&
+                            garages?.garages.length < 1 && (
+                              <div className="h-[150px] w-full flex justify-center items-center">
+                                <p className="text-sm font-semibold text-red-500">
+                                  No garage found
+                                </p>
+                              </div>
+                            )}
+                        </div>
+                      </FormItem>
+                    )}
                   />
                 </PopoverContent>
               </Popover>
@@ -845,39 +893,116 @@ const Vehicles = () => {
                 <PopoverTrigger className="flex-1 flex gap-2 flex-col justify-start">
                   <Label htmlFor="driver">Driver</Label>
                   <Input
-                    value={`${driver[0]?.coxscabId || ""} ${
-                      driver[0]?.name || ""
-                    }`}
+                    value={driver
+                      .map((d) => `${d.coxscabId || ""} ${d.name || ""}`)
+                      .join(", ")}
                     readOnly
                     disabled={createLoading || updateLoading}
                   />
                 </PopoverTrigger>
-                <PopoverContent className="w-full">
+                <PopoverContent className="w-[360px] sm:w-[420px] p-2">
                   <input
                     type="text"
                     placeholder="Search driver"
                     onChange={handleSearchChangeDriver}
                     className="w-full px-3 py-1 rounded-md border border-gray-300 outline-gray-400 text-base text-gray-800"
                   />
-                  <DataTable
-                    columns={driverColumns}
-                    data={drivers?.drivers}
-                    responsive
-                    progressPending={driversLoading}
-                    progressComponent={
-                      <div className="h-[50vh] flex items-center justify-center">
-                        <LoadingComponent loader={driversLoading} />
-                      </div>
-                    }
-                    selectableRowsSingle
-                    selectableRows
-                    onSelectedRowsChange={handleRowSelectedDriver}
-                    pagination
-                    paginationServer
-                    paginationTotalRows={drivers?.totalDriver}
-                    onChangeRowsPerPage={handlePerRowsChangeDriver}
-                    onChangePage={handlePageChangeDriver}
-                    paginationRowsPerPageOptions={[10, 20, 50, 100]}
+                  <FormField
+                    control={form.control}
+                    name="driverIds"
+                    render={() => (
+                      <FormItem className="w-full mt-1">
+                        <div className="flex space-x-5 font-semibold text-sm">
+                          <span>#</span>
+                          <div className="flex w-full">
+                            <span className="w-2/12">ID</span>
+                            <span className="w-5/12">Name</span>
+                            <span className="w-5/12">License</span>
+                          </div>
+                        </div>
+
+                        <div className="h-[120px] w-full">
+                          {driversLoading || isFetchingDrivers ? (
+                            <div className="h-[150px] w-full flex items-center justify-center">
+                              <LoadingComponent
+                                loader={driversLoading || isFetchingDrivers}
+                              />
+                            </div>
+                          ) : (
+                            drivers?.drivers?.map((item) => (
+                              <FormField
+                                key={item.id}
+                                control={form.control}
+                                name="driverIds"
+                                render={({ field }) => {
+                                  const handleCheckboxChange = (checked) => {
+                                    const updatedDriverIds = checked
+                                      ? [...field.value, item.id]
+                                      : field.value?.filter(
+                                          (value) => value !== item.id
+                                        );
+
+                                    // Update the form field
+                                    field.onChange(updatedDriverIds);
+
+                                    // Call handleSelectedDriver with the updated IDs
+                                    handleSelectedDriver(updatedDriverIds);
+                                  };
+                                  return (
+                                    <FormItem
+                                      key={item.id}
+                                      className="w-full flex space-x-3 space-y-0 mb-2"
+                                    >
+                                      <FormControl>
+                                        <Checkbox
+                                          checked={field.value?.includes(
+                                            item.id
+                                          )}
+                                          onCheckedChange={handleCheckboxChange}
+                                          // onCheckedChange={(checked) => {
+                                          //   return checked
+                                          //     ? field.onChange([
+                                          //         ...field.value,
+                                          //         item.id,
+                                          //       ])
+                                          //     : field.onChange(
+                                          //         field.value?.filter(
+                                          //           (value) => value !== item.id
+                                          //         )
+                                          //       );
+                                          // }}
+                                        />
+                                      </FormControl>
+
+                                      <FormLabel className="font-normal w-full flex">
+                                        <span className="w-2/12">
+                                          {item.coxscabId}
+                                        </span>
+                                        <span className="w-5/12">
+                                          {item.name}
+                                        </span>
+                                        <span className="w-5/12">
+                                          {item.drivingLicenseNo}
+                                        </span>
+                                      </FormLabel>
+                                    </FormItem>
+                                  );
+                                }}
+                              />
+                            ))
+                          )}
+                          {!isFetchingDrivers &&
+                            !driversLoading &&
+                            drivers?.drivers.length < 1 && (
+                              <div className="h-[150px] w-full flex justify-center items-center">
+                                <p className="text-sm font-semibold text-red-500">
+                                  No driver found
+                                </p>
+                              </div>
+                            )}
+                        </div>
+                      </FormItem>
+                    )}
                   />
                 </PopoverContent>
               </Popover>
@@ -934,7 +1059,7 @@ const Vehicles = () => {
       />
       <div className="bg-white shadow-md rounded-md">
         <div className="p-1">
-          <ul className="flex justify-center gap-3 items-center pb-2 text-sm font-semibold">
+          <ul className="flex flex-wrap justify-center gap-3 items-center pb-2 text-sm font-semibold">
             {types?.map((type) => (
               <li
                 key={type.id}
@@ -961,10 +1086,10 @@ const Vehicles = () => {
           columns={columns}
           data={data?.vehicles}
           responsive
-          progressPending={isLoading}
+          progressPending={isLoading || isFetching}
           progressComponent={
             <div className="h-[50vh] flex items-center justify-center">
-              <LoadingComponent loader={isLoading} />
+              <LoadingComponent loader={isLoading || isFetching} />
             </div>
           }
           pagination

@@ -104,6 +104,16 @@ const SideBar = () => {
             Dashboard
           </Link>
           <Link
+            to={`/drivers/all`}
+            onClick={handleNavItemClick}
+            className={`flex items-center text-sm font-medium text-gray-100 ${
+              pathname.includes("/drivers") && "bg-gray-600"
+            } hover:bg-gray-600 hover:text-white px-3 py-3`}
+          >
+            <FaList className="mr-3" />
+            Drivers
+          </Link>
+          <Link
             to={`/vehicles/${
               types?.find((type) => type.name === "TOMTOM")?.id || ""
             }`}
@@ -115,16 +125,7 @@ const SideBar = () => {
             <FaList className="mr-3" />
             Vehicles
           </Link>
-          <Link
-            to={`/drivers/all`}
-            onClick={handleNavItemClick}
-            className={`flex items-center text-sm font-medium text-gray-100 ${
-              pathname.includes("/drivers") && "bg-gray-600"
-            } hover:bg-gray-600 hover:text-white px-3 py-3`}
-          >
-            <FaList className="mr-3" />
-            Drivers
-          </Link>
+
           <Link
             to={`/garage/${
               types?.find((type) => type.name === "TOMTOM")?.id || ""

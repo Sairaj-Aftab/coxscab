@@ -2,6 +2,7 @@ import express from "express";
 import {
   createVehicle,
   deleteVehicle,
+  generateVehicles,
   getVehicle,
   getVehicles,
   updateVehicle,
@@ -16,5 +17,7 @@ router.get("/getsingle/:id", getVehicle);
 router.delete("/delete/:id", deleteVehicle);
 // router.put("/:id", updateRole);
 // router.put("/status/:id", updateRoleStatus);
+
+router.post("/generate", generateVehicles);
 
 export default router;
