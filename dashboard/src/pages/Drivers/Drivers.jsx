@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-
+import avatar from "../../assets/avatar.png";
 import { toast } from "@/components/hooks/use-toast";
 import { toast as sonner } from "sonner";
 import {
@@ -23,7 +23,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Edit, Eye, Loader2, MoreHorizontal } from "lucide-react";
+import {
+  Edit,
+  Eye,
+  FilePlus,
+  ImagePlus,
+  Loader2,
+  MoreHorizontal,
+} from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -31,7 +38,7 @@ import {
 } from "@/components/ui/popover";
 
 import DialogBox from "@/components/DialogBox/DialogBox";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { getDriverActivitiesData } from "@/features/driverActivitiesSlice";
 import { getDriverStatusData } from "@/features/driverStatusSlice";
@@ -55,6 +62,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useDropzone } from "react-dropzone";
+import { Progress } from "@/components/ui/progress";
+import { useS3Upload } from "@/hooks/useS3Upload";
 
 const FormSchema = z.object({
   name: z.string().nonempty("Name is required"),
@@ -115,6 +125,41 @@ const Drivers = () => {
       vehicleId: "",
     },
   });
+  const { progress, imgLoading, imgUrl, setImgUrl, error, uploadFile } =
+    useS3Upload();
+  useEffect(() => {
+    if (imgUrl) {
+      form.setValue("picture", imgUrl);
+    }
+  }, [imgUrl, form]);
+  const onDrop = useCallback(
+    async (acceptedFiles) => {
+      if (acceptedFiles.length > 0) {
+        const file = acceptedFiles[0];
+
+        uploadFile(file, imgUrl);
+      }
+    },
+    [imgUrl, uploadFile]
+  );
+
+  const { getRootProps, getInputProps } = useDropzone({
+    accept: {
+      "image/*": [
+        ".png",
+        ".jpg",
+        ".jpeg",
+        ".gif",
+        ".webp",
+        ".svg",
+        ".bmp",
+        ".tiff",
+      ],
+    },
+    maxFiles: 1,
+    onDrop,
+  });
+
   const params = useParams();
   const [search, setSearch] = useState("");
   const [searchVehicle, setSearchVehicle] = useState("");
@@ -198,6 +243,8 @@ const Drivers = () => {
     setIsEditing(true);
     setCurrentData(data);
 
+    setImgUrl(data?.picture || "");
+    form.setValue("picture", data?.picture || "");
     form.setValue("name", data.name);
     form.setValue("nameBn", data.nameBn);
     form.setValue("fatherName", data?.fatherName || "");
@@ -366,11 +413,24 @@ const Drivers = () => {
       width: "70px",
     },
     {
+      name: "Photo",
+      selector: (row) => row,
+      cell: (row) => (
+        <div className="flex items-center">
+          <img
+            src={row.picture ? row.picture : avatar}
+            alt={row.name}
+            className="w-12 h-12 object-cover"
+          />
+        </div>
+      ),
+    },
+    {
       name: "QR",
       selector: (row) => row,
       cell: (row) => (
         <div className="flex items-center">
-          <img src={row.qrCode} alt={row.name} className="w-12 h-12 mr-4" />
+          <img src={row.qrCode} alt={row.name} className="w-12 h-12" />
         </div>
       ),
     },
@@ -488,6 +548,7 @@ const Drivers = () => {
             onClick={() => {
               setIsEditing(false); // Reset editing mode
               form.reset(); // Reset form
+              setImgUrl(null);
               setIsDialogOpen(true);
             }}
           >
@@ -1134,8 +1195,41 @@ const Drivers = () => {
                 )}
               />
             </div>
+            <div className="flex flex-col gap-2">
+              <div
+                {...getRootProps({
+                  className:
+                    "border-2 border-dashed border-gray-300 rounded-lg h-[120px] flex justify-center items-center cursor-pointer hover:bg-gray-100 w-full",
+                })}
+              >
+                <div className="h-full w-full flex flex-col items-center justify-center relative">
+                  <input
+                    {...getInputProps({ multiple: false })}
+                    disabled={createLoading || updateLoading || imgLoading}
+                  />{" "}
+                  {imgUrl ? (
+                    <img src={imgUrl} alt="" className="h-full" />
+                  ) : (
+                    <>
+                      <ImagePlus className="text-gray-500 w-10 h-10 mb-3" />{" "}
+                      <p className="text-gray-600 text-center">
+                        Drag & drop driver photo, or click to upload
+                      </p>
+                    </>
+                  )}
+                  {imgLoading && (
+                    <div className="w-full absolute top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 rounded-lg">
+                      <Loader2 className="animate-spin w-5 h-5 text-white" />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
             {/* Add other fields as necessary */}
-            <Button type="submit" disabled={createLoading || updateLoading}>
+            <Button
+              type="submit"
+              disabled={createLoading || updateLoading || imgLoading}
+            >
               {createLoading || updateLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please
