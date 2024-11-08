@@ -65,6 +65,7 @@ import {
 import { useDropzone } from "react-dropzone";
 import { Progress } from "@/components/ui/progress";
 import { useS3Upload } from "@/hooks/useS3Upload";
+import { authData } from "@/features/auth/authSlice";
 
 const FormSchema = z.object({
   name: z.string().nonempty("Name is required"),
@@ -125,8 +126,7 @@ const Drivers = () => {
       vehicleId: "",
     },
   });
-  const { progress, imgLoading, imgUrl, setImgUrl, error, uploadFile } =
-    useS3Upload();
+  const { imgLoading, imgUrl, setImgUrl, error, uploadFile } = useS3Upload();
   useEffect(() => {
     if (imgUrl) {
       form.setValue("picture", imgUrl);
@@ -172,6 +172,7 @@ const Drivers = () => {
   const [isDialogOpenView, setIsDialogOpenView] = useState(false);
   const [currentData, setCurrentData] = useState(null);
   // Get Data
+  const { auth } = useSelector(authData);
   const { activities } = useSelector(getDriverActivitiesData);
   const { status } = useSelector(getDriverStatusData);
   const { types } = useSelector(getVehicleTypeData);
@@ -200,7 +201,7 @@ const Drivers = () => {
     useCreateDriverMutation();
   const [updateDriver, { isLoading: updateLoading }] =
     useUpdateDriverMutation();
-  const [deleteDriver] = useDeleteDriverMutation();
+  // const [deleteDriver] = useDeleteDriverMutation();
 
   // Handle Search, pagination and filtering data using react table
   const handlePageChange = (page) => {
@@ -327,21 +328,21 @@ const Drivers = () => {
     }
   }
 
-  const handleDelete = async (id) => {
-    try {
-      const res = await deleteDriver(id).unwrap();
-      if (res?.success) {
-        toast({
-          title: `${res?.message}`,
-        });
-      }
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: `${error?.data?.message}`,
-      });
-    }
-  };
+  // const handleDelete = async (id) => {
+  //   try {
+  //     const res = await deleteDriver(id).unwrap();
+  //     if (res?.success) {
+  //       toast({
+  //         title: `${res?.message}`,
+  //       });
+  //     }
+  //   } catch (error) {
+  //     toast({
+  //       variant: "destructive",
+  //       title: `${error?.data?.message}`,
+  //     });
+  //   }
+  // };
 
   const columns = [
     {
@@ -349,16 +350,20 @@ const Drivers = () => {
       selector: (data, index) => calculateItemIndex(page, limit, index),
       width: "70px",
     },
+
     {
       name: "Action",
       selector: (row) => row,
       cell: (row) => (
-        <div className="flex gap-2 items-center">
+        <button
+          disabled={auth?.role?.name === "VIEWER"}
+          className="flex gap-2 items-center"
+        >
           <BiEditAlt
             onClick={() => handleEdit(row)}
             className="text-primary text-xl cursor-pointer"
           />
-        </div>
+        </button>
       ),
       width: "50px",
     },
@@ -503,19 +508,19 @@ const Drivers = () => {
       },
       sortable: true,
     },
-    {
-      name: "Action",
-      selector: (row) => row,
-      cell: (row) => (
-        <div className="flex gap-2 items-center">
-          <AlertDialogMessage
-            button={<BiTrash className="text-red-500 text-xl cursor-pointer" />}
-            action={() => handleDelete(row.id)}
-          />
-        </div>
-      ),
-      width: "150px",
-    },
+    // {
+    //   name: "Action",
+    //   selector: (row) => row,
+    //   cell: (row) => (
+    //     <div className="flex gap-2 items-center">
+    //       <AlertDialogMessage
+    //         button={<BiTrash className="text-red-500 text-xl cursor-pointer" />}
+    //         action={() => handleDelete(row.id)}
+    //       />
+    //     </div>
+    //   ),
+    //   width: "150px",
+    // },
   ];
 
   const viewDriverDialogComponent = () => {
@@ -545,6 +550,7 @@ const Drivers = () => {
         onOpenChange={setIsDialogOpen}
         openButton={
           <Button
+            disabled={auth?.role?.name === "VIEWER"}
             onClick={() => {
               setIsEditing(false); // Reset editing mode
               form.reset(); // Reset form

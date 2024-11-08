@@ -8,7 +8,12 @@ const PrivateRouteGird = () => {
   const location = useLocation();
 
   // Define routes that only super-admin can access
-  const restrictedRoutes = ["/auth-users", "/roles", "/permissions"];
+  const restrictedRoutes = [
+    "/auth-users",
+    "/roles",
+    "/permissions",
+    "/required-categories",
+  ];
 
   // Check if the current route is restricted and if the user is not a super-admin
   const isRestricted = restrictedRoutes.includes(location.pathname);

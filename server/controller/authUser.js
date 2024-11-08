@@ -138,14 +138,16 @@ export const updateUser = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { userName, phone, password, roleId } = req.body;
+
     const existingUser = await prisma.authUser.findFirst({
       where: {
-        userName: userName,
+        userName,
         id: {
           not: String(id),
         },
       },
     });
+
     if (existingUser) {
       return next(createError(400, "User already exists"));
     }

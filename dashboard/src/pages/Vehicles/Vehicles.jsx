@@ -48,6 +48,7 @@ import { Link, useParams } from "react-router-dom";
 import { useGetGaragesQuery } from "@/app/services/garageApi";
 import { useGetDriversQuery } from "@/app/services/driverApi";
 import { Checkbox } from "@/components/ui/checkbox";
+import { authData } from "@/features/auth/authSlice";
 
 const FormSchema = z.object({
   vehicleTypeId: z.string().min(2, {
@@ -114,6 +115,7 @@ const Vehicles = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [currentData, setCurrentData] = useState(null);
+  const { auth } = useSelector(authData);
   const { types } = useSelector(getVehicleTypeData);
   const { conditions } = useSelector(getVehicleConditionData);
   const { data, isLoading, isFetching } = useGetVehiclesQuery({
@@ -297,21 +299,21 @@ const Vehicles = () => {
     }
   }
 
-  const handleDelete = async (id) => {
-    try {
-      const res = await deleteVehicle(id).unwrap();
-      if (res?.success) {
-        toast({
-          title: `${res?.message}`,
-        });
-      }
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: `${error?.data?.message}`,
-      });
-    }
-  };
+  // const handleDelete = async (id) => {
+  //   try {
+  //     const res = await deleteVehicle(id).unwrap();
+  //     if (res?.success) {
+  //       toast({
+  //         title: `${res?.message}`,
+  //       });
+  //     }
+  //   } catch (error) {
+  //     toast({
+  //       variant: "destructive",
+  //       title: `${error?.data?.message}`,
+  //     });
+  //   }
+  // };
 
   const columns = [
     {
@@ -323,12 +325,15 @@ const Vehicles = () => {
       name: "Action",
       selector: (row) => row,
       cell: (row) => (
-        <div className="flex gap-2 items-center">
+        <button
+          disabled={auth?.role?.name === "VIEWER"}
+          className="flex gap-2 items-center"
+        >
           <BiEditAlt
             onClick={() => handleEdit(row)}
             className="text-primary text-xl cursor-pointer"
           />
-        </div>
+        </button>
       ),
       width: "50px",
     },
@@ -395,24 +400,20 @@ const Vehicles = () => {
       selector: (row) => row.followUpByAuthority,
       sortable: true,
     },
-    {
-      name: "Action",
-      selector: (row) => row,
-      cell: (row) => (
-        <div className="flex gap-2 items-center">
-          <BiEditAlt
-            onClick={() => handleEdit(row)}
-            className="text-primary text-xl cursor-pointer"
-          />
+    // {
+    //   name: "Action",
+    //   selector: (row) => row,
+    //   cell: (row) => (
+    //     <div className="flex gap-2 items-center">
 
-          <AlertDialogMessage
-            button={<BiTrash className="text-red-500 text-xl cursor-pointer" />}
-            action={() => handleDelete(row.id)}
-          />
-        </div>
-      ),
-      width: "150px",
-    },
+    //       <AlertDialogMessage
+    //         button={<BiTrash className="text-red-500 text-xl cursor-pointer" />}
+    //         action={() => handleDelete(row.id)}
+    //       />
+    //     </div>
+    //   ),
+    //   width: "150px",
+    // },
   ];
 
   const createVehicleDialogComponent = () => {
@@ -422,6 +423,7 @@ const Vehicles = () => {
         onOpenChange={setIsDialogOpen}
         openButton={
           <Button
+            disabled={auth?.role?.name === "VIEWER"}
             onClick={() => {
               setIsEditing(false); // Reset editing mode
               form.reset(); // Reset form

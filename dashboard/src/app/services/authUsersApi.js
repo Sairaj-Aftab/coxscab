@@ -38,12 +38,11 @@ export const authUsersApi = createApi({
       invalidatesTags: [{ type: "authUsers", id: "LIST" }],
     }),
     updateAuth: builder.mutation({
-      query(data) {
-        const { id, ...body } = data;
+      query({ id, data }) {
         return {
           url: `/auth/${id}`,
           method: "PUT",
-          body,
+          body: data,
         };
       },
       // Invalidates all queries that subscribe to this Post `id` only.

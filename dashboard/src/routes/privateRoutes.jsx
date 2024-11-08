@@ -8,10 +8,12 @@ import PrivateRouteGird from "./PrivateRouteGrid";
 import RequiredCategories from "@/pages/RequiredCategories/RequiredCategories";
 import Drivers from "@/pages/Drivers/Drivers";
 import Garage from "@/pages/Garage/Garage";
+import ErrorPage from "@/pages/ErrorPage/ErrorPage";
 
 const privateRoutes = [
   {
     element: <SideBar />,
+    errorElement: <ErrorPage />,
     children: [
       {
         element: <PrivateRouteGird />,

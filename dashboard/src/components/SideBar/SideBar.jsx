@@ -1,4 +1,4 @@
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { BiAlignLeft, BiSolidBell } from "react-icons/bi";
 import {
   FaTachometerAlt,
@@ -21,13 +21,16 @@ import {
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutAuthUser } from "@/features/auth/authApiSlice";
-import { setLogoutUser } from "@/features/auth/authSlice";
+import { authData, setLogoutUser } from "@/features/auth/authSlice";
 import { getVehicleTypeData } from "@/features/vehicleTypeSlice";
 
 const SideBar = () => {
   const dispatch = useDispatch();
+  const { auth } = useSelector(authData);
+  const permissions =
+    auth?.role?.permissions?.map((permission) => permission.name) || [];
+
   const { types } = useSelector(getVehicleTypeData);
-  const { pathname } = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const handleLogOut = () => {
@@ -41,6 +44,53 @@ const SideBar = () => {
       setIsSidebarOpen(false); // Close sidebar on small screens
     }
   };
+  const menuItem = [
+    {
+      to: "/",
+      name: "Dashboard",
+      icon: <FaTachometerAlt />,
+      permission: "DASHBOARD",
+    },
+    {
+      to: `/drivers/all`,
+      name: "Drivers",
+      icon: <FaList />,
+      permission: "DRIVER",
+    },
+    {
+      to: `/vehicles/${
+        types?.find((type) => type.name === "TOMTOM")?.id || ""
+      }`,
+      name: "Vehicles",
+      icon: <FaList />,
+      permission: "VEHICLE",
+    },
+    {
+      to: `/garage/${types?.find((type) => type.name === "TOMTOM")?.id || ""}`,
+      name: "Garage",
+      icon: <FaList />,
+      permission: "GARAGE",
+    },
+    {
+      to: "/auth-users",
+      name: "Auth Users",
+      icon: <FaList />,
+      permission: "AUTH-USERS",
+    },
+    {
+      to: "/required-categories",
+      name: "Required Categories",
+      icon: <FaList />,
+      permission: "REQUIRED-CATEGORY",
+    },
+    { to: "/roles", name: "Roles", icon: <FaList />, permission: "ROLE" },
+    {
+      to: "/permissions",
+      name: "Permissions",
+      icon: <FaList />,
+      permission: "PERMISSION",
+    },
+  ];
   return (
     <>
       {/* Header Section */}
@@ -93,155 +143,23 @@ const SideBar = () => {
             isSidebarOpen ? "translate-x-0" : "-translate-x-full"
           } transition-transform lg:translate-x-0 lg:overflow-y-auto`}
         >
-          <Link
-            to="/"
-            onClick={handleNavItemClick}
-            className={`flex items-center text-sm font-medium text-gray-100 ${
-              pathname === "/" && "bg-gray-600"
-            } hover:bg-gray-600 hover:text-white px-3 py-3`}
-          >
-            <FaTachometerAlt className="mr-3" />
-            Dashboard
-          </Link>
-          <Link
-            to={`/drivers/all`}
-            onClick={handleNavItemClick}
-            className={`flex items-center text-sm font-medium text-gray-100 ${
-              pathname.includes("/drivers") && "bg-gray-600"
-            } hover:bg-gray-600 hover:text-white px-3 py-3`}
-          >
-            <FaList className="mr-3" />
-            Drivers
-          </Link>
-          <Link
-            to={`/vehicles/${
-              types?.find((type) => type.name === "TOMTOM")?.id || ""
-            }`}
-            onClick={handleNavItemClick}
-            className={`flex items-center text-sm font-medium text-gray-100 ${
-              pathname.includes("/vehicles") && "bg-gray-600"
-            } hover:bg-gray-600 hover:text-white px-3 py-3`}
-          >
-            <FaList className="mr-3" />
-            Vehicles
-          </Link>
-
-          <Link
-            to={`/garage/${
-              types?.find((type) => type.name === "TOMTOM")?.id || ""
-            }`}
-            onClick={handleNavItemClick}
-            className={`flex items-center text-sm font-medium text-gray-100 ${
-              pathname.includes("/garage") && "bg-gray-600"
-            } hover:bg-gray-600 hover:text-white px-3 py-3`}
-          >
-            <FaList className="mr-3" />
-            Garage
-          </Link>
-
-          <Link
-            to="/auth-users"
-            className={`flex items-center text-sm font-medium text-gray-100 ${
-              pathname === "/auth-users" && "bg-gray-600"
-            } hover:bg-gray-600 hover:text-white px-3 py-3`}
-          >
-            <FaList className="mr-3" />
-            Auth Users
-          </Link>
-          <Link
-            to="/required-categories"
-            className={`flex items-center text-sm font-medium text-gray-100 ${
-              pathname === "/required-categories" && "bg-gray-600"
-            } hover:bg-gray-600 hover:text-white px-3 py-3`}
-          >
-            <FaList className="mr-3" />
-            Required Categories
-          </Link>
-          <Link
-            to="/roles"
-            className={`flex items-center text-sm font-medium text-gray-100 ${
-              pathname === "/roles" && "bg-gray-600"
-            } hover:bg-gray-600 hover:text-white px-3 py-3`}
-          >
-            <FaList className="mr-3" />
-            Roles
-          </Link>
-
-          <Link
-            to="/permissions"
-            className={`flex items-center text-sm font-medium text-gray-100 ${
-              pathname === "/permissions" && "bg-gray-600"
-            } hover:bg-gray-600 hover:text-white px-3 py-3`}
-          >
-            <FaList className="mr-3" />
-            Permissions
-          </Link>
-          {/* <Link
-            to="/products"
-            className="flex items-center text-sm font-medium text-gray-100 hover:bg-gray-600 hover:text-white px-3 py-3"
-          >
-            <FaList className="mr-3" />
-            Products
-          </Link>
-          <Link
-            to="/categories"
-            className="flex items-center text-sm font-medium text-gray-100 hover:bg-gray-600 hover:text-white px-3 py-3"
-          >
-            <FaUsers className="mr-3" />
-            Categories
-          </Link>
-          <a
-            href="#"
-            className="flex items-center text-sm font-medium text-gray-100 hover:bg-gray-600 hover:text-white px-3 py-3"
-          >
-            <FaUsers className="mr-3" />
-            Customers
-          </a>
-          <a
-            href="#"
-            className="flex items-center text-sm font-medium text-gray-100 hover:bg-gray-600 hover:text-white px-3 py-2"
-          >
-            <FaShoppingCart className="mr-3" />
-            Orders
-          </a>
-          <a
-            href="#"
-            className="flex items-center text-sm font-medium text-gray-100 hover:bg-gray-600 hover:text-white px-3 py-2"
-          >
-            <FaMailBulk className="mr-3" />
-            Marketing
-          </a>
-          <a
-            href="#"
-            className="flex items-center text-sm font-medium text-gray-100 hover:bg-gray-600 hover:text-white px-3 py-2 relative"
-          >
-            <FaCalendarAlt className="mr-3" />
-            Inbox
-            <span className="absolute right-3 top-2 bg-yellow-500 text-black px-2 py-0.5 rounded-full text-xs">
-              8
-            </span>
-          </a>
-          <a
-            href="#"
-            className="flex items-center text-sm font-medium text-gray-100 hover:bg-gray-600 hover:text-white px-3 py-2"
-          >
-            <FaCalendarAlt className="mr-3" />
-            Calendar
-          </a>
-          <a
-            href="#"
-            className="flex items-center text-sm font-medium text-gray-100 hover:bg-gray-600 hover:text-white px-3 py-2"
-          >
-            <FaChartBar className="mr-3" />
-            Analytics
-          </a>
-          <a
-            href="#"
-            className="flex items-center text-sm font-medium text-gray-100 hover:bg-gray-600 hover:text-white px-3 py-2"
-          >
-            <FaCog className="mr-3" />
-            Settings
-          </a> */}
+          {menuItem?.map(
+            ({ to, name, icon, permission }) =>
+              permissions.includes(permission) && (
+                <NavLink
+                  key={to}
+                  to={to}
+                  onClick={handleNavItemClick}
+                  className={({ isActive }) =>
+                    `flex items-center text-sm font-medium text-gray-100 ${
+                      isActive ? "bg-gray-600" : ""
+                    } hover:bg-gray-600 hover:text-white px-3 py-3`
+                  }
+                >
+                  {icon} <span className="ml-3">{name}</span>
+                </NavLink>
+              )
+          )}
         </nav>
         {/* Overlay for Sidebar on Small Screens */}
         {isSidebarOpen && (

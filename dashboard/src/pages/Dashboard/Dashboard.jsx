@@ -1,12 +1,7 @@
-import { Button } from "@/components/ui/Button";
-import ActiveUsers from "@/components/ActiveUsers/ActiveUsers";
-import IncomeStatisticChart from "@/components/IncomeStatisticChart/IncomeStatisticChart";
-import SalesByTrafficSource from "@/components/SalesByTrafficSource/SalesByTrafficSource";
-import RecentOrdersTable from "@/components/RecentOrdersTable/RecentOrdersTable";
-import RecentReviewTable from "@/components/RecentReviewTable/RecentReviewTable";
 import PageHeader from "@/components/PageHeader/PageHeader";
 import { useGetChartsQuery } from "@/app/services/chartApi";
 import LoadingComponent from "@/components/LoadingComponents/LoadingComponent";
+import RoundedChart from "@/components/RoundedChart/RoundedChart";
 
 const Dashboard = () => {
   const { data, isLoading, error } = useGetChartsQuery();
@@ -81,13 +76,13 @@ const Dashboard = () => {
           <LoadingComponent loader={isLoading} />
         </div>
       )}
-      <div className="grid grid-cols-4 gap-3">
-        <IncomeStatisticChart
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+        <RoundedChart
           title={"Vehicle Types"}
           labels={vehicleTypes}
           data={vehicleCounts}
         />
-        <IncomeStatisticChart
+        <RoundedChart
           title={"Vehicle Conditions"}
           labels={vehicleConditions}
           data={vehicleCountsConditions}
