@@ -25,6 +25,8 @@ import { authData, setLogoutUser } from "@/features/auth/authSlice";
 import { getVehicleTypeData } from "@/features/vehicleTypeSlice";
 
 const SideBar = () => {
+  const location = useLocation();
+
   const dispatch = useDispatch();
   const { auth } = useSelector(authData);
   const permissions =

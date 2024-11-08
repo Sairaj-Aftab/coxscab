@@ -126,7 +126,9 @@ const Drivers = () => {
       vehicleId: "",
     },
   });
-  const { imgLoading, imgUrl, setImgUrl, error, uploadFile } = useS3Upload();
+  const { imgLoading, imgUrl, setImgUrl, error, sizeError, uploadFile } =
+    useS3Upload();
+
   useEffect(() => {
     if (imgUrl) {
       form.setValue("picture", imgUrl);
@@ -429,6 +431,10 @@ const Drivers = () => {
           />
         </div>
       ),
+      width: "50px",
+      style: {
+        padding: "0",
+      },
     },
     {
       name: "QR",
@@ -438,6 +444,10 @@ const Drivers = () => {
           <img src={row.qrCode} alt={row.name} className="w-12 h-12" />
         </div>
       ),
+      width: "50px",
+      style: {
+        padding: "0",
+      },
     },
 
     {
@@ -445,21 +455,21 @@ const Drivers = () => {
       selector: (row) => row.name,
       sortable: true,
     },
-    {
-      name: "Name Bangla",
-      selector: (row) => row.nameBn,
-      sortable: true,
-    },
+    // {
+    //   name: "Name Bangla",
+    //   selector: (row) => row.nameBn,
+    //   sortable: true,
+    // },
     {
       name: "Father Name",
       selector: (row) => row.fatherName,
       sortable: true,
     },
-    {
-      name: "Mother Name",
-      selector: (row) => row.motherName,
-      sortable: true,
-    },
+    // {
+    //   name: "Mother Name",
+    //   selector: (row) => row.motherName,
+    //   sortable: true,
+    // },
     {
       name: "Driver Mobile No.",
       selector: (row) => row.mobileNo,
@@ -468,6 +478,21 @@ const Drivers = () => {
     {
       name: "Driving License No.",
       selector: (row) => row.drivingLicenseNo,
+      sortable: true,
+    },
+    {
+      name: "Vehicle Type",
+      selector: (row) => row.vehicleType?.name,
+      sortable: true,
+    },
+    {
+      name: "Vehicle Reg. No.",
+      selector: (row) => row.vehicle?.registrationNo,
+      sortable: true,
+    },
+    {
+      name: "Status",
+      selector: (row) => row.driverStatus?.name,
       sortable: true,
     },
     {
@@ -480,16 +505,16 @@ const Drivers = () => {
       selector: (row) => row.nidDob,
       sortable: true,
     },
-    {
-      name: "Education",
-      selector: (row) => row.educationalQualification,
-      sortable: true,
-    },
-    {
-      name: "Blood Group",
-      selector: (row) => row.bloodGroup,
-      sortable: true,
-    },
+    // {
+    //   name: "Education",
+    //   selector: (row) => row.educationalQualification,
+    //   sortable: true,
+    // },
+    // {
+    //   name: "Blood Group",
+    //   selector: (row) => row.bloodGroup,
+    //   sortable: true,
+    // },
     {
       name: "Permanent Address",
       cell: (row) => {
@@ -1201,7 +1226,7 @@ const Drivers = () => {
                 )}
               />
             </div>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1">
               <div
                 {...getRootProps({
                   className:
@@ -1230,6 +1255,11 @@ const Drivers = () => {
                   )}
                 </div>
               </div>
+              {sizeError && (
+                <p className="text-red-600 font-semibold text-xs">
+                  {sizeError}
+                </p>
+              )}
             </div>
             {/* Add other fields as necessary */}
             <Button

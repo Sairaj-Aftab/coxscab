@@ -354,13 +354,17 @@ const Vehicles = () => {
           />
         </div>
       ),
+      width: "50px",
+      style: {
+        padding: "0",
+      },
     },
 
-    {
-      name: "Eng. Chass. No.",
-      selector: (row) => row.engineChassisNo,
-      sortable: true,
-    },
+    // {
+    //   name: "Eng. Chass. No.",
+    //   selector: (row) => row.engineChassisNo,
+    //   sortable: true,
+    // },
     {
       name: "Owner Name",
       selector: (row) => row.ownerName,
@@ -369,6 +373,47 @@ const Vehicles = () => {
     {
       name: "Owner Mobile",
       selector: (row) => row.ownerMobileNo,
+      sortable: true,
+    },
+    {
+      name: "Father Name",
+      selector: (row) => row.fatherName,
+      sortable: true,
+    },
+    {
+      name: "Driver ID",
+      // selector: (row) => row.drivers?.name,
+      cell: (row) => (
+        <div className="flex items-center">
+          {row?.drivers?.map((data) => (
+            <p key={data.id}>{data?.coxscabId}</p>
+          ))}
+        </div>
+      ),
+      sortable: true,
+    },
+    {
+      name: "Driver Name",
+      // selector: (row) => row.drivers?.name,
+      cell: (row) => (
+        <div className="flex items-center">
+          {row?.drivers?.map((data) => (
+            <p key={data.id}>{data?.name}</p>
+          ))}
+        </div>
+      ),
+      sortable: true,
+    },
+    {
+      name: "Driving Licence",
+      // selector: (row) => row.drivers?.name,
+      cell: (row) => (
+        <div className="flex items-center">
+          {row?.drivers?.map((data) => (
+            <p key={data.id}>{data?.drivingLicenseNo}</p>
+          ))}
+        </div>
+      ),
       sortable: true,
     },
     {
@@ -381,11 +426,7 @@ const Vehicles = () => {
       selector: (row) => row.ownerNidDob,
       sortable: true,
     },
-    {
-      name: "Father Name",
-      selector: (row) => row.fatherName,
-      sortable: true,
-    },
+
     {
       name: "Owner Address",
       cell: (row) => {

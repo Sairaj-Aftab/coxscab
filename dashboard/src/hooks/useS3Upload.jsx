@@ -32,6 +32,7 @@ export function useS3Upload() {
   const [imgLoading, setImgLoading] = useState(false);
   const [imgUrl, setImgUrl] = useState(null);
   const [error, setError] = useState(null);
+  const [sizeError, setSizeError] = useState(null);
 
   // Helper function to delete an existing file
   const deleteExistingFile = async (fileKey) => {
@@ -48,6 +49,14 @@ export function useS3Upload() {
 
   const uploadFile = async (file, deleteFile) => {
     if (!file) return;
+
+    // Check if file size is greater than 300KB (300 * 1024 bytes)
+    if (file.size > 300 * 1024) {
+      setSizeError("File must be under 300KB");
+      return; // Exit function if file is too large
+    } else {
+      setSizeError(null); // Clear size error if file is valid
+    }
 
     if (deleteFile) {
       const url = new URL(deleteFile);
@@ -101,6 +110,7 @@ export function useS3Upload() {
     imgUrl,
     setImgUrl,
     error,
+    sizeError,
     uploadFile,
   };
 }
