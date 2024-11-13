@@ -12,6 +12,8 @@
   "author": "Sairaj Aftab",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.689.0",
+    "@aws-sdk/s3-request-presigner": "^3.689.0",
     "@prisma/client": "^5.20.0",
     "bcrypt": "^5.1.1",
     "colors": "^1.4.0",
@@ -21,6 +23,7 @@
     "express": "^4.19.2",
     "jimp": "^1.6.0",
     "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
     "node-cron": "^3.0.3",
     "nodemon": "^3.1.4",
     "qrcode": "^1.5.4",

@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import {
+  CloudUpload,
   Edit,
   Eye,
   FilePlus,
@@ -62,9 +63,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useDropzone } from "react-dropzone";
 import { Progress } from "@/components/ui/progress";
-import { useS3Upload } from "@/hooks/useS3Upload";
 import { authData } from "@/features/auth/authSlice";
 
 const FormSchema = z.object({
@@ -72,7 +71,7 @@ const FormSchema = z.object({
   nameBn: z.string().nonempty("Bengali name is required"),
   fatherName: z.string().optional(),
   motherName: z.string().optional(),
-  picture: z.string().optional(),
+  picture: z.instanceof(FileList).optional(),
   nidNo: z.string().optional(),
   nidDob: z.string().optional(),
   mobileNo: z.string().optional(),
@@ -103,7 +102,7 @@ const Drivers = () => {
       nameBn: "",
       fatherName: "",
       motherName: "",
-      picture: "",
+      picture: undefined,
       nidNo: "",
       nidDob: "",
       mobileNo: "",
@@ -126,43 +125,10 @@ const Drivers = () => {
       vehicleId: "",
     },
   });
-  const { imgLoading, imgUrl, setImgUrl, error, sizeError, uploadFile } =
-    useS3Upload();
-
-  useEffect(() => {
-    if (imgUrl) {
-      form.setValue("picture", imgUrl);
-    }
-  }, [imgUrl, form]);
-  const onDrop = useCallback(
-    async (acceptedFiles) => {
-      if (acceptedFiles.length > 0) {
-        const file = acceptedFiles[0];
-
-        uploadFile(file, imgUrl);
-      }
-    },
-    [imgUrl, uploadFile]
-  );
-
-  const { getRootProps, getInputProps } = useDropzone({
-    accept: {
-      "image/*": [
-        ".png",
-        ".jpg",
-        ".jpeg",
-        ".gif",
-        ".webp",
-        ".svg",
-        ".bmp",
-        ".tiff",
-      ],
-    },
-    maxFiles: 1,
-    onDrop,
-  });
+  const fileRef = form.register("picture");
 
   const params = useParams();
+  const [file, setFile] = useState(null);
   const [search, setSearch] = useState("");
   const [searchVehicle, setSearchVehicle] = useState("");
   const [page, setPage] = useState(1);
@@ -203,6 +169,7 @@ const Drivers = () => {
     useCreateDriverMutation();
   const [updateDriver, { isLoading: updateLoading }] =
     useUpdateDriverMutation();
+
   // const [deleteDriver] = useDeleteDriverMutation();
 
   // Handle Search, pagination and filtering data using react table
@@ -241,13 +208,14 @@ const Drivers = () => {
     }
   };
 
+  const [existImgUrl, setExistImgUrl] = useState(null);
   // Function to open the dialog for editing a role
   const handleEdit = (data) => {
     setIsEditing(true);
     setCurrentData(data);
 
-    setImgUrl(data?.picture || "");
-    form.setValue("picture", data?.picture || "");
+    setExistImgUrl(data?.pictureUrl);
+    setFile(null);
     form.setValue("name", data.name);
     form.setValue("nameBn", data.nameBn);
     form.setValue("fatherName", data?.fatherName || "");
@@ -292,42 +260,73 @@ const Drivers = () => {
   };
 
   async function onSubmit(data) {
-    if (isEditing) {
-      try {
-        const res = await updateDriver({
-          id: currentData.id,
-          ...data,
-        }).unwrap();
-        if (res?.message) {
-          sonner("Success", {
-            description: `${res?.message}`,
-          });
-          setIsDialogOpen(false);
-          form.reset();
-        }
-      } catch (error) {
-        toast({
-          variant: "destructive",
-          title: `${error?.data?.message}`,
-        });
-      }
-    } else {
-      try {
-        const res = await createDriver({ ...data }).unwrap();
-        if (res?.message) {
-          sonner("Success", {
-            description: `${res?.message}`,
-          });
-          setIsDialogOpen(false);
-          form.reset();
-        }
-      } catch (error) {
-        toast({
-          variant: "destructive",
-          title: `${error?.data?.message}`,
-        });
+    const formData = new FormData();
+
+    for (const key in data) {
+      if (key === "picture" && data.picture?.length > 0) {
+        formData.append("picture", data.picture[0]); // Appending single file
+      } else {
+        formData.append(key, data[key]);
       }
     }
+
+    try {
+      const res = isEditing
+        ? await updateDriver({
+            id: currentData.id,
+            formData,
+          }).unwrap()
+        : await createDriver({ ...data }).unwrap();
+
+      if (res?.message) {
+        sonner("Success", {
+          description: `${res?.message}`,
+        });
+        setIsDialogOpen(false);
+        form.reset();
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: `${error?.data?.message}`,
+      });
+    }
+    // if (isEditing) {
+    //   try {
+    //     const res = await updateDriver({
+    //       id: currentData.id,
+    //       ...data,
+    //     }).unwrap();
+    //     if (res?.message) {
+    //       sonner("Success", {
+    //         description: `${res?.message}`,
+    //       });
+    //       setIsDialogOpen(false);
+    //       form.reset();
+    //     }
+    //   } catch (error) {
+    //     toast({
+    //       variant: "destructive",
+    //       title: `${error?.data?.message}`,
+    //     });
+    //   }
+    // } else {
+    //   try {
+    //     const res = await createDriver({ ...data }).unwrap();
+    //     if (res?.message) {
+    //       sonner("Success", {
+    //         description: `${res?.message}`,
+    //       });
+    //       setIsDialogOpen(false);
+    //       form.reset();
+    //     }
+    //   } catch (error) {
+    //     toast({
+    //       variant: "destructive",
+    //       title: `${error?.data?.message}`,
+    //     });
+    //   }
+    // }
   }
 
   // const handleDelete = async (id) => {
@@ -352,7 +351,6 @@ const Drivers = () => {
       selector: (data, index) => calculateItemIndex(page, limit, index),
       width: "70px",
     },
-
     {
       name: "Action",
       selector: (row) => row,
@@ -425,7 +423,7 @@ const Drivers = () => {
       cell: (row) => (
         <div className="flex items-center">
           <img
-            src={row.picture ? row.picture : avatar}
+            src={row.pictureUrl ? row.pictureUrl : avatar}
             alt={row.name}
             className="w-12 h-12 object-cover"
           />
@@ -579,7 +577,7 @@ const Drivers = () => {
             onClick={() => {
               setIsEditing(false); // Reset editing mode
               form.reset(); // Reset form
-              setImgUrl(null);
+              setFile(null);
               setIsDialogOpen(true);
             }}
           >
@@ -591,7 +589,11 @@ const Drivers = () => {
         onInteractOutside={(event) => event.preventDefault()}
       >
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            encType="multipart/form-data"
+            className="space-y-2"
+          >
             {/* Driver name */}
             <div className="flex flex-col md:flex-row gap-2">
               <FormField
@@ -1226,46 +1228,60 @@ const Drivers = () => {
                 )}
               />
             </div>
-            <div className="flex flex-col gap-1">
-              <div
-                {...getRootProps({
-                  className:
-                    "border-2 border-dashed border-gray-300 rounded-lg h-[120px] flex justify-center items-center cursor-pointer hover:bg-gray-100 w-full",
-                })}
-              >
-                <div className="h-full w-full flex flex-col items-center justify-center relative">
-                  <input
-                    {...getInputProps({ multiple: false })}
-                    disabled={createLoading || updateLoading || imgLoading}
-                  />{" "}
-                  {imgUrl ? (
-                    <img src={imgUrl} alt="" className="h-full" />
-                  ) : (
-                    <>
-                      <ImagePlus className="text-gray-500 w-10 h-10 mb-3" />{" "}
-                      <p className="text-gray-600 text-center">
-                        Drag & drop driver photo, or click to upload
-                      </p>
-                    </>
-                  )}
-                  {imgLoading && (
-                    <div className="w-full absolute top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 rounded-lg">
-                      <Loader2 className="animate-spin w-5 h-5 text-white" />
-                    </div>
-                  )}
-                </div>
-              </div>
-              {sizeError && (
-                <p className="text-red-600 font-semibold text-xs">
-                  {sizeError}
-                </p>
-              )}
+            {/* Driver Photo */}
+            <div>
+              <FormField
+                control={form.control}
+                name="picture"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel
+                      className={`${
+                        (createLoading || updateLoading) &&
+                        "cursor-not-allowed text-gray-400"
+                      }`}
+                    >
+                      Driver Photo
+                    </FormLabel>
+                    <FormControl>
+                      <div className="outline-dashed outline-1 outline-slate-500 relative cursor-pointer rounded-lg h-[130px] flex items-center justify-center">
+                        <Input
+                          {...fileRef}
+                          onChange={(e) => setFile(e.target.files[0])}
+                          type="file"
+                          accept=".jpeg, .jpg, .png, .gif, .tiff, .tif, .webp, .svg"
+                          disabled={createLoading || updateLoading}
+                          className="absolute top-0 left-0 bottom-0 right-0 w-full h-full opacity-0"
+                        />
+                        {file || existImgUrl ? (
+                          <img
+                            src={file ? URL.createObjectURL(file) : existImgUrl}
+                            alt=""
+                            className="h-full"
+                          />
+                        ) : (
+                          <div className="flex items-center justify-center flex-col p-8 w-full">
+                            <CloudUpload className="text-gray-500 w-10 h-10" />
+                            <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">
+                              <span className="font-semibold">
+                                Click to upload
+                              </span>
+                              &nbsp; or drag and drop
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              PNG, JPG, JPEG, GIF, TIFF,TIF, WEBP or SVG
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
             {/* Add other fields as necessary */}
-            <Button
-              type="submit"
-              disabled={createLoading || updateLoading || imgLoading}
-            >
+            <Button type="submit" disabled={createLoading || updateLoading}>
               {createLoading || updateLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please

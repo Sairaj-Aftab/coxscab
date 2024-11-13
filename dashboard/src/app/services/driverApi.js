@@ -45,11 +45,13 @@ export const driverApi = createApi({
     }),
     updateDriver: builder.mutation({
       query(data) {
-        const { id, ...body } = data;
+        const { id, formData } = data;
+        console.log(formData);
+
         return {
           url: `/driver/${id}`,
           method: "PUT",
-          body,
+          body: formData,
         };
       },
       // Invalidates all queries that subscribe to this Post `id` only.

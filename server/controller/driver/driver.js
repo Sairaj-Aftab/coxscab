@@ -1,7 +1,9 @@
 import { PrismaClient } from "@prisma/client";
 import createError from "../../utils/createError.js";
 import { createSlug } from "../../utils/slug.js";
+import crypto from "crypto";
 import qr from "qrcode";
+import { getObjectSignedUrl, uploadFile } from "../../utils/s3.js";
 const prisma = new PrismaClient();
 
 export const createDriver = async (req, res, next) => {
@@ -176,18 +178,29 @@ export const getDrivers = async (req, res, next) => {
       take: parseInt(limit), // Limit results per page
     });
 
+    const driverInfoWithUrls = await Promise.all(
+      drivers.map(async (driver) => {
+        if (driver.picture) {
+          try {
+            driver.pictureUrl = await getObjectSignedUrl(driver.picture);
+          } catch (err) {
+            driver.pictureUrl = null; // Set to null if URL generation fails
+          }
+        }
+        return driver;
+      })
+    );
+
     // Count the total number of drivers matching the filters
     const totalDrivers = await prisma.driver.count({
       where: filters,
     });
     return res.status(200).json({
-      drivers,
+      drivers: driverInfoWithUrls,
       totalDrivers,
       success: true,
     });
   } catch (error) {
-    console.log(error);
-
     return next(error);
   }
 };
@@ -207,6 +220,9 @@ export const getDriver = async (req, res, next) => {
     if (!driver) {
       return next(createError(400, "Driver not found!"));
     }
+    if (driver.picture) {
+      driver.pictureUrl = await getObjectSignedUrl(driver.picture);
+    }
     return res.status(200).json({ driver, success: true });
   } catch (error) {
     return next(error);
@@ -221,7 +237,6 @@ export const updateDriver = async (req, res, next) => {
       nameBn,
       fatherName,
       motherName,
-      picture,
       nidNo,
       nidDob,
       mobileNo,
@@ -291,20 +306,39 @@ export const updateDriver = async (req, res, next) => {
       }
     }
 
-    const driver = await prisma.driver.update({
+    // Upload File
+    let fileNameWithFolder;
+    if (req.file) {
+      fileNameWithFolder = `driver/${crypto.randomBytes(32).toString("hex")}-${
+        req.file.originalname
+      }`;
+
+      const existImage = await prisma.driver.findFirst({
+        where: { id: String(id) },
+      });
+
+      try {
+        await uploadFile(req.file, fileNameWithFolder, existImage?.picture);
+      } catch (error) {
+        return next(error);
+      }
+    }
+
+    // Update data
+    let driver = await prisma.driver.update({
       where: { id: String(id) },
       data: {
         name,
         nameBn,
         fatherName,
         motherName,
-        picture,
         nidNo,
         nidDob: nidDob ? new Date(nidDob).toISOString() : null,
         mobileNo,
         drivingLicenseNo,
         bloodGroup,
         educationalQualification,
+        ...(fileNameWithFolder && { picture: fileNameWithFolder }),
         permanentAddress: {
           village: perVillage,
           po: perPo,
@@ -338,14 +372,16 @@ export const updateDriver = async (req, res, next) => {
       return next(createError(400, "Please try again!"));
     }
 
+    if (driver.picture) {
+      driver.pictureUrl = await getObjectSignedUrl(driver.picture);
+    }
+
     return res.status(200).json({
       driver,
       success: true,
       message: "Successfully updated!",
     });
   } catch (error) {
-    console.log(error);
-
     return next(error);
   }
 };
