@@ -208,6 +208,7 @@ export const getDrivers = async (req, res, next) => {
 export const getDriver = async (req, res, next) => {
   try {
     const { id } = req.params;
+
     const driver = await prisma.driver.findUnique({
       where: { id },
       include: {

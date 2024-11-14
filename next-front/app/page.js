@@ -1,3 +1,4 @@
+import { Button, buttonVariants } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -15,12 +16,11 @@ export default function Home() {
         sizes="100vw"
         className="w-full md:w-1/2"
       />
-      <Link
-        href={"https://www.linkedin.com/in/sairaj-aftab/"}
-        className="text-lg font-bold underline text-red-500"
-      >
-        By Sairaj Aftab
-      </Link>
+      <Button asChild className="font-bold">
+        <Link href={"https://www.linkedin.com/in/sairaj-aftab/"}>
+          By Sairaj Aftab sabuj
+        </Link>
+      </Button>
     </main>
   );
 }
