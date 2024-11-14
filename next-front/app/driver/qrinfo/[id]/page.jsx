@@ -2,6 +2,7 @@ import { getDriver } from "@/app/service/driver.service";
 
 const DriverQrInfo = async ({ params }) => {
   const { id } = await params;
+  console.log("id here" + id);
 
   const driver = await getDriver(id);
 
