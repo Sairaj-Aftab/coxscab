@@ -5,6 +5,7 @@ const DriverQrInfo = async ({ params }) => {
   console.log("id here" + id);
 
   const driver = await getDriver(id);
+  console.log("driver" + driver);
 
   return (
     <div>
