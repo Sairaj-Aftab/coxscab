@@ -1,0 +1,14 @@
+model Review {
+  id             String     @id @default(auto()) @map("_id") @db.ObjectId
+  rideId         String?     @db.ObjectId
+  ride           Ride?       @relation(fields: [rideId], references: [id])
+  reviewerId     String?     @db.ObjectId //Passenger ID like User ID
+  reviewer       User?       @relation("ReviewerReviews", fields: [reviewerId], references: [id])
+  revieweeId     String     @db.ObjectId // Driver ID
+  reviewee       Driver      @relation("RevieweeReviews", fields: [revieweeId], references: [id])
+  rating         Float
+  comment        String?
+  tags           String[]
+  isAnonymous    Boolean    @default(false)
+  createdAt      DateTime   @default(now())
+}

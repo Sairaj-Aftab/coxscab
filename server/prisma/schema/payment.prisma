@@ -1,0 +1,9 @@
+model Payment {
+  id             String     @id @default(auto()) @map("_id") @db.ObjectId
+  rideId         String     @db.ObjectId @unique
+  ride           Ride       @relation(fields: [rideId], references: [id])
+  amount         Float
+  status         String     @default("pending") // e.g., "pending", "completed", "failed"
+  method         String     // e.g., "credit_card", "cash", "paypal"
+  createdAt      DateTime   @default(now())
+}

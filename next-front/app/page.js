@@ -18,7 +18,7 @@ export default function Home() {
       />
       <Button asChild className="font-bold">
         <Link href={"https://www.linkedin.com/in/sairaj-aftab/"}>
-          By Sairaj Aftab sabuj
+          By Sairaj Aftab
         </Link>
       </Button>
     </main>

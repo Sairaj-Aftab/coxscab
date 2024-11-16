@@ -224,6 +224,7 @@ export const getDriver = async (req, res, next) => {
     if (driver.picture) {
       driver.pictureUrl = await getObjectSignedUrl(driver.picture);
     }
+
     return res.status(200).json({ driver, success: true });
   } catch (error) {
     return next(error);
