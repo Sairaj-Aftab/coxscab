@@ -1,15 +1,5 @@
-import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { BiAlignLeft, BiSolidBell } from "react-icons/bi";
-import {
-  FaTachometerAlt,
-  FaList,
-  FaUsers,
-  FaShoppingCart,
-  FaMailBulk,
-  FaCalendarAlt,
-  FaChartBar,
-  FaCog,
-} from "react-icons/fa";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,6 +13,19 @@ import { useDispatch, useSelector } from "react-redux";
 import { logoutAuthUser } from "@/features/auth/authApiSlice";
 import { authData, setLogoutUser } from "@/features/auth/authSlice";
 import { getVehicleTypeData } from "@/features/vehicleTypeSlice";
+import {
+  Car,
+  ClipboardCheck,
+  LayoutDashboard,
+  ListTodo,
+  Lock,
+  MapPin,
+  ShieldCheck,
+  Star,
+  UserCog,
+  Users,
+  Warehouse,
+} from "lucide-react";
 
 const SideBar = () => {
   const location = useLocation();
@@ -50,13 +53,13 @@ const SideBar = () => {
     {
       to: "/",
       name: "Dashboard",
-      icon: <FaTachometerAlt />,
+      icon: <LayoutDashboard className="w-4 h-4" />,
       permission: "DASHBOARD",
     },
     {
       to: `/drivers/all`,
       name: "Drivers",
-      icon: <FaList />,
+      icon: <Users className="w-4 h-4" />,
       permission: "DRIVER",
     },
     {
@@ -64,32 +67,55 @@ const SideBar = () => {
         types?.find((type) => type.name === "TOMTOM")?.id || ""
       }`,
       name: "Vehicles",
-      icon: <FaList />,
+      icon: <Car className="w-4 h-4" />,
       permission: "VEHICLE",
     },
     {
       to: `/garage/${types?.find((type) => type.name === "TOMTOM")?.id || ""}`,
       name: "Garage",
-      icon: <FaList />,
+      icon: <Warehouse className="w-4 h-4" />,
       permission: "GARAGE",
+    },
+    {
+      to: "/rides",
+      name: "Rides",
+      icon: <MapPin className="w-4 h-4" />,
+      permission: "RIDES",
+    },
+    {
+      to: "/users",
+      name: "Users",
+      icon: <Users className="w-4 h-4" />,
+      permission: "USERS",
+    },
+    {
+      to: "/review",
+      name: "Review",
+      icon: <Star className="w-4 h-4" />,
+      permission: "REVIEW",
     },
     {
       to: "/auth-users",
       name: "Auth Users",
-      icon: <FaList />,
+      icon: <UserCog className="w-4 h-4" />,
       permission: "AUTH-USERS",
     },
     {
       to: "/required-categories",
       name: "Required Categories",
-      icon: <FaList />,
+      icon: <ListTodo className="w-4 h-4" />,
       permission: "REQUIRED-CATEGORY",
     },
-    { to: "/roles", name: "Roles", icon: <FaList />, permission: "ROLE" },
+    {
+      to: "/roles",
+      name: "Roles",
+      icon: <ShieldCheck className="w-4 h-4" />,
+      permission: "ROLE",
+    },
     {
       to: "/permissions",
       name: "Permissions",
-      icon: <FaList />,
+      icon: <Lock className="w-4 h-4" />,
       permission: "PERMISSION",
     },
   ];

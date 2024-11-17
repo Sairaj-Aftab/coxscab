@@ -1,3 +1,9 @@
+enum ReviewStatus {
+  APPROVED
+  PENDING
+  REJECTED
+}
+
 model Review {
   id             String     @id @default(auto()) @map("_id") @db.ObjectId
   rideId         String?     @db.ObjectId
@@ -10,5 +16,6 @@ model Review {
   comment        String?
   tags           String[]
   isAnonymous    Boolean    @default(false)
+  status         ReviewStatus @default(PENDING)
   createdAt      DateTime   @default(now())
 }

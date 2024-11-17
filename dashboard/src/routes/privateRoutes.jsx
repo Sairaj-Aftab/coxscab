@@ -9,6 +9,9 @@ import RequiredCategories from "@/pages/RequiredCategories/RequiredCategories";
 import Drivers from "@/pages/Drivers/Drivers";
 import Garage from "@/pages/Garage/Garage";
 import ErrorPage from "@/pages/ErrorPage/ErrorPage";
+import Review from "@/pages/Review/Review";
+import Users from "@/pages/Users/Users";
+import Rides from "@/pages/Rides/Rides";
 
 const privateRoutes = [
   {
@@ -33,6 +36,18 @@ const privateRoutes = [
           {
             path: "/garage/:id",
             element: <Garage />,
+          },
+          {
+            path: "/rides",
+            element: <Rides />,
+          },
+          {
+            path: "/users",
+            element: <Users />,
+          },
+          {
+            path: "/review",
+            element: <Review />,
           },
           {
             path: "/required-categories",

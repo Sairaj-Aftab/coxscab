@@ -2,8 +2,65 @@ import PageHeader from "@/components/PageHeader/PageHeader";
 import { useGetChartsQuery } from "@/app/services/chartApi";
 import LoadingComponent from "@/components/LoadingComponents/LoadingComponent";
 import RoundedChart from "@/components/RoundedChart/RoundedChart";
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Car, DollarSign, MapPin, Users } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+} from "recharts";
+const rideData = [
+  { date: "2023-06-01", rides: 1200, revenue: 15000 },
+  { date: "2023-06-02", rides: 1300, revenue: 16500 },
+  { date: "2023-06-03", rides: 1400, revenue: 17000 },
+  { date: "2023-06-04", rides: 1100, revenue: 14000 },
+  { date: "2023-06-05", rides: 1500, revenue: 18500 },
+  { date: "2023-06-06", rides: 1600, revenue: 20000 },
+  { date: "2023-06-07", rides: 1700, revenue: 21500 },
+];
+
+const popularLocations = [
+  { location: "Laboni Beach", rides: 500 },
+  { location: "Cox's Bazar Airport", rides: 350 },
+  { location: "Inani Beach", rides: 300 },
+  { location: "Cox's Bazar Central Bus Terminal", rides: 250 },
+  { location: "Himchori Waterfall", rides: 200 },
+];
+
+const rideTypes = [
+  { name: "Standard", value: 60 },
+  { name: "Premium", value: 25 },
+  { name: "Pool", value: 15 },
+];
+
+const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
 
 const Dashboard = () => {
+  const [activeTab, setActiveTab] = useState("overview");
   const { data, isLoading, error } = useGetChartsQuery();
 
   // if (isLoading)
@@ -87,6 +144,220 @@ const Dashboard = () => {
           labels={vehicleConditions}
           data={vehicleCountsConditions}
         />
+      </div>
+      {/* New Dashboard */}
+      <div className="py-5">
+        {/* <h1 className="text-xl font-bold mb-2">Dashboard</h1> */}
+
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-2">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total Revenue
+              </CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">&#2547; 45,231.89</div>
+              <p className="text-xs text-muted-foreground">
+                +20.1% from last month
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Active Riders
+              </CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">+2350</div>
+              <p className="text-xs text-muted-foreground">
+                +180.1% from last month
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Active Drivers
+              </CardTitle>
+              <Car className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">+12,234</div>
+              <p className="text-xs text-muted-foreground">
+                +19% from last month
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Completed Rides
+              </CardTitle>
+              <MapPin className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">+573,234</div>
+              <p className="text-xs text-muted-foreground">
+                +201 since last hour
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          </TabsList>
+          <TabsContent value="overview" className="space-y-4">
+            <div className="grid gap-4 lg:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Ride Trends</CardTitle>
+                </CardHeader>
+                <CardContent className="pl-0">
+                  <ChartContainer
+                    config={{
+                      rides: {
+                        label: "Rides",
+                        color: "hsl(var(--chart-1))",
+                      },
+                    }}
+                    className="h-[300px] w-full"
+                  >
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={rideData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="date" />
+                        <YAxis />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <Line
+                          type="monotone"
+                          dataKey="rides"
+                          stroke="var(--color-rides)"
+                          strokeWidth={2}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
+                </CardContent>
+              </Card>
+              <Card className="">
+                <CardHeader>
+                  <CardTitle>Popular Pickup Locations</CardTitle>
+                </CardHeader>
+                <CardContent className="pl-0">
+                  <ChartContainer
+                    config={{
+                      rides: {
+                        label: "Rides",
+                        color: "hsl(var(--chart-2))",
+                      },
+                    }}
+                    className="h-[300px] w-full"
+                  >
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={popularLocations}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="location" />
+                        <YAxis />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <Bar dataKey="rides" fill="var(--color-rides)" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
+                </CardContent>
+              </Card>
+            </div>
+            <div className="grid gap-4 lg:grid-cols-2">
+              <Card className="">
+                <CardHeader>
+                  <CardTitle>Revenue Over Time</CardTitle>
+                </CardHeader>
+                <CardContent className="pl-0">
+                  <ChartContainer
+                    config={{
+                      revenue: {
+                        label: "Revenue",
+                        color: "hsl(var(--chart-3))",
+                      },
+                    }}
+                    className="h-[300px] w-full"
+                  >
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={rideData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="date" />
+                        <YAxis />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <Area
+                          type="monotone"
+                          dataKey="revenue"
+                          stroke="var(--color-revenue)"
+                          fill="var(--color-revenue)"
+                          fillOpacity={0.3}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Ride Types Distribution</CardTitle>
+                </CardHeader>
+                <CardContent className="pl-0">
+                  <ChartContainer
+                    config={{
+                      value: {
+                        label: "Percentage",
+                        color: "hsl(var(--chart-4))",
+                      },
+                    }}
+                    className="h-[300px] w-full"
+                  >
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={rideTypes}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {rideTypes.map((entry, index) => (
+                            <Cell
+                              key={`cell-${index}`}
+                              fill={COLORS[index % COLORS.length]}
+                            />
+                          ))}
+                        </Pie>
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <Legend />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+          <TabsContent value="analytics">
+            <Card>
+              <CardHeader>
+                <CardTitle>Analytics</CardTitle>
+                <CardDescription>
+                  Detailed analytics view coming soon...
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
