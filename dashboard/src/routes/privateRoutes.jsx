@@ -12,6 +12,8 @@ import ErrorPage from "@/pages/ErrorPage/ErrorPage";
 import Review from "@/pages/Review/Review";
 import Users from "@/pages/Users/Users";
 import Rides from "@/pages/Rides/Rides";
+import Notification from "@/pages/Notification/Notification";
+import Payment from "@/pages/Payment/Payment";
 
 const privateRoutes = [
   {
@@ -48,6 +50,14 @@ const privateRoutes = [
           {
             path: "/review",
             element: <Review />,
+          },
+          {
+            path: "/notification",
+            element: <Notification />,
+          },
+          {
+            path: "/payment",
+            element: <Payment />,
           },
           {
             path: "/required-categories",

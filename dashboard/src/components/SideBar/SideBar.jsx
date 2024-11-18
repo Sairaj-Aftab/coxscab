@@ -14,6 +14,7 @@ import { logoutAuthUser } from "@/features/auth/authApiSlice";
 import { authData, setLogoutUser } from "@/features/auth/authSlice";
 import { getVehicleTypeData } from "@/features/vehicleTypeSlice";
 import {
+  Bell,
   Car,
   ClipboardCheck,
   LayoutDashboard,
@@ -24,6 +25,7 @@ import {
   Star,
   UserCog,
   Users,
+  Wallet,
   Warehouse,
 } from "lucide-react";
 
@@ -93,6 +95,18 @@ const SideBar = () => {
       name: "Review",
       icon: <Star className="w-4 h-4" />,
       permission: "REVIEW",
+    },
+    {
+      to: "/notification",
+      name: "Notification",
+      icon: <Bell className="w-4 h-4" />,
+      permission: "NOTIFICATION",
+    },
+    {
+      to: "/payment",
+      name: "Payment",
+      icon: <Wallet className="w-4 h-4" />,
+      permission: "PAYMENT",
     },
     {
       to: "/auth-users",

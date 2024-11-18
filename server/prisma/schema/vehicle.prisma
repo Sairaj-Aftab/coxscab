@@ -20,6 +20,12 @@ model VehicleCondition {
   updatedAt   DateTime         @updatedAt
 }
 
+enum VehicleStatus {
+  ACTIVE
+  MAINTENANCE
+  INACTIVE
+}
+
 model Vehicle {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   vehicleType         VehicleType @relation(fields: [vehicleTypeId], references: [id], onDelete: Cascade)

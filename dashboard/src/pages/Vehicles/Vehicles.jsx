@@ -25,22 +25,19 @@ import {
 } from "@/components/ui/popover";
 import DataTable from "react-data-table-component";
 import PageHeader from "@/components/PageHeader/PageHeader";
-import { BiTrash, BiEditAlt } from "react-icons/bi";
 import { Button } from "@/components/ui/Button";
 import {
   useCreateVehicleMutation,
-  useDeleteVehicleMutation,
   useGetVehiclesQuery,
   useUpdateVehicleMutation,
 } from "@/app/services/vehicleApi";
 import LoadingComponent from "@/components/LoadingComponents/LoadingComponent";
-import AlertDialogMessage from "@/components/AlertDialogMessage/AlertDialogMessage";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import { getVehicles } from "@/features/vehicleSlice";
 import DialogBox from "@/components/DialogBox/DialogBox";
 import { Input } from "@/components/ui/input";
-import { Loader2 } from "lucide-react";
+import { Edit, Eye, Loader2 } from "lucide-react";
 import { getVehicleTypeData } from "@/features/vehicleTypeSlice";
 import { getVehicleConditionData } from "@/features/vehicleConditionSlice";
 import { Label } from "@/components/ui/label";
@@ -49,6 +46,14 @@ import { useGetGaragesQuery } from "@/app/services/garageApi";
 import { useGetDriversQuery } from "@/app/services/driverApi";
 import { Checkbox } from "@/components/ui/checkbox";
 import { authData } from "@/features/auth/authSlice";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const FormSchema = z.object({
   vehicleTypeId: z.string().min(2, {
@@ -112,7 +117,9 @@ const Vehicles = () => {
   const [searchDriver, setSearchDriver] = useState("");
   const [driver, setDriver] = useState([]);
   // State to track if editing mode is active
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [currentData, setCurrentData] = useState(null);
   const { auth } = useSelector(authData);
@@ -149,7 +156,6 @@ const Vehicles = () => {
   useEffect(() => {
     dispatch(getVehicles({ vehicles: data?.vehicles, loader: isLoading }));
   }, [dispatch, data, isLoading]);
-  const [deleteVehicle] = useDeleteVehicleMutation();
 
   // Handle Search, pagination and filtering data using react table
   // Vehicle
@@ -206,6 +212,12 @@ const Vehicles = () => {
 
   const calculateItemIndex = (page, rowPage, index) => {
     return (page - 1) * rowPage + index + 1;
+  };
+
+  // View details of Vehicle
+  const handleViewClick = (vehicle) => {
+    setSelectedVehicle(vehicle);
+    setIsViewDialogOpen(true);
   };
 
   // Function to open the dialog for editing a role
@@ -318,29 +330,43 @@ const Vehicles = () => {
   const columns = [
     {
       name: "#",
-      selector: (data, index) => calculateItemIndex(page, limit, index),
+      selector: (_data, index) => calculateItemIndex(page, limit, index),
       width: "70px",
     },
     {
       name: "Action",
       selector: (row) => row,
       cell: (row) => (
-        <button
-          disabled={auth?.role?.name === "VIEWER"}
-          className="flex gap-2 items-center"
-        >
-          <BiEditAlt
+        <div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleViewClick(row)}
+          >
+            <Eye className="h-4 w-4 text-primary" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            disabled={auth?.role?.name === "VIEWER"}
             onClick={() => handleEdit(row)}
-            className="text-primary text-xl cursor-pointer"
-          />
-        </button>
+          >
+            <Edit className="h-4 w-4 text-blue-500" />
+          </Button>
+        </div>
       ),
-      width: "50px",
+      width: "90px",
+      style: {
+        padding: "0",
+      },
     },
     {
       name: "Reg. No.",
       selector: (row) => row.registrationNo,
       sortable: true,
+      style: {
+        paddingLeft: "0",
+      },
     },
     {
       name: "QR",
@@ -371,15 +397,35 @@ const Vehicles = () => {
       sortable: true,
     },
     {
+      name: "Father Name",
+      selector: (row) => row.fatherName,
+      sortable: true,
+    },
+    {
       name: "Owner Mobile",
       selector: (row) => row.ownerMobileNo,
       sortable: true,
     },
     {
-      name: "Father Name",
-      selector: (row) => row.fatherName,
+      name: "Owner NID No.",
+      selector: (row) => row.ownerNidNo,
       sortable: true,
     },
+    {
+      name: "Date of Birth",
+      selector: (row) => row.ownerNidDob,
+      sortable: true,
+    },
+    {
+      name: "Owner Address",
+      cell: (row) => {
+        return (
+          <p>{`${row.ownerAddress?.village}, ${row.ownerAddress?.holdingNo}, ${row.ownerAddress?.wardNo}, ${row.ownerAddress?.thana}, ${row.ownerAddress?.district}`}</p>
+        );
+      },
+      sortable: true,
+    },
+
     {
       name: "Driver ID",
       // selector: (row) => row.drivers?.name,
@@ -404,38 +450,7 @@ const Vehicles = () => {
       ),
       sortable: true,
     },
-    {
-      name: "Driving Licence",
-      // selector: (row) => row.drivers?.name,
-      cell: (row) => (
-        <div className="flex items-center">
-          {row?.drivers?.map((data) => (
-            <p key={data.id}>{data?.drivingLicenseNo}</p>
-          ))}
-        </div>
-      ),
-      sortable: true,
-    },
-    {
-      name: "Owner NID No.",
-      selector: (row) => row.ownerNidNo,
-      sortable: true,
-    },
-    {
-      name: "Date of Birth",
-      selector: (row) => row.ownerNidDob,
-      sortable: true,
-    },
 
-    {
-      name: "Owner Address",
-      cell: (row) => {
-        return (
-          <p>{`${row.ownerAddress?.village}, ${row.ownerAddress?.holdingNo}, ${row.ownerAddress?.wardNo}, ${row.ownerAddress?.thana}, ${row.ownerAddress?.district}`}</p>
-        );
-      },
-      sortable: true,
-    },
     {
       name: "Authority",
       selector: (row) => row.followUpByAuthority,
@@ -1143,6 +1158,50 @@ const Vehicles = () => {
           paginationRowsPerPageOptions={[10, 20, 50, 100, 125, 150, 175, 200]}
         />
       </div>
+      {/* View details */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Vehicle Details</DialogTitle>
+            <DialogDescription>
+              View details for vehicle {selectedVehicle?.registrationNo}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedVehicle && (
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <span className="font-bold">Make:</span>
+                <span className="col-span-3">{selectedVehicle.make}</span>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <span className="font-bold">Model:</span>
+                <span className="col-span-3">{selectedVehicle.model}</span>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <span className="font-bold">Year:</span>
+                <span className="col-span-3">{selectedVehicle.year}</span>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <span className="font-bold">License:</span>
+                <span className="col-span-3">
+                  {selectedVehicle.licensePlate}
+                </span>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <span className="font-bold">Status:</span>
+                <span className="col-span-3">{selectedVehicle.status}</span>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <span className="font-bold">Driver:</span>
+                <span className="col-span-3">{selectedVehicle.driver}</span>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button onClick={() => setIsViewDialogOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

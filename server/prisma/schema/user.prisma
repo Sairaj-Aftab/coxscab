@@ -1,13 +1,34 @@
+enum UserRole {
+  CUSTOMER
+  DRIVER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  BLOCKED
+}
+
 model User {
   id             String     @id @default(auto()) @map("_id") @db.ObjectId
-  name           String
+  firstName      String
+  lastName       String?
   email          String?     @unique
   phone          String?     @unique
   password       String
-  role           String     // "driver" or "passenger"
   profilePicture String?
+  location       Json?      // latitude   Float, longitude  Float, address    String
+  isOnline       Boolean     @default(false)
+  driver         Driver?     @relation("DriverToUser", fields: [driverId], references: [id])
+  driverId       String?     @unique @db.ObjectId // Connect with Driver model
+  role           UserRole    @default(CUSTOMER) // Can be CUSTOMER, DRIVER, or ADMIN
+  status         UserStatus  @default(ACTIVE)
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
+  paymentMethods Payment[]   @relation("UserPayments")
   reviewsGiven   Review[]   @relation("ReviewerReviews")
+  reviewsReceived Review[] @relation("RevieweeReviews")
   ride           Ride[]     @relation("PassengerRides")
 }
