@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { NavLink, Outlet } from "react-router-dom";
 import { BiAlignLeft, BiSolidBell } from "react-icons/bi";
 import {
   DropdownMenu,
@@ -16,7 +16,6 @@ import { getVehicleTypeData } from "@/features/vehicleTypeSlice";
 import {
   Bell,
   Car,
-  ClipboardCheck,
   LayoutDashboard,
   ListTodo,
   Lock,
@@ -30,7 +29,7 @@ import {
 } from "lucide-react";
 
 const SideBar = () => {
-  const location = useLocation();
+  // const location = useLocation();
 
   const dispatch = useDispatch();
   const { auth } = useSelector(authData);
@@ -108,6 +107,12 @@ const SideBar = () => {
       icon: <Wallet className="w-4 h-4" />,
       permission: "PAYMENT",
     },
+    // {
+    //   to: "/places",
+    //   name: "Places",
+    //   icon: <SquareDot className="w-4 h-4" />,
+    //   permission: "PLACES",
+    // },
     {
       to: "/auth-users",
       name: "Auth Users",

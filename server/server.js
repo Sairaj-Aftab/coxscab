@@ -6,6 +6,7 @@ import cors from "cors";
 import { Server } from "socket.io";
 import { createServer } from "node:http";
 import authUser from "./routes/authUser.js";
+import review from "./routes/review.js";
 import chart from "./routes/charts.js";
 import driver from "./routes/driver/driver.js";
 import driverStatus from "./routes/driver/driverStatus.js";
@@ -59,6 +60,7 @@ app.use(
 );
 
 app.use("/api/v1/auth", authUser);
+app.use("/api/v1/review", review);
 app.use("/api/v1/chart", chart);
 app.use("/api/v1/driver", driver);
 app.use("/api/v1/driver-status", driverStatus);

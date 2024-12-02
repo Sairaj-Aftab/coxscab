@@ -15,14 +15,19 @@ model User {
   id             String     @id @default(auto()) @map("_id") @db.ObjectId
   firstName      String
   lastName       String?
-  email          String?     @unique
-  phone          String?     @unique
-  password       String
+  phone          String     @unique
+  password       String?
+  otp            String?
+  otpExpiresAt   DateTime?
+  otpRetries     Int?
   profilePicture String?
   location       Json?      // latitude   Float, longitude  Float, address    String
+  refreshToken   String?
   isOnline       Boolean     @default(false)
-  driver         Driver?     @relation("DriverToUser", fields: [driverId], references: [id])
-  driverId       String?     @unique @db.ObjectId // Connect with Driver model
+  lastLoginTime  DateTime? @default(now())
+  lastLoginIp    String?
+  driver         Driver?     @relation("DriverToUser", fields: [driverId], references: [id], onDelete: Cascade)
+  driverId       String?     @db.ObjectId // Connect with Driver model
   role           UserRole    @default(CUSTOMER) // Can be CUSTOMER, DRIVER, or ADMIN
   status         UserStatus  @default(ACTIVE)
   createdAt      DateTime   @default(now())
