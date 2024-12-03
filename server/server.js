@@ -36,6 +36,7 @@ const io = new Server(server, {
       process.env.MAIN_DOMAIN1,
       process.env.MAIN_DOMAIN2,
     ],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     credentials: true,
   },
 });
@@ -55,6 +56,7 @@ app.use(
       process.env.MAIN_DOMAIN1,
       process.env.MAIN_DOMAIN2,
     ],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     credentials: true,
   })
 );
