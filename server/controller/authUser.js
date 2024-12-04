@@ -103,8 +103,8 @@ export const loginUser = async (req, res, next) => {
     // Set refresh token as a cookie
     res.cookie("user_refresh_token", refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV == "Development" ? false : true, // Secure in production
-      sameSite: "strict",
+      secure: process.env.NODE_ENV === "Development" ? false : true, // Secure in production
+      sameSite: "none",
       path: "/",
       maxAge: 50 * 365 * 24 * 60 * 60 * 1000, // 50 years in milliseconds
     });
@@ -371,7 +371,7 @@ export const loginAuthAdminDashboard = async (req, res, next) => {
     res.cookie("auth_token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "Development" ? false : true,
-      sameSite: process.env.NODE_ENV === "Development" ? "lax" : "strict",
+      sameSite: "none",
       path: "/",
     });
 
