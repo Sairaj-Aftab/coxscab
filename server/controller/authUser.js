@@ -139,13 +139,18 @@ export const logOut = async (req, res, next) => {
     await prisma.user.update({
       where: { id },
       data: {
+        otp: null,
+        otpExpiresAt: null,
         refreshToken: null,
       },
     });
     res.clearCookie("user_refresh_token", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // Use secure cookies in production
-      sameSite: "strict", // Protect against CSRF
+      secure: process.env.NODE_ENV !== "Development", // Use secure cookies only in production
+      sameSite: process.env.NODE_ENV !== "Development" ? "none" : "lax",
+      domain:
+        process.env.NODE_ENV !== "Development" ? ".coxscab.com" : undefined,
+      path: "/",
     });
     res.status(200).json({ success: true });
   } catch (error) {
