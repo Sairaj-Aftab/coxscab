@@ -3,8 +3,6 @@ import { NextResponse } from "next/server";
 export function middleware(req) {
   const token = req.cookies.get("user_refresh_token");
   const { pathname } = req.nextUrl;
-  console.log(token);
-  console.log(pathname);
 
   // Redirect authenticated users away from login
   if (token && pathname === "/auth-login") {

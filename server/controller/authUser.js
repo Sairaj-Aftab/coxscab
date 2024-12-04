@@ -374,6 +374,8 @@ export const loginAuthAdminDashboard = async (req, res, next) => {
       httpOnly: true,
       secure: process.env.NODE_ENV !== "Development", // Use secure cookies only in production
       sameSite: process.env.NODE_ENV !== "Development" ? "none" : "lax",
+      domain:
+        process.env.NODE_ENV !== "Development" ? ".coxscab.com" : undefined,
       path: "/",
     });
 
