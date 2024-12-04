@@ -1,8 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import { useAuthUser } from "@/store/authUser";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect } from "react";
 
 const protectedRoutes = ["/profile"];
 const publicRoutes = ["/"];
@@ -11,7 +11,6 @@ export default function AuthGuard({ children }) {
   const { user, setLogedInUser, refreshAccessToken } = useAuthUser();
   const router = useRouter();
   const pathname = usePathname();
-  console.log(user);
 
   useEffect(() => {
     const checkAuth = async () => {

@@ -104,7 +104,7 @@ export const loginUser = async (req, res, next) => {
     res.cookie("user_refresh_token", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV == "Development" ? false : true, // Secure in production
-      sameSite: "none",
+      sameSite: "strict",
       path: "/",
       maxAge: 50 * 365 * 24 * 60 * 60 * 1000, // 50 years in milliseconds
     });
@@ -116,8 +116,6 @@ export const loginUser = async (req, res, next) => {
       success: true,
     });
   } catch (error) {
-    console.log(error);
-
     return next(error);
   }
 };
