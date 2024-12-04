@@ -105,6 +105,8 @@ export const loginUser = async (req, res, next) => {
       httpOnly: true,
       secure: process.env.NODE_ENV !== "Development", // Use secure cookies only in production
       sameSite: process.env.NODE_ENV !== "Development" ? "none" : "lax",
+      domain:
+        process.env.NODE_ENV !== "Development" ? ".coxscab.com" : undefined,
       path: "/",
       maxAge: 50 * 365 * 24 * 60 * 60 * 1000, // 50 years in milliseconds
     });
