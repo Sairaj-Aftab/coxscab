@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,13 +10,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Clock, Loader2, Navigation2, Star, ThumbsUp } from "lucide-react";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -39,17 +37,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import Link from "next/link";
-
-const tagOptions = [
-  { value: "comfortable", label: "Comfortable" },
-  { value: "clean", label: "Clean" },
-  { value: "safe", label: "Safe" },
-  { value: "professional", label: "Professional" },
-  { value: "courteous", label: "Courteous" },
-];
 
 const reviewSchema = z.object({
   name: z
@@ -82,6 +71,8 @@ const reviewSchema = z.object({
 });
 
 const ReviewFormPage = ({ driver }) => {
+  const [ipAddress, setIpAddress] = useState("");
+  const [ipError, setIpError] = useState("");
   const [hoverRating, setHoverRating] = useState(0);
   const [loader, setLoader] = useState(false);
   const [showAlertDialog, setShowAlertDialog] = useState(false);
@@ -128,6 +119,8 @@ const ReviewFormPage = ({ driver }) => {
     try {
       const res = await createReview({
         ...cleanedData,
+        type: user ? "RIDER" : "PUBLIC",
+        ipAddress,
         reviewerId: user?.id,
         driverId: driver.id,
       });
@@ -144,6 +137,20 @@ const ReviewFormPage = ({ driver }) => {
       setLoader(false);
     }
   };
+
+  useEffect(() => {
+    const fetchIP = async () => {
+      try {
+        const response = await fetch("https://api.ipify.org?format=json");
+        const data = await response.json();
+        setIpAddress(data.ip);
+      } catch (error) {
+        setIpError("Failed to fetch IP address.");
+      }
+    };
+
+    fetchIP();
+  }, []);
 
   return (
     <>

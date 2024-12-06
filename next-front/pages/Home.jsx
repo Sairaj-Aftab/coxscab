@@ -23,6 +23,14 @@ import carVehicle from "@/public/car.png";
 import hiaceVehicle from "@/public/hiace.png";
 import { useMapCoordinates } from "@/store/mapCoordinates";
 import axios from "axios";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const vehicleType = [
   {
@@ -37,7 +45,7 @@ const vehicleType = [
   },
   {
     id: 3,
-    name: "JEEP",
+    name: "TOURIST JEEP",
     path: jeepVehicle,
   },
   {
@@ -50,9 +58,12 @@ const vehicleType = [
     name: "HIACE",
     path: hiaceVehicle,
   },
+  {
+    id: 6,
+    name: "MICRO",
+    path: hiaceVehicle,
+  },
 ];
-
-const mapAccessToken = process.env.NEXT_PUBLIC_MAP_ACCESS_TOKEN;
 
 const Home = () => {
   const { setPicupCoordinates, setDestinationCoordinates } =
@@ -64,25 +75,62 @@ const Home = () => {
   const [pickupSuggestions, setPickupSuggestions] = useState([]);
   const [destinationSuggestions, setDestinationSuggestions] = useState([]);
   const [focusedInput, setFocusedInput] = useState(null);
+  const [bengali, setBengali] = useState(false);
+  const bengaliRegex = /[\u0980-\u09FF]/;
+  const englishRegex = /^[\u0000-\u007F]*$/;
 
   const handlePickupChange = async (e) => {
     setPickup(e.target.value);
+
     if (e.target.value.length > 0) {
+      if (bengaliRegex.test(e.target.value)) {
+        setBengali(true);
+      } else if (englishRegex.test(e.target.value)) {
+        setBengali(false);
+      } else {
+        setBengali(false);
+      }
+
       const res = await axios.get(
-        `https://barikoi.xyz/v2/api/search/autocomplete/place?api_key=${mapAccessToken}&q=${e.target.value}&bangla=true`
+        `https://barikoi.xyz/v2/api/search/autocomplete/place?api_key=${process.env.NEXT_PUBLIC_MAP_ACCESS_TOKEN}&q=${e.target.value}&bangla=true`
       );
-      setPickupSuggestions(res?.data?.places.slice(0, 5));
+
+      setPickupSuggestions(res?.data?.places);
     } else {
       setPickupSuggestions([]);
     }
   };
+  // const handlePickupChange = async (e) => {
+  //   setPickup(e.target.value);
+  //   if (e.target.value.length > 0) {
+  //     const res = await axios.get(`https://photon.komoot.io/api/`, {
+  //       params: {
+  //         q: e.target.value,
+  //         lang: "en",
+  //         bbox: "88.007915,26.6358859,92.680196,20.3679092",
+  //       },
+  //     });
+
+  //     setPickupSuggestions(res?.data?.features);
+  //   } else {
+  //     setPickupSuggestions([]);
+  //   }
+  // };
   const handleDestinationChange = async (e) => {
     setDestination(e.target.value);
     if (e.target.value.length > 0) {
+      if (bengaliRegex.test(e.target.value)) {
+        setBengali(true);
+      } else if (englishRegex.test(e.target.value)) {
+        setBengali(false);
+      } else {
+        setBengali(false);
+      }
       const res = await axios.get(
-        `https://barikoi.xyz/v2/api/search/autocomplete/place?api_key=${mapAccessToken}&q=${e.target.value}&bangla=true`
+        `https://barikoi.xyz/v2/api/search/autocomplete/place?api_key=${process.env.NEXT_PUBLIC_MAP_ACCESS_TOKEN}&q=${e.target.value}&bangla=true`
       );
-      setDestinationSuggestions(res?.data?.places.slice(0, 5));
+
+      setDestinationSuggestions(res?.data?.places);
     } else {
       setDestinationSuggestions([]);
     }
@@ -105,12 +153,18 @@ const Home = () => {
     type = "pickup" | "destination"
   ) => {
     if (type === "pickup") {
-      setPickup(suggestion.address);
-      setPicupCoordinates(suggestion);
+      setPickup(suggestion?.address);
+      setPicupCoordinates({
+        latitude: suggestion?.latitude,
+        longitude: suggestion?.longitude,
+      });
       setPickupSuggestions([]);
     } else {
-      setDestination(suggestion.address);
-      setDestinationCoordinates(suggestion);
+      setDestination(suggestion?.address);
+      setDestinationCoordinates({
+        latitude: suggestion?.latitude,
+        longitude: suggestion?.longitude,
+      });
       setDestinationSuggestions([]);
     }
     setFocusedInput(null);
@@ -152,14 +206,22 @@ const Home = () => {
                       <MapPin className="w-4 h-4 mr-2 text-muted-foreground" />
                       <span>Your location</span>
                     </li>
-                    {pickupSuggestions.map((data) => (
+                    {pickupSuggestions.map((data, index) => (
                       <li
-                        key={data.id}
+                        key={index}
                         className="px-4 py-2 hover:bg-muted cursor-pointer flex items-center"
                         onClick={() => handleSuggestionClick(data, "pickup")}
                       >
                         <MapPin className="w-4 h-4 mr-2 text-muted-foreground" />
-                        <span>{data.address}</span>
+                        {bengali ? (
+                          <span className="w-full">
+                            {data?.address_bn
+                              ? data?.address_bn
+                              : data?.address}
+                          </span>
+                        ) : (
+                          <span className="w-full">{data?.address}</span>
+                        )}
                       </li>
                     ))}
                   </motion.ul>
@@ -171,7 +233,7 @@ const Home = () => {
               <Input
                 placeholder="Destination"
                 value={destination}
-                onChange={(e) => setDestination(e.target.value)}
+                onChange={handleDestinationChange}
                 onFocus={() => setFocusedInput("destination")}
                 className="pl-10"
               />
@@ -184,27 +246,35 @@ const Home = () => {
                       exit={{ opacity: 0, y: -10 }}
                       className="absolute z-10 w-full bg-background border border-input rounded-md mt-1 shadow-lg"
                     >
-                      {destinationSuggestions.map((data) => (
+                      {destinationSuggestions?.map((data, index) => (
                         <li
-                          key={data.id}
+                          key={index}
                           className="px-4 py-2 hover:bg-muted cursor-pointer flex items-center"
                           onClick={() =>
                             handleSuggestionClick(data, "destination")
                           }
                         >
                           <MapPin className="w-4 h-4 mr-2 text-muted-foreground" />
-                          <span>{data.name}</span>
+                          {bengali ? (
+                            <span className="w-full">
+                              {data?.address_bn
+                                ? data?.address_bn
+                                : data?.address}
+                            </span>
+                          ) : (
+                            <span className="w-full">{data?.address}</span>
+                          )}
                         </li>
                       ))}
                     </motion.ul>
                   )}
               </AnimatePresence>
             </div>
-            <div>
+            {/* <div>
               <h3 className="text-sm font-semibold text-primary mb-1">
                 Select Vehicle
               </h3>
-              <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                 {vehicleType.map((data) => (
                   <span
                     key={data.id}
@@ -219,7 +289,21 @@ const Home = () => {
                   </span>
                 ))}
               </div>
-            </div>
+            </div> */}
+            <Select>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select vehicle type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {vehicleType.map((data) => (
+                    <SelectItem key={data.id} value={data.name}>
+                      {data.name}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </div>
           <Button className="w-full text-sm font-semibold h-10" size="lg">
             <MapPin className="w-5 h-5 mr-2" />
@@ -273,14 +357,24 @@ const Home = () => {
                         <MapPin className="w-4 h-4 mr-2 text-muted-foreground" />
                         <span>Your location</span>
                       </li>
-                      {pickupSuggestions.map((data) => (
+                      {pickupSuggestions?.map((data, index) => (
                         <li
-                          key={data.id}
+                          key={index}
                           className="px-4 py-2 hover:bg-muted cursor-pointer flex items-center"
                           onClick={() => handleSuggestionClick(data, "pickup")}
                         >
                           <MapPin className="w-4 h-4 mr-2 text-muted-foreground" />
-                          <span className="w-full">{data.address}</span>
+                          <div className="flex flex-col gap-1">
+                            {bengali ? (
+                              <span className="w-full">
+                                {data?.address_bn
+                                  ? data?.address_bn
+                                  : data?.address}
+                              </span>
+                            ) : (
+                              <span className="w-full">{data?.address}</span>
+                            )}
+                          </div>
                         </li>
                       ))}
                     </motion.ul>
@@ -305,16 +399,24 @@ const Home = () => {
                         exit={{ opacity: 0, y: -10 }}
                         className="absolute z-10 w-full bg-background border border-input rounded-md mt-1 shadow-lg"
                       >
-                        {destinationSuggestions.map((data) => (
+                        {destinationSuggestions.map((data, index) => (
                           <li
-                            key={data.id}
+                            key={index}
                             className="px-4 py-2 hover:bg-muted cursor-pointer flex items-center"
                             onClick={() =>
                               handleSuggestionClick(data, "destination")
                             }
                           >
                             <MapPin className="w-4 h-4 mr-2 text-muted-foreground" />
-                            <span>{data.address}</span>
+                            {bengali ? (
+                              <span className="w-full">
+                                {data?.address_bn
+                                  ? data?.address_bn
+                                  : data?.address}
+                              </span>
+                            ) : (
+                              <span className="w-full">{data?.address}</span>
+                            )}
                           </li>
                         ))}
                       </motion.ul>
@@ -325,7 +427,7 @@ const Home = () => {
                 <h3 className="text-sm font-semibold text-primary mb-1">
                   Select Vehicle
                 </h3>
-                <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                   {vehicleType.map((data) => (
                     <span
                       key={data.id}
@@ -359,15 +461,15 @@ const Home = () => {
             <div className="space-y-2">
               <Button variant="outline" className="w-full justify-start">
                 <MapPin className="mr-2 h-4 w-4" />
-                Downtown
+                Sugandha Sea Beach
               </Button>
               <Button variant="outline" className="w-full justify-start">
                 <MapPin className="mr-2 h-4 w-4" />
-                Airport
+                Dolphin Mor
               </Button>
               <Button variant="outline" className="w-full justify-start">
                 <MapPin className="mr-2 h-4 w-4" />
-                Shopping Mall
+                Laboni Beach
               </Button>
             </div>
           </div>

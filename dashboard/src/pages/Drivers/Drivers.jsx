@@ -517,7 +517,17 @@ const Drivers = () => {
       name: "Permanent Address",
       cell: (row) => {
         return (
-          <p>{`${row.permanentAddress?.village}, ${row.permanentAddress?.po}, ${row.permanentAddress?.thana}, ${row.permanentAddress?.district}`}</p>
+          <p>
+            {[
+              row.permanentAddress?.village,
+              row.permanentAddress?.po,
+              row.permanentAddress?.thana,
+              row.permanentAddress?.district,
+            ]
+              .filter(Boolean) // Removes falsy values
+              .join(", ")}{" "}
+            {/* Joins remaining values with ", " */}
+          </p>
         );
       },
       sortable: true,
@@ -526,7 +536,18 @@ const Drivers = () => {
       name: "Current Address",
       cell: (row) => {
         return (
-          <p>{`${row.currentAddress?.village}, ${row.currentAddress?.holdingNo}, ${row.currentAddress?.wardNo}, ${row.currentAddress?.thana}, ${row.currentAddress?.district}`}</p>
+          <p>
+            {[
+              row.currentAddress?.village,
+              row.currentAddress?.holdingNo,
+              row.currentAddress?.wardNo,
+              row.currentAddress?.thana,
+              row.currentAddress?.district,
+            ]
+              .filter(Boolean) // Removes falsy values
+              .join(", ")}{" "}
+            {/* Joins remaining values with ", " */}
+          </p>
         );
       },
       sortable: true,

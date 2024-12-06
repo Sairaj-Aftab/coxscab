@@ -46,7 +46,6 @@ export const driverApi = createApi({
     updateDriver: builder.mutation({
       query(data) {
         const { id, formData } = data;
-        console.log(formData);
 
         return {
           url: `/driver/${id}`,

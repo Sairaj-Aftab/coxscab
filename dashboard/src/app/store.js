@@ -20,6 +20,7 @@ import driverStatusSlice from "../features/driverStatusSlice";
 import { driverApi } from "./services/driverApi";
 import { garageApi } from "./services/garageApi";
 import { chartApi } from "./services/chartApi";
+import { reviewApi } from "./services/reviewApi";
 
 export const store = configureStore({
   reducer: {
@@ -39,6 +40,7 @@ export const store = configureStore({
     vehicle: vehicleSlice,
     [driverApi.reducerPath]: driverApi.reducer,
     [garageApi.reducerPath]: garageApi.reducer,
+    [reviewApi.reducerPath]: reviewApi.reducer,
     [roleApi.reducerPath]: roleApi.reducer,
     roles: rolesSlice,
     [permissionApi.reducerPath]: permissionApi.reducer,
@@ -57,6 +59,7 @@ export const store = configureStore({
       driverActivitiesApi.middleware,
       driverStatusApi.middleware,
       garageApi.middleware,
+      reviewApi.middleware,
       roleApi.middleware,
       permissionApi.middleware
     ),

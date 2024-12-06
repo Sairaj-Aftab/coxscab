@@ -6,6 +6,7 @@ enum ReviewStatus {
 
 model Review {
   id             String     @id @default(auto()) @map("_id") @db.ObjectId
+  type           String
   rideId         String?     @db.ObjectId
   ride           Ride?       @relation(fields: [rideId], references: [id])
   reviewerId     String?     @db.ObjectId //Passenger ID like User ID
@@ -20,6 +21,7 @@ model Review {
   comment        String?
   aspects        Json?
   tags           String[]
+  ipAddress      String?
   isAnonymous    Boolean    @default(true)
   status         ReviewStatus @default(PENDING)
   createdAt      DateTime   @default(now())

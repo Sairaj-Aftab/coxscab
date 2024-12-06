@@ -3,6 +3,8 @@ import Map, {
   FullscreenControl,
   AttributionControl,
   NavigationControl,
+  ScaleControl,
+  GeolocateControl,
 } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useEffect, useRef } from "react";
@@ -73,6 +75,7 @@ const MapComponent = () => {
     const res = await axios.get(
       `${mapBoxDrivingEndPointApi}${picupCoordinates.lng},${picupCoordinates.lat};${destinationCoordinates.lng},${destinationCoordinates.lat}?overview=full&geometries=geojson&access_token=${process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}`
     );
+
     setDirectionData(res.data);
   };
   return (
@@ -83,7 +86,7 @@ const MapComponent = () => {
         initialViewState={{
           longitude: 92.0058, // Cox's Bazar center
           latitude: 21.4272,
-          zoom: 16,
+          zoom: 15,
         }}
         className="w-full h-full"
         mapStyle="mapbox://styles/mapbox/streets-v11"
@@ -92,7 +95,8 @@ const MapComponent = () => {
         <AttributionControl customAttribution="Map design by Sairaj Aftab" />
         <FullscreenControl />
         <NavigationControl />
-        {/* <ScaleControl /> */}
+        <ScaleControl />
+        <GeolocateControl />
         <MapMarker />
         {directionData?.routes && (
           <MapBoxRoute

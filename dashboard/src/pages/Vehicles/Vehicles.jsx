@@ -420,7 +420,18 @@ const Vehicles = () => {
       name: "Owner Address",
       cell: (row) => {
         return (
-          <p>{`${row.ownerAddress?.village}, ${row.ownerAddress?.holdingNo}, ${row.ownerAddress?.wardNo}, ${row.ownerAddress?.thana}, ${row.ownerAddress?.district}`}</p>
+          <p>
+            {[
+              row.ownerAddress?.village,
+              row.ownerAddress?.holdingNo,
+              row.ownerAddress?.wardNo,
+              row.ownerAddress?.thana,
+              row.ownerAddress?.district,
+            ]
+              .filter(Boolean) // Removes falsy values
+              .join(", ")}{" "}
+            {/* Joins remaining values with ", " */}
+          </p>
         );
       },
       sortable: true,
@@ -1168,33 +1179,68 @@ const Vehicles = () => {
             </DialogDescription>
           </DialogHeader>
           {selectedVehicle && (
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <span className="font-bold">Make:</span>
-                <span className="col-span-3">{selectedVehicle.make}</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <div className="flex flex-col gap-2 border p-2 rounded-md">
+                <Label>Owner name</Label>
+                <p>{selectedVehicle.ownerName}</p>
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <span className="font-bold">Model:</span>
-                <span className="col-span-3">{selectedVehicle.model}</span>
+              <div className="flex flex-col gap-2 border p-2 rounded-md">
+                <Label>Address</Label>
+                <p>
+                  {[
+                    selectedVehicle?.ownerAddress?.village,
+                    selectedVehicle?.ownerAddress?.holdingNo,
+                    selectedVehicle?.ownerAddress?.wardNo,
+                    selectedVehicle?.ownerAddress?.thana,
+                    selectedVehicle?.ownerAddress?.district,
+                  ]
+                    .filter(Boolean) // Filter out falsy values (e.g., null, undefined, "")
+                    .join(", ")}{" "}
+                  {/* Join with ", " */}
+                </p>
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <span className="font-bold">Year:</span>
-                <span className="col-span-3">{selectedVehicle.year}</span>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <span className="font-bold">License:</span>
-                <span className="col-span-3">
-                  {selectedVehicle.licensePlate}
-                </span>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <span className="font-bold">Status:</span>
-                <span className="col-span-3">{selectedVehicle.status}</span>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <span className="font-bold">Driver:</span>
-                <span className="col-span-3">{selectedVehicle.driver}</span>
-              </div>
+              {selectedVehicle?.ownerMobileNo && (
+                <div className="flex flex-col gap-2 border p-2 rounded-md">
+                  <Label>Mobile number</Label>
+                  <p>{selectedVehicle?.ownerMobileNo}</p>
+                </div>
+              )}
+              {selectedVehicle?.engineChassisNo && (
+                <div className="flex flex-col gap-2 border p-2 rounded-md">
+                  <Label>Chesis No.</Label>
+                  <p>{selectedVehicle?.engineChassisNo}</p>
+                </div>
+              )}
+              {selectedVehicle?.drivers?.length > 0 && (
+                <div className="flex flex-col gap-2 border p-2 rounded-md">
+                  <Label>Driver ID</Label>
+                  <p>
+                    {selectedVehicle?.drivers
+                      ?.map((d) => d.coxscabId)
+                      .join(", ")}
+                  </p>
+                </div>
+              )}
+              {selectedVehicle?.drivers?.length > 0 && (
+                <div className="flex flex-col gap-2 border p-2 rounded-md">
+                  <Label>Driver name</Label>
+                  <p>
+                    {selectedVehicle?.drivers?.map((d) => d.name).join(", ")}
+                  </p>
+                </div>
+              )}
+              {selectedVehicle?.vehicleCondition && (
+                <div className="flex flex-col gap-2 border p-2 rounded-md">
+                  <Label>Vehicle condition</Label>
+                  <p>{selectedVehicle?.vehicleCondition?.name}</p>
+                </div>
+              )}
+              {selectedVehicle?.followUpByAuthority && (
+                <div className="flex flex-col gap-2 border p-2 rounded-md">
+                  <Label>Report</Label>
+                  <p>{selectedVehicle?.followUpByAuthority}</p>
+                </div>
+              )}
             </div>
           )}
           <DialogFooter>

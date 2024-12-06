@@ -1,3 +1,10 @@
+import {
+  useGetReviewsQuery,
+  useUpdateReviewStatusMutation,
+} from "@/app/services/reviewApi";
+import { toast } from "@/components/hooks/use-toast";
+import { toast as sonner } from "sonner";
+import LoadingComponent from "@/components/LoadingComponents/LoadingComponent";
 import PageHeader from "@/components/PageHeader/PageHeader";
 import { Button } from "@/components/ui/Button";
 import {
@@ -17,128 +24,95 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  CheckCircle,
+  Check,
   ChevronDown,
   Flag,
+  Loader2,
   Search,
   Star,
-  XCircle,
+  X,
 } from "lucide-react";
 import { useState } from "react";
 import DataTable from "react-data-table-component";
-
-const initialReviews = [
-  {
-    id: "1",
-    type: "rider",
-    reviewer: "John Doe",
-    reviewee: "Driver A",
-    rating: 4,
-    comment: "Great ride, very punctual",
-    date: "2023-06-01",
-    status: "pending",
-    reported: false,
-  },
-  {
-    id: "2",
-    type: "driver",
-    reviewer: "Driver B",
-    reviewee: "Jane Smith",
-    rating: 2,
-    comment: "Passenger was rude",
-    date: "2023-06-02",
-    status: "pending",
-    reported: true,
-  },
-  {
-    id: "3",
-    type: "rider",
-    reviewer: "Alice Johnson",
-    reviewee: "Driver C",
-    rating: 5,
-    comment: "Excellent service!",
-    date: "2023-06-03",
-    status: "approved",
-    reported: false,
-  },
-  {
-    id: "4",
-    type: "driver",
-    reviewer: "Driver D",
-    reviewee: "Bob Wilson",
-    rating: 3,
-    comment: "Passenger was okay",
-    date: "2023-06-04",
-    status: "rejected",
-    reported: false,
-  },
-  {
-    id: "5",
-    type: "rider",
-    reviewer: "Eva Brown",
-    reviewee: "Driver E",
-    rating: 1,
-    comment: "Terrible experience, driver was late",
-    date: "2023-06-05",
-    status: "pending",
-    reported: true,
-  },
-];
+import { formatDateTime } from "@/utils/timeAgo";
 
 const Review = () => {
-  const [reviews, setReviews] = useState(initialReviews);
-  const [filter, setFilter] = useState("all");
-  const [typeFilter, setTypeFilter] = useState("all");
+  // const [reviews, setReviews] = useState(initialReviews);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [status, setStatus] = useState("ALL");
+  const [typeFilter, setTypeFilter] = useState("ALL");
   const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
 
-  const filteredReviews = reviews?.filter(
-    (review) =>
-      (filter === "all" || review.status === filter) &&
-      (typeFilter === "all" || review.type === typeFilter) &&
-      (review.reviewer?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        review.reviewee?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        review.comment?.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const { data, isLoading, isFetching } = useGetReviewsQuery({
+    search: searchTerm,
+    status,
+    typeFilter,
+    page,
+    limit,
+  });
+  const [updateReviewStatus, { isLoading: updateLoading }] =
+    useUpdateReviewStatusMutation();
 
-  const handleStatusChange = (id, newStatus = "approved" | "rejected") => {
-    setReviews(
-      reviews.map((review) =>
-        review.id === id ? { ...review, status: newStatus } : review
-      )
-    );
+  const handlePageChange = (page) => {
+    setPage(page);
   };
 
-  const handleReportResolution = (id) => {
-    setReviews(
-      reviews.map((review) =>
-        review.id === id ? { ...review, reported: false } : review
-      )
-    );
+  const handlePerRowsChange = (newPerPage) => {
+    setLimit(newPerPage);
   };
+
+  const calculateItemIndex = (page, rowPage, index) => {
+    return (page - 1) * rowPage + index + 1;
+  };
+
+  const handleStatusChange = async (id, status = "APPROVED" | "REJECTED") => {
+    try {
+      const res = await updateReviewStatus({
+        id,
+        status,
+      }).unwrap();
+      if (res?.message) {
+        sonner("Success", {
+          description: `${res?.message}`,
+        });
+        setIsDialogOpen(false);
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: `${error?.data?.message}`,
+      });
+    }
+  };
+
   const columns = [
-    // {
-    //   name: "#",
-    //   selector: (data, index) =>
-    //     calculateItemIndex(pageGarage, limitGarage, index),
-    //   width: "60px",
-    // },
-
+    {
+      name: "#",
+      selector: (data, index) => calculateItemIndex(page, limit, index),
+      width: "60px",
+    },
     {
       name: "Type",
       selector: (row) => row.type,
       cell: (row) => (
-        <p>{row.type === "driver" ? "Driver → Rider" : "Rider → Driver"}</p>
+        <p>{row.type === "RIDER" ? "Rider → Driver" : "Public → Driver"}</p>
       ),
       sortable: true,
     },
     {
       name: "Reviewer",
-      selector: (row) => row.reviewer,
+      cell: (row) => (
+        <p>
+          {row?.reviewer?.firstName ? row.reviewer?.firstName : "Anonymous"}
+        </p>
+      ),
       sortable: true,
     },
     {
       name: "Reviewee",
-      selector: (row) => row.reviewee,
+      selector: (row) => row.driver?.name,
       sortable: true,
     },
     {
@@ -154,18 +128,17 @@ const Review = () => {
     },
     {
       name: "Date",
-      selector: (row) => row.date,
+      selector: (row) => formatDateTime(row.createdAt),
       sortable: true,
     },
     {
       name: "Status",
-      selector: (row) => row.managerMobileNo,
       cell: (row) => (
         <span
           className={`px-2 py-1 rounded-full text-xs font-semibold ${
-            row.status === "pending"
+            row.status === "PENDING"
               ? "bg-yellow-100 text-yellow-800"
-              : row.status === "approved"
+              : row.status === "APPROVED"
               ? "bg-green-100 text-green-800"
               : "bg-red-100 text-red-800"
           }`}
@@ -179,7 +152,7 @@ const Review = () => {
       name: "Actions",
       cell: (row) => (
         <div className="flex space-x-2">
-          <Dialog>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" size="sm">
                 <ChevronDown className="w-4 h-4 mr-1" />
@@ -191,45 +164,61 @@ const Review = () => {
                 <DialogTitle>Review Details</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
-                <div>
-                  <Label>Comment</Label>
-                  <p className="mt-1">{row.comment}</p>
-                </div>
-                {row.reported && (
-                  <div>
-                    <Label className="text-red-500">Reported</Label>
-                    <p className="mt-1 text-red-500">
-                      This review has been flagged for inappropriate content.
-                    </p>
+                <div className="flex flex-col gap-2">
+                  {row.comment && (
+                    <div className="border rounded-md p-2">
+                      <Label>Comment</Label>
+                      <p className="mt-1">{row.comment}</p>
+                    </div>
+                  )}
+
+                  {(row.reviewer?.phone || row?.reviewerPhone) && (
+                    <div className="border rounded-md p-2">
+                      <Label>Phone Number</Label>
+                      <p className="mt-1">
+                        {row.reviewer?.phone
+                          ? row.reviewer?.phone
+                          : row?.reviewerPhone}
+                      </p>
+                    </div>
+                  )}
+                  <div className="border rounded-md p-2">
+                    <Label>IP Address</Label>
+                    <p className="mt-1">{row.ipAddress}</p>
                   </div>
-                )}
-                {row.status === "pending" && (
+                </div>
+                {row.status === "PENDING" && (
                   <div className="flex space-x-2">
                     <Button
-                      onClick={() => handleStatusChange(row.id, "approved")}
+                      onClick={() => handleStatusChange(row.id, "APPROVED")}
                       className="flex-1"
+                      disabled={updateLoading}
                     >
-                      <CheckCircle className="w-4 h-4 mr-1" />
-                      Approve
+                      {updateLoading ? (
+                        <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                      ) : (
+                        <>
+                          <Check className="w-4 h-4 mr-1" />
+                          Approve
+                        </>
+                      )}
                     </Button>
                     <Button
-                      onClick={() => handleStatusChange(row.id, "rejected")}
+                      onClick={() => handleStatusChange(row.id, "REJECTED")}
                       variant="destructive"
                       className="flex-1"
+                      disabled={updateLoading}
                     >
-                      <XCircle className="w-4 h-4 mr-1" />
-                      Reject
+                      {updateLoading ? (
+                        <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                      ) : (
+                        <>
+                          <X className="w-4 h-4 mr-1" />
+                          Reject
+                        </>
+                      )}
                     </Button>
                   </div>
-                )}
-                {row.reported && (
-                  <Button
-                    onClick={() => handleReportResolution(row.id)}
-                    variant="outline"
-                    className="w-full"
-                  >
-                    Resolve Report
-                  </Button>
                 )}
               </div>
             </DialogContent>
@@ -244,15 +233,15 @@ const Review = () => {
       <PageHeader title1={"Dashboard/Review"} title2={"Review"} />
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-2 space-y-1 md:space-y-0">
         <div className="flex flex-col md:flex-row space-y-1 md:space-y-0 md:space-x-2 w-full md:w-auto">
-          <Select value={filter} onValueChange={(value) => setFilter(value)}>
+          <Select value={status} onValueChange={(value) => setStatus(value)}>
             <SelectTrigger className="w-full md:w-[180px]">
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Reviews</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="approved">Approved</SelectItem>
-              <SelectItem value="rejected">Rejected</SelectItem>
+              <SelectItem value="ALL">All Reviews</SelectItem>
+              <SelectItem value="PENDING">Pending</SelectItem>
+              <SelectItem value="APPROVED">Approved</SelectItem>
+              <SelectItem value="REJECTED">Rejected</SelectItem>
             </SelectContent>
           </Select>
           <Select
@@ -263,9 +252,10 @@ const Review = () => {
               <SelectValue placeholder="Filter by type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="driver">Driver Reviews</SelectItem>
-              <SelectItem value="rider">Rider Reviews</SelectItem>
+              <SelectItem value="ALL">All Types</SelectItem>
+              <SelectItem value="RIDER">Rider Reviews</SelectItem>
+              <SelectItem value="PUBLIC">Public Reviews</SelectItem>
+              <SelectItem value="DRIVER">Driver Reviews</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -282,19 +272,19 @@ const Review = () => {
       </div>
       <DataTable
         columns={columns}
-        data={filteredReviews}
+        data={data?.reviews}
         responsive
-        // progressPending={getGarageLoading || garageFetching}
-        // progressComponent={
-        //   <div className="h-[50vh] flex items-center justify-center">
-        //     <LoadingComponent loader={getGarageLoading || garageFetching} />
-        //   </div>
-        // }
+        progressPending={isLoading || isFetching}
+        progressComponent={
+          <div className="h-[50vh] flex items-center justify-center">
+            <LoadingComponent loader={isLoading || isFetching} />
+          </div>
+        }
         pagination
         paginationServer
-        // paginationTotalRows={garages?.totalGarage}
-        // onChangeRowsPerPage={handlePerRowsChangeGarage}
-        // onChangePage={handlePageChangeGarage}
+        paginationTotalRows={data?.totalReviews}
+        onChangeRowsPerPage={handlePerRowsChange}
+        onChangePage={handlePageChange}
         paginationRowsPerPageOptions={[10, 20, 50, 100, 125, 150, 175, 200]}
       />
     </div>
