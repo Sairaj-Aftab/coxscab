@@ -38,7 +38,6 @@ import { formatDateTime } from "@/utils/timeAgo";
 
 const Review = () => {
   // const [reviews, setReviews] = useState(initialReviews);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [status, setStatus] = useState("ALL");
   const [typeFilter, setTypeFilter] = useState("ALL");
   const [searchTerm, setSearchTerm] = useState("");
@@ -77,7 +76,6 @@ const Review = () => {
         sonner("Success", {
           description: `${res?.message}`,
         });
-        setIsDialogOpen(false);
       }
     } catch (error) {
       toast({
@@ -152,7 +150,7 @@ const Review = () => {
       name: "Actions",
       cell: (row) => (
         <div className="flex space-x-2">
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <Dialog>
             <DialogTrigger asChild>
               <Button variant="outline" size="sm">
                 <ChevronDown className="w-4 h-4 mr-1" />
