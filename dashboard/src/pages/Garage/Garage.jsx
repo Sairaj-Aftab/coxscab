@@ -43,6 +43,8 @@ import {
   useUpdateGarageMutation,
 } from "@/app/services/garageApi";
 import AlertDialogMessage from "@/components/AlertDialogMessage/AlertDialogMessage";
+import { useSelector } from "react-redux";
+import { authData } from "@/features/auth/authSlice";
 
 const FormSchema = z.object({
   coxscabId: z.string().nonempty("Coxscab ID is required"),
@@ -71,6 +73,7 @@ const Garage = () => {
       note: "",
     },
   });
+  const { auth } = useSelector(authData);
   const params = useParams();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -589,7 +592,15 @@ const Garage = () => {
               />
             </div>
             {/* Add other fields as necessary */}
-            <Button type="submit" disabled={createLoading || updateLoading}>
+            <Button
+              type="submit"
+              disabled={
+                createLoading ||
+                updateLoading ||
+                auth?.role?.name === "VIEWER" ||
+                auth?.role?.name === "DEMO"
+              }
+            >
               {createLoading || updateLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please

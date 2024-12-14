@@ -1103,7 +1103,15 @@ const Vehicles = () => {
               />
             </div>
             {/* Add other fields as necessary */}
-            <Button type="submit" disabled={createLoading || updateLoading}>
+            <Button
+              type="submit"
+              disabled={
+                createLoading ||
+                updateLoading ||
+                auth?.role?.name === "VIEWER" ||
+                auth?.role?.name === "DEMO"
+              }
+            >
               {createLoading || updateLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please

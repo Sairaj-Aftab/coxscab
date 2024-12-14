@@ -160,6 +160,7 @@ const Roles = () => {
                       <SelectItem value="SUPER-ADMIN">SUPER ADMIN</SelectItem>
                       <SelectItem value="ADMIN">ADMIN</SelectItem>
                       <SelectItem value="VIEWER">VIEWER</SelectItem>
+                      <SelectItem value="DEMO">DEMO</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

@@ -4,6 +4,7 @@ model VehicleType {
   slug String
   vehicles                     Vehicle[]
   driver                       Driver[]
+  package                      Package[]
   status      Boolean          @default(true)
   trash       Boolean          @default(false)
   createdAt   DateTime         @default(now())

@@ -20,6 +20,7 @@ import {
   ListTodo,
   Lock,
   MapPin,
+  Package,
   ShieldCheck,
   Star,
   UserCog,
@@ -82,6 +83,12 @@ const SideBar = () => {
       name: "Rides",
       icon: <MapPin className="w-4 h-4" />,
       permission: "RIDES",
+    },
+    {
+      to: "/package",
+      name: "Package",
+      icon: <Package className="w-4 h-4" />,
+      permission: "PACKAGE",
     },
     {
       to: "/users",

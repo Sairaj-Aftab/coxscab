@@ -18,6 +18,7 @@ import garage from "./routes/garage.js";
 import permission from "./routes/permission.js";
 import role from "./routes/role.js";
 import visitor from "./routes/visitorCount.js";
+import packageItems from "./routes/package.js";
 import errorHandler from "./middleware/errorHandler.js";
 
 const app = express();
@@ -74,6 +75,7 @@ app.use("/api/v1/garage", garage);
 app.use("/api/v1/permission", permission);
 app.use("/api/v1/role", role);
 app.use("/api/v1/visitorcount", visitor);
+app.use("/api/v1/package", packageItems);
 
 // Error Handler
 app.use(errorHandler);

@@ -1,5 +1,8 @@
 import PageHeader from "@/components/PageHeader/PageHeader";
-import { useGetChartsQuery } from "@/app/services/chartApi";
+import {
+  useGetDriverChartsQuery,
+  useGetVehicleChartsQuery,
+} from "@/app/services/chartApi";
 import LoadingComponent from "@/components/LoadingComponents/LoadingComponent";
 import RoundedChart from "@/components/RoundedChart/RoundedChart";
 import { useState } from "react";
@@ -61,14 +64,13 @@ const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
-  const { data, isLoading, error } = useGetChartsQuery();
+  const { data, isLoading, error } = useGetVehicleChartsQuery();
+  const {
+    data: driver,
+    isLoading: driverLoading,
+    error: driverError,
+  } = useGetDriverChartsQuery();
 
-  // if (isLoading)
-  //   return (
-  //     <div className="h-[90vh] flex items-center justify-center">
-  //       <LoadingComponent loader={isLoading} />
-  //     </div>
-  //   );
   if (error) return <div>Error: {error.message}</div>;
 
   // Prepare data for the Pie chart
@@ -79,6 +81,20 @@ const Dashboard = () => {
     (type) => type.condition
   );
   const vehicleCountsConditions = data?.vehicleConditionCounts?.map(
+    (type) => type.count
+  );
+  // Prepare data for the Pie chart
+  const driverTypes = driver?.driverTypeCounts?.map((type) => type.type);
+  const driverCounts = driver?.driverTypeCounts?.map((type) => type.count);
+  // Prepare data for the Pie chart
+  const driverStatus = driver?.driverStatusCounts?.map((type) => type.status);
+  const driverCountsStatus = driver?.driverStatusCounts?.map(
+    (type) => type.count
+  );
+  const driverActivities = driver?.driverActivitiesCounts?.map(
+    (type) => type.activity
+  );
+  const driverCountsActivities = driver?.driverActivitiesCounts?.map(
     (type) => type.count
   );
   return (
@@ -133,9 +149,9 @@ const Dashboard = () => {
           <LoadingComponent loader={isLoading} />
         </div>
       )}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
         <RoundedChart
-          title={"Vehicle Types"}
+          title={"Vehicle"}
           labels={vehicleTypes}
           data={vehicleCounts}
         />
@@ -144,11 +160,24 @@ const Dashboard = () => {
           labels={vehicleConditions}
           data={vehicleCountsConditions}
         />
+        <RoundedChart
+          title={"Driver"}
+          labels={driverTypes}
+          data={driverCounts}
+        />
+        <RoundedChart
+          title={"Driver Status"}
+          labels={driverStatus}
+          data={driverCountsStatus}
+        />
+        <RoundedChart
+          title={"Driver Activities"}
+          labels={driverActivities}
+          data={driverCountsActivities}
+        />
       </div>
       {/* New Dashboard */}
-      <div className="py-5">
-        {/* <h1 className="text-xl font-bold mb-2">Dashboard</h1> */}
-
+      {/* <div className="py-5">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-2">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -358,7 +387,7 @@ const Dashboard = () => {
             </Card>
           </TabsContent>
         </Tabs>
-      </div>
+      </div> */}
     </div>
   );
 };

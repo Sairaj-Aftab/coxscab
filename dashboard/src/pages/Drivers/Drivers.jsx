@@ -567,26 +567,26 @@ const Drivers = () => {
     // },
   ];
 
-  const viewDriverDialogComponent = () => {
-    return (
-      <DialogBox
-        open={isDialogOpenView}
-        onOpenChange={setIsDialogOpenView}
-        title="Details"
-      >
-        <div>
-          <div className="flex gap-2">
-            <img src="https://picsum.photos/200" alt="" />
-            {/* <div>
-              <h3>{data.name}</h3>
-              <h3>{data?.drivingLicenseNo}</h3>
-              <h3>{data?.mobileNo}</h3>
-            </div> */}
-          </div>
-        </div>
-      </DialogBox>
-    );
-  };
+  // const viewDriverDialogComponent = () => {
+  //   return (
+  //     <DialogBox
+  //       open={isDialogOpenView}
+  //       onOpenChange={setIsDialogOpenView}
+  //       title="Details"
+  //     >
+  //       <div>
+  //         <div className="flex gap-2">
+  //           <img src="https://picsum.photos/200" alt="" />
+  //           {/* <div>
+  //             <h3>{data.name}</h3>
+  //             <h3>{data?.drivingLicenseNo}</h3>
+  //             <h3>{data?.mobileNo}</h3>
+  //           </div> */}
+  //         </div>
+  //       </div>
+  //     </DialogBox>
+  //   );
+  // };
   const createDriverDialogComponent = () => {
     return (
       <DialogBox
@@ -1302,7 +1302,15 @@ const Drivers = () => {
               />
             </div>
             {/* Add other fields as necessary */}
-            <Button type="submit" disabled={createLoading || updateLoading}>
+            <Button
+              type="submit"
+              disabled={
+                createLoading ||
+                updateLoading ||
+                auth?.role?.name === "VIEWER" ||
+                auth?.role?.name === "DEMO"
+              }
+            >
               {createLoading || updateLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please

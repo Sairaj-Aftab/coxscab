@@ -1,0 +1,35 @@
+model Package {
+    id             String     @id @default(auto()) @map("_id") @db.ObjectId
+    packageName    String?
+    price          Float
+    description    String?
+    routes         PackageRoute[]
+    vehicleType    VehicleType @relation(fields: [vehicleTypeId], references: [id], onDelete: Cascade)
+    vehicleTypeId  String @db.ObjectId
+    seat           Int?
+    status          Boolean    @default(true)
+    trash           Boolean    @default(false)
+    createdAt      DateTime   @default(now())
+    updatedAt      DateTime   @updatedAt
+}
+
+model Route {
+    id             String     @id @default(auto()) @map("_id") @db.ObjectId
+    startPoint     Json? //{ latitude : [{name : String, nameBn : String, latitude : Float}], longitude : [{name : String, nameBn : String, longitude : Float}] }
+    endPoint       Json? //{ latitude : [{name : String, nameBn : String, latitude : Float}], longitude : [{name : String, nameBn : String, longitude : Float}] }
+    package        PackageRoute[]
+    status         Boolean    @default(true)
+    trash          Boolean    @default(false)
+    createdAt      DateTime   @default(now())
+    updatedAt      DateTime   @updatedAt
+}
+
+model PackageRoute {
+    id        String   @id @default(auto()) @map("_id") @db.ObjectId
+    package   Package  @relation(fields: [packageId], references: [id], onDelete: Cascade)
+    packageId String   @db.ObjectId
+    route     Route    @relation(fields: [routeId], references: [id], onDelete: Cascade)
+    routeId   String   @db.ObjectId
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}

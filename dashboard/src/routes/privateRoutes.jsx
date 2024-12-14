@@ -15,6 +15,7 @@ import Rides from "@/pages/Rides/Rides";
 import Notification from "@/pages/Notification/Notification";
 import Payment from "@/pages/Payment/Payment";
 import Places from "@/pages/Places/Places";
+import Package from "@/pages/Package/Package";
 
 const privateRoutes = [
   {
@@ -43,6 +44,10 @@ const privateRoutes = [
           {
             path: "/rides",
             element: <Rides />,
+          },
+          {
+            path: "/package",
+            element: <Package />,
           },
           {
             path: "/users",

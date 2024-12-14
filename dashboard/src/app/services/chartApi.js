@@ -10,9 +10,9 @@ export const chartApi = createApi({
   }),
   tagTypes: ["Chart"],
   endpoints: (builder) => ({
-    getCharts: builder.query({
+    getVehicleCharts: builder.query({
       query: () => ({
-        url: "/chart",
+        url: "/chart/vehicle",
         method: "GET",
       }),
       transformResponse: (response) => ({
@@ -34,9 +34,38 @@ export const chartApi = createApi({
             ]
           : [{ type: "Chart", id: "LIST" }],
     }),
+    getDriverCharts: builder.query({
+      query: () => ({
+        url: "/chart/driver",
+        method: "GET",
+      }),
+      transformResponse: (response) => ({
+        driverTypeCounts: response.driverTypeCounts,
+        driverStatusCounts: response.driverStatusCounts,
+        driverActivitiesCounts: response.driverActivitiesCounts,
+      }),
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.driverTypeCounts.map(({ type }) => ({
+                type: "Chart",
+                id: type,
+              })),
+              ...result.driverStatusCounts.map(({ status }) => ({
+                type: "Chart",
+                id: status,
+              })),
+              ...result.driverActivitiesCounts.map(({ activity }) => ({
+                type: "Chart",
+                id: activity,
+              })),
+              { type: "Chart", id: "LIST" },
+            ]
+          : [{ type: "Chart", id: "LIST" }],
+    }),
   }),
 });
 
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
-export const { useGetChartsQuery } = chartApi;
+export const { useGetVehicleChartsQuery, useGetDriverChartsQuery } = chartApi;
