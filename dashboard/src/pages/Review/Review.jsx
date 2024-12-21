@@ -2,6 +2,7 @@ import {
   useGetReviewsQuery,
   useUpdateReviewStatusMutation,
 } from "@/app/services/reviewApi";
+import avatar from "../../assets/avatar.png";
 import { toast } from "@/components/hooks/use-toast";
 import { toast as sonner } from "sonner";
 import LoadingComponent from "@/components/LoadingComponents/LoadingComponent";
@@ -10,6 +11,8 @@ import { Button } from "@/components/ui/Button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -28,6 +31,7 @@ import {
   ChevronDown,
   Flag,
   Loader2,
+  Phone,
   Search,
   Star,
   X,
@@ -35,6 +39,7 @@ import {
 import { useState } from "react";
 import DataTable from "react-data-table-component";
 import { formatDateTime } from "@/utils/timeAgo";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const Review = () => {
   // const [reviews, setReviews] = useState(initialReviews);
@@ -43,6 +48,9 @@ const Review = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [selectedDriver, setSelectedDriver] = useState(null);
 
   const { data, isLoading, isFetching } = useGetReviewsQuery({
     search: searchTerm,
@@ -85,6 +93,11 @@ const Review = () => {
     }
   };
 
+  const handleViewDriverInfo = (driver) => {
+    setSelectedDriver(driver);
+    setIsViewDialogOpen(true);
+  };
+
   const columns = [
     {
       name: "#",
@@ -114,6 +127,18 @@ const Review = () => {
       sortable: true,
     },
     {
+      name: "Driver ID",
+      cell: (row) => (
+        <p
+          onClick={() => handleViewDriverInfo(row.driver)}
+          className="text-primary underline cursor-pointer"
+        >
+          {row.driver?.coxscabId}
+        </p>
+      ),
+      sortable: true,
+    },
+    {
       name: "Rating",
       selector: (row) => row.managerName,
       cell: (row) => (
@@ -123,6 +148,7 @@ const Review = () => {
         </div>
       ),
       sortable: true,
+      width: "90px",
     },
     {
       name: "Date",
@@ -285,6 +311,142 @@ const Review = () => {
         onChangePage={handlePageChange}
         paginationRowsPerPageOptions={[10, 20, 50, 100, 125, 150, 175, 200]}
       />
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="sm:max-w-[625px]">
+          <DialogHeader>
+            <DialogTitle>Driver Details</DialogTitle>
+            <DialogDescription>
+              View details for driver {selectedDriver?.coxscabId}
+            </DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="max-h-[60vh] pr-2">
+            {selectedDriver && (
+              <div className="flex flex-col gap-2">
+                <div className="flex gap-2 items-center">
+                  <img
+                    src={
+                      selectedDriver?.pictureUrl
+                        ? selectedDriver?.pictureUrl
+                        : avatar
+                    }
+                    alt={selectedDriver.name}
+                    className="w-20 h-20 md:w-32 md:h-32 object-cover rounded-full border border-primary"
+                  />
+                  <div>
+                    <p className="text-lg font-semibold text-primary mb-2">
+                      {selectedDriver.name}
+                    </p>
+                    {selectedDriver?.mobileNo && (
+                      <a
+                        href={`tel:+88${selectedDriver.mobileNo}`}
+                        className="flex items-center gap-1"
+                      >
+                        <Phone className="h-4 w-4 text-blue-500" />{" "}
+                        <span className="text-blue-500 underline">
+                          {selectedDriver.mobileNo}
+                        </span>
+                      </a>
+                    )}
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  {selectedDriver?.fatherName && (
+                    <div className="flex flex-col gap-2 border p-2 rounded-md">
+                      <Label>Father&apos;s Name</Label>
+                      <p>{selectedDriver.fatherName}</p>
+                    </div>
+                  )}
+                  {selectedDriver?.motherName && (
+                    <div className="flex flex-col gap-2 border p-2 rounded-md">
+                      <Label>Mother&apos;s Name</Label>
+                      <p>{selectedDriver.motherName}</p>
+                    </div>
+                  )}
+                  {selectedDriver?.nidNo && (
+                    <div className="flex flex-col gap-2 border p-2 rounded-md">
+                      <Label>NID Number</Label>
+                      <p>{selectedDriver.nidNo}</p>
+                    </div>
+                  )}
+                  {selectedDriver?.nidDob && (
+                    <div className="flex flex-col gap-2 border p-2 rounded-md">
+                      <Label>Date of Birth (NID)</Label>
+                      <p>
+                        {new Date(selectedDriver.nidDob).toLocaleDateString()}
+                      </p>
+                    </div>
+                  )}
+                  {selectedDriver?.drivingLicenseNo && (
+                    <div className="flex flex-col gap-2 border p-2 rounded-md">
+                      <Label>Driving License No.</Label>
+                      <p>{selectedDriver.drivingLicenseNo}</p>
+                    </div>
+                  )}
+                  {selectedDriver?.bloodGroup && (
+                    <div className="flex flex-col gap-2 border p-2 rounded-md">
+                      <Label>Blood Group</Label>
+                      <p>{selectedDriver.bloodGroup}</p>
+                    </div>
+                  )}
+                  {selectedDriver?.educationalQualification && (
+                    <div className="flex flex-col gap-2 border p-2 rounded-md">
+                      <Label>Educational Qualification</Label>
+                      <p>{selectedDriver.educationalQualification}</p>
+                    </div>
+                  )}
+                  {selectedDriver?.permanentAddress && (
+                    <div className="flex flex-col gap-2 border p-2 rounded-md">
+                      <Label>Permanent Address</Label>
+                      <p>
+                        {[
+                          selectedDriver?.permanentAddress?.village,
+                          selectedDriver?.permanentAddress?.po,
+                          selectedDriver?.permanentAddress?.thana,
+                          selectedDriver?.permanentAddress?.district,
+                        ]
+                          .filter(Boolean)
+                          .join(", ")}
+                      </p>
+                    </div>
+                  )}
+                  {selectedDriver?.currentAddress && (
+                    <div className="flex flex-col gap-2 border p-2 rounded-md">
+                      <Label>Current Address</Label>
+                      <p>
+                        {[
+                          selectedDriver?.currentAddress?.holdingNo,
+                          selectedDriver?.currentAddress?.wardNo,
+                          selectedDriver?.currentAddress?.village,
+                          selectedDriver?.currentAddress?.thana,
+                          selectedDriver?.currentAddress?.district,
+                        ]
+                          .filter(Boolean)
+                          .join(", ")}
+                      </p>
+                    </div>
+                  )}
+
+                  {selectedDriver?.vehicle && (
+                    <div className="flex flex-col gap-2 border p-2 rounded-md">
+                      <Label>Vehicle Reg. No.</Label>
+                      <p>{selectedDriver?.vehicle?.registrationNo}</p>
+                    </div>
+                  )}
+                  {selectedDriver?.note && (
+                    <div className="flex flex-col gap-2 border p-2 rounded-md md:col-span-2">
+                      <Label>Note</Label>
+                      <p>{selectedDriver.note}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </ScrollArea>
+          <DialogFooter>
+            <Button onClick={() => setIsViewDialogOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

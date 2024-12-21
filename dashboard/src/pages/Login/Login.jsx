@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import logoImg from "../../assets/logo1.png";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -65,10 +66,17 @@ const Login = () => {
   }, [error, message, success, dispatch, navigate, form]);
 
   return (
-    <div className="py-5 flex justify-center items-center h-screen">
-      <Card className={cn("w-[95%] sm:w-[480px]")}>
-        <CardHeader>
-          <CardTitle>Sign In</CardTitle>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/70 via-transparent to-red-500/70 p-4">
+      <Card className={cn("w-full max-w-md shadow-md")}>
+        <CardHeader className="space-y-1 flex flex-col items-center">
+          <img src={logoImg} alt="COXSCAB" className="h-28 w-48 object-cover" />
+          {/* <div className="w-32 h-32 relative mb-4"></div> */}
+          <h2 className="text-2xl font-bold tracking-tight text-primary text-center">
+            Welcome back
+          </h2>
+          <p className="text-muted-foreground text-sm">
+            Enter your credentials to access your account
+          </p>
         </CardHeader>
         <CardContent>
           <Form {...form} className="w-full">
@@ -116,7 +124,7 @@ const Login = () => {
                   </FormItem>
                 )}
               />
-              <Button type="submit" disabled={loader}>
+              <Button type="submit" disabled={loader} className="w-full">
                 {loader ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please

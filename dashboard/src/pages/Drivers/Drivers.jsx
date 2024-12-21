@@ -23,15 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import {
-  CloudUpload,
-  Edit,
-  Eye,
-  FilePlus,
-  ImagePlus,
-  Loader2,
-  MoreHorizontal,
-} from "lucide-react";
+import { CloudUpload, Edit, Eye, Loader2, Phone } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -39,32 +31,31 @@ import {
 } from "@/components/ui/popover";
 
 import DialogBox from "@/components/DialogBox/DialogBox";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { useSelector } from "react-redux";
 import { getDriverActivitiesData } from "@/features/driverActivitiesSlice";
 import { getDriverStatusData } from "@/features/driverStatusSlice";
 import { getVehicleTypeData } from "@/features/vehicleTypeSlice";
 import DataTable from "react-data-table-component";
 import LoadingComponent from "@/components/LoadingComponents/LoadingComponent";
-import AlertDialogMessage from "@/components/AlertDialogMessage/AlertDialogMessage";
 import {
   useCreateDriverMutation,
-  useDeleteDriverMutation,
   useGetDriversQuery,
   useUpdateDriverMutation,
 } from "@/app/services/driverApi";
-import { BiEditAlt, BiTrash } from "react-icons/bi";
 import { Link, useParams } from "react-router-dom";
 import { useGetVehiclesQuery } from "@/app/services/vehicleApi";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Progress } from "@/components/ui/progress";
 import { authData } from "@/features/auth/authSlice";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const FormSchema = z.object({
   name: z.string().nonempty("Name is required"),
@@ -137,7 +128,11 @@ const Drivers = () => {
   // State to track if editing mode is active
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [isDialogOpenView, setIsDialogOpenView] = useState(false);
+
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [selectedDriver, setSelectedDriver] = useState(null);
+  const [isViewVehicleDialogOpen, setIsViewVehicleDialogOpen] = useState(false);
+  const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [currentData, setCurrentData] = useState(null);
   // Get Data
   const { auth } = useSelector(authData);
@@ -209,6 +204,16 @@ const Drivers = () => {
   };
 
   const [existImgUrl, setExistImgUrl] = useState(null);
+  // Function to open the dialog for viewing a Driver
+  const handleViewClick = (driver) => {
+    setSelectedDriver(driver);
+    setIsViewDialogOpen(true);
+  };
+  // View vehicle info
+  const handleViewVehicleInfo = (vehicle) => {
+    setSelectedVehicle(vehicle);
+    setIsViewVehicleDialogOpen(true);
+  };
   // Function to open the dialog for editing a role
   const handleEdit = (data) => {
     setIsEditing(true);
@@ -355,17 +360,28 @@ const Drivers = () => {
       name: "Action",
       selector: (row) => row,
       cell: (row) => (
-        <button
-          disabled={auth?.role?.name === "VIEWER"}
-          className="flex gap-2 items-center"
-        >
-          <BiEditAlt
+        <div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleViewClick(row)}
+          >
+            <Eye className="h-4 w-4 text-primary" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            disabled={auth?.role?.name === "VIEWER"}
             onClick={() => handleEdit(row)}
-            className="text-primary text-xl cursor-pointer"
-          />
-        </button>
+          >
+            <Edit className="h-4 w-4 text-blue-500" />
+          </Button>
+        </div>
       ),
-      width: "50px",
+      width: "90px",
+      style: {
+        padding: "0",
+      },
     },
     // {
     //   name: "",
@@ -485,7 +501,14 @@ const Drivers = () => {
     },
     {
       name: "Vehicle Reg. No.",
-      selector: (row) => row.vehicle?.registrationNo,
+      cell: (row) => (
+        <p
+          onClick={() => handleViewVehicleInfo(row?.vehicle)}
+          className="text-primary underline cursor-pointer"
+        >
+          {row?.vehicle?.registrationNo}
+        </p>
+      ),
       sortable: true,
     },
     {
@@ -1384,6 +1407,227 @@ const Drivers = () => {
           paginationRowsPerPageOptions={[10, 20, 50, 100, 125, 150, 175, 200]}
         />
       </div>
+      {/* View details */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="sm:max-w-[625px]">
+          <DialogHeader>
+            <DialogTitle>Driver Details</DialogTitle>
+            <DialogDescription>
+              View details for driver {selectedDriver?.coxscabId}
+            </DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="max-h-[60vh] pr-2">
+            {selectedDriver && (
+              <div className="flex flex-col gap-2">
+                <div className="flex gap-2 items-center">
+                  <img
+                    src={
+                      selectedDriver?.pictureUrl
+                        ? selectedDriver?.pictureUrl
+                        : avatar
+                    }
+                    alt={selectedDriver.name}
+                    className="w-20 h-20 md:w-32 md:h-32 object-cover rounded-full border border-primary"
+                  />
+                  <div>
+                    <p className="text-lg font-semibold text-primary mb-2">
+                      {selectedDriver.name}
+                    </p>
+                    {selectedDriver?.mobileNo && (
+                      <a
+                        href={`tel:+88${selectedDriver.mobileNo}`}
+                        className="flex items-center gap-1"
+                      >
+                        <Phone className="h-4 w-4 text-blue-500" />{" "}
+                        <span className="text-blue-500 underline">
+                          {selectedDriver.mobileNo}
+                        </span>
+                      </a>
+                    )}
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  {selectedDriver?.fatherName && (
+                    <div className="flex flex-col gap-2 border p-2 rounded-md">
+                      <Label>Father&apos;s Name</Label>
+                      <p>{selectedDriver.fatherName}</p>
+                    </div>
+                  )}
+                  {selectedDriver?.motherName && (
+                    <div className="flex flex-col gap-2 border p-2 rounded-md">
+                      <Label>Mother&apos;s Name</Label>
+                      <p>{selectedDriver.motherName}</p>
+                    </div>
+                  )}
+                  {selectedDriver?.nidNo && (
+                    <div className="flex flex-col gap-2 border p-2 rounded-md">
+                      <Label>NID Number</Label>
+                      <p>{selectedDriver.nidNo}</p>
+                    </div>
+                  )}
+                  {selectedDriver?.nidDob && (
+                    <div className="flex flex-col gap-2 border p-2 rounded-md">
+                      <Label>Date of Birth (NID)</Label>
+                      <p>
+                        {new Date(selectedDriver.nidDob).toLocaleDateString()}
+                      </p>
+                    </div>
+                  )}
+                  {selectedDriver?.drivingLicenseNo && (
+                    <div className="flex flex-col gap-2 border p-2 rounded-md">
+                      <Label>Driving License No.</Label>
+                      <p>{selectedDriver.drivingLicenseNo}</p>
+                    </div>
+                  )}
+                  {selectedDriver?.bloodGroup && (
+                    <div className="flex flex-col gap-2 border p-2 rounded-md">
+                      <Label>Blood Group</Label>
+                      <p>{selectedDriver.bloodGroup}</p>
+                    </div>
+                  )}
+                  {selectedDriver?.educationalQualification && (
+                    <div className="flex flex-col gap-2 border p-2 rounded-md">
+                      <Label>Educational Qualification</Label>
+                      <p>{selectedDriver.educationalQualification}</p>
+                    </div>
+                  )}
+                  {selectedDriver?.permanentAddress && (
+                    <div className="flex flex-col gap-2 border p-2 rounded-md">
+                      <Label>Permanent Address</Label>
+                      <p>
+                        {[
+                          selectedDriver?.permanentAddress?.village,
+                          selectedDriver?.permanentAddress?.po,
+                          selectedDriver?.permanentAddress?.thana,
+                          selectedDriver?.permanentAddress?.district,
+                        ]
+                          .filter(Boolean)
+                          .join(", ")}
+                      </p>
+                    </div>
+                  )}
+                  {selectedDriver?.currentAddress && (
+                    <div className="flex flex-col gap-2 border p-2 rounded-md">
+                      <Label>Current Address</Label>
+                      <p>
+                        {[
+                          selectedDriver?.currentAddress?.holdingNo,
+                          selectedDriver?.currentAddress?.wardNo,
+                          selectedDriver?.currentAddress?.village,
+                          selectedDriver?.currentAddress?.thana,
+                          selectedDriver?.currentAddress?.district,
+                        ]
+                          .filter(Boolean)
+                          .join(", ")}
+                      </p>
+                    </div>
+                  )}
+
+                  {selectedDriver?.vehicle && (
+                    <div className="flex flex-col gap-2 border p-2 rounded-md">
+                      <Label>Vehicle Reg. No.</Label>
+                      <p>{selectedDriver?.vehicle?.registrationNo}</p>
+                    </div>
+                  )}
+                  {selectedDriver?.note && (
+                    <div className="flex flex-col gap-2 border p-2 rounded-md md:col-span-2">
+                      <Label>Note</Label>
+                      <p>{selectedDriver.note}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </ScrollArea>
+          <DialogFooter>
+            <Button onClick={() => setIsViewDialogOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      {/* View vehicle details */}
+      <Dialog
+        open={isViewVehicleDialogOpen}
+        onOpenChange={setIsViewVehicleDialogOpen}
+      >
+        <DialogContent className="sm:max-w-[625px]">
+          <DialogHeader>
+            <DialogTitle>Vehicle Details</DialogTitle>
+            <DialogDescription>
+              View details for vehicle {selectedVehicle?.registrationNo}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedVehicle && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <div className="flex flex-col gap-2 border p-2 rounded-md">
+                <Label>Owner name</Label>
+                <p>{selectedVehicle.ownerName}</p>
+              </div>
+              <div className="flex flex-col gap-2 border p-2 rounded-md">
+                <Label>Address</Label>
+                <p>
+                  {[
+                    selectedVehicle?.ownerAddress?.village,
+                    selectedVehicle?.ownerAddress?.holdingNo,
+                    selectedVehicle?.ownerAddress?.wardNo,
+                    selectedVehicle?.ownerAddress?.thana,
+                    selectedVehicle?.ownerAddress?.district,
+                  ]
+                    .filter(Boolean) // Filter out falsy values (e.g., null, undefined, "")
+                    .join(", ")}{" "}
+                  {/* Join with ", " */}
+                </p>
+              </div>
+              {selectedVehicle?.ownerMobileNo && (
+                <div className="flex flex-col gap-2 border p-2 rounded-md">
+                  <Label>Mobile number</Label>
+                  <p>{selectedVehicle?.ownerMobileNo}</p>
+                </div>
+              )}
+              {selectedVehicle?.engineChassisNo && (
+                <div className="flex flex-col gap-2 border p-2 rounded-md">
+                  <Label>Chesis No.</Label>
+                  <p>{selectedVehicle?.engineChassisNo}</p>
+                </div>
+              )}
+              {selectedVehicle?.drivers?.length > 0 && (
+                <div className="flex flex-col gap-2 border p-2 rounded-md">
+                  <Label>Driver ID</Label>
+                  <p>
+                    {selectedVehicle?.drivers
+                      ?.map((d) => d.coxscabId)
+                      .join(", ")}
+                  </p>
+                </div>
+              )}
+              {selectedVehicle?.drivers?.length > 0 && (
+                <div className="flex flex-col gap-2 border p-2 rounded-md">
+                  <Label>Driver name</Label>
+                  <p>
+                    {selectedVehicle?.drivers?.map((d) => d.name).join(", ")}
+                  </p>
+                </div>
+              )}
+              {selectedVehicle?.vehicleCondition && (
+                <div className="flex flex-col gap-2 border p-2 rounded-md">
+                  <Label>Vehicle condition</Label>
+                  <p>{selectedVehicle?.vehicleCondition?.name}</p>
+                </div>
+              )}
+              {selectedVehicle?.followUpByAuthority && (
+                <div className="flex flex-col gap-2 border p-2 rounded-md">
+                  <Label>Report</Label>
+                  <p>{selectedVehicle?.followUpByAuthority}</p>
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button onClick={() => setIsViewVehicleDialogOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

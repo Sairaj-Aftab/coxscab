@@ -20,10 +20,12 @@ const RoundedChart = ({ title, labels, data }) => {
         label: "Value",
         data: data, //it's array number
         backgroundColor: [
-          "rgb(255, 99, 132)",
-          "rgb(54, 162, 235)",
-          "rgb(255, 205, 86)",
-          "rgb(165,42,42)",
+          "#00a846", // Green-500
+          "#3b82f6", // Blue-500
+          "#eab308", // Yellow-500
+          "##06b6d4", // cyan-500
+          "rgb(168, 85, 247)", // Purple-500
+          "rgb(251, 113, 133)", // Pink-500
         ],
         hoverOffset: 5,
       },
