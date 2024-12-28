@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { UAParser } from "ua-parser-js";
 import { useRouter } from "next/navigation";
 import { useAuthUser } from "@/store/authUser";
 import { motion } from "framer-motion";
@@ -28,6 +29,7 @@ import {
   isPhoneNumber,
 } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
+import axios from "axios";
 
 const signUpSchema = z.object({
   name: z.string().min(5, {
@@ -36,6 +38,36 @@ const signUpSchema = z.object({
   phone: z.string().refine(isPhoneNumber, {
     message: "Please enter a valid Bangladeshi phone number.",
   }),
+  role: z.enum(["CUSTOMER", "DRIVER"]),
+  device: z.optional(
+    z.object({
+      browser: z.optional(
+        z.object({
+          name: z.optional(z.string()),
+          version: z.optional(z.string()),
+          major: z.optional(z.string()),
+        })
+      ),
+      device: z.optional(
+        z.object({
+          type: z.optional(z.string()),
+          vendor: z.optional(z.string()),
+          model: z.optional(z.string()),
+        })
+      ),
+      os: z.optional(
+        z.object({
+          name: z.optional(z.string()),
+          version: z.optional(z.string()),
+        })
+      ),
+    })
+  ),
+  platform: z.optional(z.string()),
+  ipAddress: z.optional(z.string()),
+  location: z.optional(
+    z.object({ latitude: z.number(), longitude: z.number() })
+  ),
 });
 
 const loginSchema = z.object({
@@ -61,6 +93,11 @@ const AuthPage = () => {
   const { setLogin } = useAuthUser();
   const [activeTab, setActiveTab] = useState("signup");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [ipAddress, setIpAddress] = useState("");
+  const [location, setLocation] = useState(null);
+  const [browser, setBrowser] = useState(null);
+  const [device, setDevice] = useState(null);
+  const [os, setOs] = useState(null);
   const [timeLeft, setTimeLeft] = useState(0);
   const [loader, setLoader] = useState(false);
 
@@ -75,9 +112,46 @@ const AuthPage = () => {
     defaultValues: {
       name: "",
       phone: "",
+      role: "CUSTOMER",
       otp: "",
+      device: null,
+      platform: "web",
+      ipAddress: "",
+      location: null,
     },
   });
+
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition(function (pos) {
+      form.setValue("location", {
+        latitude: pos.coords.latitude,
+        longitude: pos.coords.longitude,
+      });
+      setLocation({
+        latitude: pos.coords.latitude,
+        longitude: pos.coords.longitude,
+      });
+    });
+    const parser = new UAParser();
+    const result = parser.getResult();
+    form.setValue("device", {
+      browser: result.browser,
+      device: result.device,
+      os: result.os,
+    });
+    setBrowser(result.browser);
+    setDevice(result.device);
+    setOs(result.os);
+    const fetchIpAddress = async () => {
+      try {
+        const response = await axios.get("https://api.ipify.org?format=json");
+        form.setValue("ipAddress", response?.data?.ip);
+        setIpAddress(response?.data?.ip);
+      } catch (error) {}
+    };
+
+    fetchIpAddress();
+  }, []);
 
   async function onSubmit(values) {
     setLoader(true);
@@ -100,7 +174,10 @@ const AuthPage = () => {
       }
       if (activeTab === "login") {
         try {
-          const data = await sendLoginOTP({ phone: values.phone });
+          const data = await sendLoginOTP({
+            role: "CUSTOMER",
+            phone: values.phone,
+          });
           if (data?.user) {
             setPhoneNumber(data.user?.phone);
             setActiveTab("otp");
@@ -116,7 +193,19 @@ const AuthPage = () => {
       }
     } else {
       try {
-        const data = await loginUser({ phone: phoneNumber, otp: values.otp });
+        const data = await loginUser({
+          phone: phoneNumber,
+          otp: values.otp,
+          role: "CUSTOMER",
+          platform: "web",
+          device: {
+            browser: browser,
+            device: device,
+            os: os,
+          },
+          ipAddress,
+          location,
+        });
         if (data) {
           router.refresh();
           setLogin(data);
@@ -135,7 +224,7 @@ const AuthPage = () => {
   const handleGetOTPAgain = async () => {
     try {
       setLoader(true);
-      const data = await sendLoginOTP({ phone: phoneNumber });
+      const data = await sendLoginOTP({ role: "CUSTOMER", phone: phoneNumber });
       if (data?.user) {
         setPhoneNumber(data.user?.phone);
         setActiveTab("otp");

@@ -1,3 +1,10 @@
+import {
+  useGetAllUsersQuery,
+  useUpdateUserStatusMutation,
+} from "@/app/services/userApi";
+import { toast } from "@/components/hooks/use-toast";
+import { toast as sonner } from "sonner";
+import LoadingComponent from "@/components/LoadingComponents/LoadingComponent";
 import PageHeader from "@/components/PageHeader/PageHeader";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/Button";
@@ -26,6 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { formatDateTime } from "@/utils/timeAgo";
 import {
   Ban,
   Car,
@@ -38,54 +46,6 @@ import {
 import { useState } from "react";
 import DataTable from "react-data-table-component";
 
-const initialUsers = [
-  {
-    id: "1",
-    name: "John Doe",
-    email: "john@example.com",
-    type: "rider",
-    status: "active",
-    joinDate: "2023-01-15",
-    lastActive: "2023-06-10",
-  },
-  {
-    id: "2",
-    name: "Jane Smith",
-    email: "jane@example.com",
-    type: "driver",
-    status: "active",
-    joinDate: "2023-02-20",
-    lastActive: "2023-06-11",
-  },
-  {
-    id: "3",
-    name: "Bob Johnson",
-    email: "bob@example.com",
-    type: "rider",
-    status: "inactive",
-    joinDate: "2023-03-05",
-    lastActive: "2023-05-20",
-  },
-  {
-    id: "4",
-    name: "Alice Brown",
-    email: "alice@example.com",
-    type: "driver",
-    status: "suspended",
-    joinDate: "2023-04-10",
-    lastActive: "2023-06-09",
-  },
-  {
-    id: "5",
-    name: "Charlie Davis",
-    email: "charlie@example.com",
-    type: "rider",
-    status: "active",
-    joinDate: "2023-05-01",
-    lastActive: "2023-06-11",
-  },
-];
-
 const allPermissions = [
   { id: "book_ride", label: "Book Ride" },
   { id: "view_history", label: "View Ride History" },
@@ -95,95 +55,128 @@ const allPermissions = [
 ];
 
 const Users = () => {
-  const [users, setUsers] = useState(initialUsers);
-  const [filter, setFilter] = useState("all");
-  const [typeFilter, setTypeFilter] = useState("all");
-  const [searchTerm, setSearchTerm] = useState("");
+  const [status, setStatus] = useState("ALL");
+  const [role, setRole] = useState("ALL");
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isViewDetailsOpen, setIsViewDetailsOpen] = useState(false);
   const [isEditPermissionsOpen, setIsEditPermissionsOpen] = useState(false);
   const [editedPermissions, setEditedPermissions] = useState([]);
 
-  const filteredUsers = users?.filter(
-    (user) =>
-      (filter === "all" || user.status === filter) &&
-      (typeFilter === "all" || user.type === typeFilter) &&
-      (user.name?.toLowerCase()?.includes(searchTerm.toLowerCase()) ||
-        user.email?.toLowerCase()?.includes(searchTerm.toLowerCase()))
-  );
+  const {
+    data: users,
+    isLoading,
+    isFetching,
+  } = useGetAllUsersQuery({
+    search,
+    status,
+    role,
+    page,
+    limit,
+  });
+  const [updateUserStatus, { isLoading: updateLoading }] =
+    useUpdateUserStatusMutation();
 
-  const handleStatusChange = (
-    id,
-    newStatus = "active" | "inactive" | "suspended"
-  ) => {
-    setUsers(
-      users.map((user) =>
-        user.id === id ? { ...user, status: newStatus } : user
-      )
-    );
+  const handlePageChange = (page) => {
+    setPage(page);
   };
 
-  const handleViewDetails = (user) => {
-    setSelectedUser(user);
-    setIsViewDetailsOpen(true);
+  const handlePerRowsChange = (newPerPage) => {
+    setLimit(newPerPage);
+  };
+  const calculateItemIndex = (page, rowPage, index) => {
+    return (page - 1) * rowPage + index + 1;
   };
 
-  const handleEditPermissions = (user) => {
-    setSelectedUser(user);
-    setEditedPermissions(user.permissions);
-    setIsEditPermissionsOpen(true);
-  };
+  // const filteredUsers = users?.filter(
+  //   (user) =>
+  //     (filter === "all" || user.status === filter) &&
+  //     (typeFilter === "all" || user.type === typeFilter) &&
+  //     (user.name?.toLowerCase()?.includes(searchTerm.toLowerCase()) ||
+  //       user.email?.toLowerCase()?.includes(searchTerm.toLowerCase()))
+  // );
 
-  const handlePermissionChange = (permissionId) => {
-    setEditedPermissions((prev = []) =>
-      prev.includes(permissionId)
-        ? prev.filter((id) => id !== permissionId)
-        : [...prev, permissionId]
-    );
-  };
-
-  const handleSavePermissions = () => {
-    if (selectedUser) {
-      setUsers(
-        users.map((user) =>
-          user.id === selectedUser.id
-            ? { ...user, permissions: editedPermissions }
-            : user
-        )
-      );
-      setIsEditPermissionsOpen(false);
+  const handleStatusChange = async (id, status = "APPROVED" | "REJECTED") => {
+    try {
+      const res = await updateUserStatus({
+        id,
+        status,
+      }).unwrap();
+      if (res?.message) {
+        sonner("Success", {
+          description: `${res?.message}`,
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: `${error?.data?.message}`,
+      });
     }
   };
 
+  // const handleViewDetails = (user) => {
+  //   setSelectedUser(user);
+  //   setIsViewDetailsOpen(true);
+  // };
+
+  // const handleEditPermissions = (user) => {
+  //   setSelectedUser(user);
+  //   setEditedPermissions(user.permissions);
+  //   setIsEditPermissionsOpen(true);
+  // };
+
+  // const handlePermissionChange = (permissionId) => {
+  //   setEditedPermissions((prev = []) =>
+  //     prev.includes(permissionId)
+  //       ? prev.filter((id) => id !== permissionId)
+  //       : [...prev, permissionId]
+  //   );
+  // };
+
+  const handleSavePermissions = () => {
+    // if (selectedUser) {
+    //   setUsers(
+    //     users.map((user) =>
+    //       user.id === selectedUser.id
+    //         ? { ...user, permissions: editedPermissions }
+    //         : user
+    //     )
+    //   );
+    //   setIsEditPermissionsOpen(false);
+    // }
+  };
+
   const columns = [
-    // {
-    //   name: "#",
-    //   selector: (data, index) =>
-    //     calculateItemIndex(pageGarage, limitGarage, index),
-    //   width: "60px",
-    // },
+    {
+      name: "#",
+      selector: (data, index) => calculateItemIndex(page, limit, index),
+      width: "60px",
+    },
 
     {
       name: "User",
-      selector: (row) => row.type,
       cell: (row) => (
         <div className="flex items-center space-x-3">
           <Avatar>
             <AvatarImage
-              src={`https://api.dicebear.com/6.x/initials/svg?seed=${row.name}`}
-              alt={row.name}
+              src={`https://api.dicebear.com/6.x/initials/svg?seed=${row.firstName}`}
+              alt={row.firstName}
+              className="object-cover"
             />
             <AvatarFallback>
-              {row?.name
-                .split(" ")
+              {row?.firstName
+                ?.split(" ")
                 .map((n) => n[0])
                 .join("")
                 .toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div>
-            <div className="font-medium">{row.name}</div>
-            <div className="text-sm text-gray-500">{row.email}</div>
+            <div className="font-medium">{row.firstName}</div>
+            <div className="text-sm text-gray-500">{row?.phone}</div>
           </div>
         </div>
       ),
@@ -194,12 +187,12 @@ const Users = () => {
       name: "Type",
       cell: (row) => (
         <div>
-          {row.type === "rider" ? (
-            <User className="w-4 h-4 text-blue-500 inline mr-1" />
-          ) : (
+          {row.role === "DRIVER" ? (
             <Car className="w-4 h-4 text-green-500 inline mr-1" />
+          ) : (
+            <User className="w-4 h-4 text-blue-500 inline mr-1" />
           )}
-          {row.type.charAt(0).toUpperCase() + row.type.slice(1)}
+          {row?.role === "DRIVER" ? "Driver" : "Rider"}
         </div>
       ),
       sortable: true,
@@ -209,27 +202,29 @@ const Users = () => {
       cell: (row) => (
         <span
           className={`px-2 py-1 rounded-full text-xs font-semibold ${
-            row.status === "active"
+            row.status === "ACTIVE"
               ? "bg-green-100 text-green-800"
-              : row.status === "inactive"
+              : row.status === "INACTIVE"
               ? "bg-yellow-100 text-yellow-800"
               : "bg-red-100 text-red-800"
           }`}
         >
-          {row.status.charAt(0).toUpperCase() + row.status.slice(1)}
+          {row?.status}
         </span>
       ),
       sortable: true,
     },
     {
       name: "Join Date",
-      selector: (row) => row.joinDate,
+      selector: (row) => formatDateTime(row.createdAt),
       sortable: true,
+      width: "150px",
     },
     {
       name: "Last Active",
-      selector: (row) => row.lastActive,
+      selector: (row) => formatDateTime(row.createdAt),
       sortable: true,
+      width: "150px",
     },
     {
       name: "Actions",
@@ -243,33 +238,40 @@ const Users = () => {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem onClick={() => handleViewDetails(row)}>
+            {/* <DropdownMenuItem onClick={() => handleViewDetails(row)}>
               <User className="w-4 h-4 mr-2" />
               View Details
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleEditPermissions(row)}>
               <Shield className="w-4 h-4 mr-2" />
               Edit Permissions
-            </DropdownMenuItem>
+            </DropdownMenuItem> */}
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => handleStatusChange(row.id, "active")}
+              onClick={() => handleStatusChange(row.id, "ACTIVE")}
             >
               <CheckCircle className="w-4 h-4 mr-2" />
               Set as Active
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => handleStatusChange(row.id, "inactive")}
+              onClick={() => handleStatusChange(row.id, "INACTIVE")}
             >
               <Ban className="w-4 h-4 mr-2" />
               Set as Inactive
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => handleStatusChange(row.id, "suspended")}
-              className="text-red-600"
+              onClick={() => handleStatusChange(row.id, "SUSPENDED")}
+              className="text-red-500"
             >
               <Ban className="w-4 h-4 mr-2" />
               Suspend User
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => handleStatusChange(row.id, "BLOCKED")}
+              className="text-red-700"
+            >
+              <Ban className="w-4 h-4 mr-2" />
+              Block User
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -281,28 +283,26 @@ const Users = () => {
       <PageHeader title1={"Dashboard/Users"} title2={"Users"} />
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-2 space-y-1 md:space-y-0">
         <div className="flex flex-col md:flex-row space-y-1 md:space-y-0 md:space-x-2 w-full md:w-auto">
-          <Select value={filter} onValueChange={(value) => setFilter(value)}>
+          <Select value={status} onValueChange={(value) => setStatus(value)}>
             <SelectTrigger className="w-full md:w-[180px]">
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Users</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
-              <SelectItem value="suspended">Suspended</SelectItem>
+              <SelectItem value="ALL">All Users</SelectItem>
+              <SelectItem value="ACTIVE">Active</SelectItem>
+              <SelectItem value="INACTIVE">Inactive</SelectItem>
+              <SelectItem value="SUSPENDED">Suspended</SelectItem>
+              <SelectItem value="BLOCKED">Blocked</SelectItem>
             </SelectContent>
           </Select>
-          <Select
-            value={typeFilter}
-            onValueChange={(value) => setTypeFilter(value)}
-          >
+          <Select value={role} onValueChange={(value) => setRole(value)}>
             <SelectTrigger className="w-full md:w-[180px]">
               <SelectValue placeholder="Filter by type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="rider">Riders</SelectItem>
-              <SelectItem value="driver">Drivers</SelectItem>
+              <SelectItem value="ALL">All Types</SelectItem>
+              <SelectItem value="CUSTOMER">Riders</SelectItem>
+              <SelectItem value="DRIVER">Drivers</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -311,27 +311,27 @@ const Users = () => {
           <Input
             type="text"
             placeholder="Search users..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             className="pl-8 w-full md:w-[300px]"
           />
         </div>
       </div>
       <DataTable
         columns={columns}
-        data={filteredUsers}
+        data={users?.users}
         responsive
-        // progressPending={getGarageLoading || garageFetching}
-        // progressComponent={
-        //   <div className="h-[50vh] flex items-center justify-center">
-        //     <LoadingComponent loader={getGarageLoading || garageFetching} />
-        //   </div>
-        // }
+        progressPending={isLoading || isFetching}
+        progressComponent={
+          <div className="h-[50vh] flex items-center justify-center">
+            <LoadingComponent loader={isLoading || isFetching} />
+          </div>
+        }
         pagination
         paginationServer
-        // paginationTotalRows={garages?.totalGarage}
-        // onChangeRowsPerPage={handlePerRowsChangeGarage}
-        // onChangePage={handlePageChangeGarage}
+        paginationTotalRows={users?.totalUsers}
+        onChangePage={handlePageChange}
+        onChangeRowsPerPage={handlePerRowsChange}
         paginationRowsPerPageOptions={[10, 20, 50, 100, 125, 150, 175, 200]}
       />
       {/* View Details Dialog */}
@@ -367,15 +367,15 @@ const Users = () => {
                 <div>
                   <Label>User Type</Label>
                   <p>
-                    {selectedUser.type.charAt(0).toUpperCase() +
-                      selectedUser.type.slice(1)}
+                    {selectedUser?.type?.charAt(0).toUpperCase() +
+                      selectedUser?.type?.slice(1)}
                   </p>
                 </div>
                 <div>
                   <Label>Status</Label>
                   <p>
-                    {selectedUser.status.charAt(0).toUpperCase() +
-                      selectedUser.status.slice(1)}
+                    {selectedUser?.status.charAt(0).toUpperCase() +
+                      selectedUser?.status?.slice(1)}
                   </p>
                 </div>
                 <div>

@@ -22,12 +22,14 @@ import { garageApi } from "./services/garageApi";
 import { chartApi } from "./services/chartApi";
 import { reviewApi } from "./services/reviewApi";
 import { packageApi } from "./services/packageApi";
+import { userApi } from "./services/userApi";
 
 export const store = configureStore({
   reducer: {
     // Add the generated reducer as a specific top-level slice
     auth: authSlice,
     [authUsersApi.reducerPath]: authUsersApi.reducer,
+    [userApi.reducerPath]: userApi.reducer,
     [chartApi.reducerPath]: chartApi.reducer,
     [vehicleTypeApi.reducerPath]: vehicleTypeApi.reducer,
     vehicleType: vehicleTypeSlice,
@@ -53,6 +55,7 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
       authUsersApi.middleware,
+      userApi.middleware,
       chartApi.middleware,
       vehicleTypeApi.middleware,
       vehicleConditionApi.middleware,

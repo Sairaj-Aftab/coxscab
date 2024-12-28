@@ -1,4 +1,7 @@
 import jwt from "jsonwebtoken";
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcrypt";
+const prisma = new PrismaClient();
 
 // Create Token
 export const createToken = (payload, exp = null) => {
@@ -11,6 +14,7 @@ export const createToken = (payload, exp = null) => {
 export const createRefreshToken = (payload, exp = null) => {
   const options = exp ? { expiresIn: exp } : {};
   const token = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, options);
+
   return token;
 };
 

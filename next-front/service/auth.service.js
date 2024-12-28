@@ -2,7 +2,7 @@ import axiosInstance from "./url.service";
 
 export const registerUser = async (data) => {
   try {
-    const result = await axiosInstance.post(`/auth/register-user`, data);
+    const result = await axiosInstance.post(`/user/register-user`, data);
     if (result?.data?.user) {
       const expirationTime = new Date(result.data.user.otpExpiresAt).getTime();
       const phoneNumber = result.data.user.phone;
@@ -20,7 +20,7 @@ export const registerUser = async (data) => {
 };
 export const sendLoginOTP = async (data) => {
   try {
-    const result = await axiosInstance.post(`/auth/send-otp`, data);
+    const result = await axiosInstance.post(`/user/send-otp`, data);
     if (result?.data?.user) {
       const expirationTime = new Date(result.data.user.otpExpiresAt).getTime();
       const phoneNumber = result.data.user.phone;
@@ -38,7 +38,7 @@ export const sendLoginOTP = async (data) => {
 };
 export const loginUser = async (data) => {
   try {
-    const result = await axiosInstance.post(`/auth/login-user`, data);
+    const result = await axiosInstance.post(`/user/login-user`, data);
     if (result?.data?.user) {
       localStorage.removeItem("phone");
     }
@@ -49,15 +49,15 @@ export const loginUser = async (data) => {
 };
 export const logedInUser = async () => {
   try {
-    const result = await axiosInstance.get(`/auth/user`);
+    const result = await axiosInstance.get(`/user/user`);
     return result?.data;
   } catch (error) {
     throw error;
   }
 };
-export const logOut = async (id) => {
+export const logOut = async (id, data) => {
   try {
-    const result = await axiosInstance.post(`/auth/logout-user/${id}`);
+    const result = await axiosInstance.post(`/user/logout-user/${id}`, data);
     if (result.data) {
       delete axiosInstance.defaults.headers.common["Authorization"];
       // Clear localStorage for this store

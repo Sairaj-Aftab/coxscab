@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 
 import MapComponent from "@/components/MapComponent";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import Image from "next/image";
 import cngVehicle from "@/public/cng.png";
 import jeepVehicle from "@/public/jeep.png";

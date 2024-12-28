@@ -22,7 +22,7 @@ export const useAuthUser = create(
         setMessage: (message) => set({ message }),
 
         // Login Function
-        setLogin: async (data) => {
+        setLogin: (data) => {
           set({
             user: data.user,
             accessToken: data.user?.accessToken,
@@ -37,7 +37,8 @@ export const useAuthUser = create(
         setLogedInUser: async () => {
           set({ loader: true, error: null, message: null });
           try {
-            const response = await axiosInstance.get("/auth/user");
+            const response = await axiosInstance.get("/user/user");
+
             set({ user: response.data });
           } catch (error) {
             set({
@@ -55,7 +56,7 @@ export const useAuthUser = create(
         refreshAccessToken: async () => {
           set({ loader: true, error: null, message: null });
           try {
-            const response = await axiosInstance.post("/auth/auth-refresh");
+            const response = await axiosInstance.post("/user/auth-refresh");
             set({ accessToken: response.data.accessToken });
             axiosInstance.defaults.headers.common[
               "Authorization"
@@ -71,6 +72,7 @@ export const useAuthUser = create(
           }
         },
         setLogOut: () => {
+          localStorage.removeItem("auth-user");
           set({
             user: null,
             accessToken: null,

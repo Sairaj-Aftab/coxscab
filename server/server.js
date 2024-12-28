@@ -6,6 +6,7 @@ import cors from "cors";
 import { Server } from "socket.io";
 import { createServer } from "node:http";
 import authUser from "./routes/authUser.js";
+import user from "./routes/user.js";
 import review from "./routes/review.js";
 import chart from "./routes/charts.js";
 import driver from "./routes/driver/driver.js";
@@ -56,6 +57,7 @@ app.use(
       process.env.ADMIN_DOMAIN2,
       process.env.MAIN_DOMAIN1,
       process.env.MAIN_DOMAIN2,
+      "http://192.168.160.166:8081",
     ],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     credentials: true,
@@ -63,6 +65,7 @@ app.use(
 );
 
 app.use("/api/v1/auth", authUser);
+app.use("/api/v1/user", user);
 app.use("/api/v1/review", review);
 app.use("/api/v1/chart", chart);
 app.use("/api/v1/driver", driver);

@@ -15,17 +15,28 @@ model User {
   id             String     @id @default(auto()) @map("_id") @db.ObjectId
   firstName      String
   lastName       String?
-  phone          String     @unique
+  phone          String
   password       String?
   otp            String?
   otpExpiresAt   DateTime?
   otpRetries     Int?
   profilePicture String?
-  location       Json?      // latitude   Float, longitude  Float, address    String
-  refreshToken   String?
-  isOnline       Boolean     @default(false)
-  lastLoginTime  DateTime? @default(now())
+  lastLoginLocation  Json?      // latitude   Float, longitude  Float, address    String
+  registeredLocation Json?      // latitude   Float, longitude  Float, address    String
+  registerDevice     Json?
+  registerIp         String?
+  lastLoginDevice    Json?
+  refreshToken   UserRefreshToken[]
+  lastLoginTime  DateTime?
   lastLoginIp    String?
+  lastLogoutTime DateTime?
+  lastLogoutIp   String?
+  lastLogoutDevice Json?
+  lastLogoutLocation Json? // latitude   Float, longitude  Float, address    String
+  isOnline       Boolean     @default(false)
+  onlineStatus   Boolean     @default(false)
+  onlineTime     DateTime?
+  lastOnlineTime DateTime?
   driver         Driver?     @relation("DriverToUser", fields: [driverId], references: [id], onDelete: Cascade)
   driverId       String?     @db.ObjectId // Connect with Driver model
   role           UserRole    @default(CUSTOMER) // Can be CUSTOMER, DRIVER, or ADMIN
@@ -36,4 +47,19 @@ model User {
   reviewsGiven   Review[]   @relation("ReviewerReviews")
   reviewsReceived Review[] @relation("RevieweeReviews")
   ride           Ride[]     @relation("PassengerRides")
+}
+
+model UserRefreshToken {
+  id             String     @id @default(auto()) @map("_id") @db.ObjectId
+  token          String
+  device         Json?
+  ipAddress      String?
+  location       Json?      // latitude   Float, longitude  Float
+  loginTime      DateTime?
+  onlineStatus   Boolean     @default(false)
+  lastOnlineTime DateTime?
+  createdAt      DateTime   @default(now())
+  expiresAt      DateTime
+  userId         String     @db.ObjectId
+  user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
