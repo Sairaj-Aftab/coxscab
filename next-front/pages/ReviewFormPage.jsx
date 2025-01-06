@@ -81,8 +81,8 @@ const ReviewFormPage = ({ driver }) => {
   const form = useForm({
     resolver: zodResolver(reviewSchema),
     defaultValues: {
-      name: "",
-      reviewerPhone: "",
+      name: user?.firstName || "",
+      reviewerPhone: user?.phone || "",
       rating: 0,
       comment: "",
       aspects: {

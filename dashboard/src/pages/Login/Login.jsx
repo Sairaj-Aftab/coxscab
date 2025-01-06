@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import logoImg from "../../assets/logo1.png";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,10 +19,8 @@ import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { authData, setMessageEmpty } from "@/features/auth/authSlice";
-import { loginAuthUser } from "@/features/auth/authApiSlice";
 import { useEffect } from "react";
+import useAuth from "@/store/useAuth";
 
 const formSchema = z.object({
   userName: z.string().min(3, {
@@ -34,8 +32,14 @@ const formSchema = z.object({
 });
 
 const Login = () => {
-  const dispatch = useDispatch();
-  const { error, loader, success, message } = useSelector(authData);
+  const {
+    isAuthenticated,
+    setLogin,
+    loader,
+    message,
+    error,
+    setAuthMessageEmpty,
+  } = useAuth();
   const navigate = useNavigate();
 
   const form = useForm({
@@ -47,23 +51,21 @@ const Login = () => {
   });
 
   const onSubmit = async (data) => {
-    dispatch(
-      loginAuthUser({ userName: data.userName, password: data.password })
-    );
+    await setLogin({ userName: data.userName, password: data.password });
   };
 
   useEffect(() => {
     if (error) {
       toast.error(error);
     }
-    if (success) {
+    if (isAuthenticated) {
       form.reset();
       navigate("/");
     }
-    if (error || success || message) {
-      dispatch(setMessageEmpty());
+    if (error || message) {
+      setAuthMessageEmpty();
     }
-  }, [error, message, success, dispatch, navigate, form]);
+  }, [error, form, isAuthenticated, message, navigate, setAuthMessageEmpty]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/70 via-transparent to-red-500/70 p-4">

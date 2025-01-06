@@ -1,7 +1,3 @@
-import {
-  useGetReviewsQuery,
-  useUpdateReviewStatusMutation,
-} from "@/app/services/reviewApi";
 import avatar from "../../assets/avatar.png";
 import { toast } from "@/components/hooks/use-toast";
 import { toast as sonner } from "sonner";
@@ -36,13 +32,15 @@ import {
   Star,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
 import { formatDateTime } from "@/utils/timeAgo";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getReviews, updateReviewStatus } from "@/service/review.service";
 
 const Review = () => {
-  // const [reviews, setReviews] = useState(initialReviews);
+  const queryClient = useQueryClient();
   const [status, setStatus] = useState("ALL");
   const [typeFilter, setTypeFilter] = useState("ALL");
   const [searchTerm, setSearchTerm] = useState("");
@@ -51,52 +49,86 @@ const Review = () => {
 
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState(null);
-
-  const { data, isLoading, isFetching } = useGetReviewsQuery({
-    search: searchTerm,
-    status,
-    typeFilter,
-    page,
-    limit,
+  // Get Reviews
+  const { data, isLoading } = useQuery({
+    queryKey: [
+      "reviews",
+      {
+        search: searchTerm,
+        status,
+        typeFilter,
+        page,
+        limit,
+      },
+    ],
+    queryFn: () =>
+      getReviews({
+        search: searchTerm,
+        status,
+        typeFilter,
+        page,
+        limit,
+      }),
   });
-  const [updateReviewStatus, { isLoading: updateLoading }] =
-    useUpdateReviewStatusMutation();
-
-  const handlePageChange = (page) => {
-    setPage(page);
-  };
-
-  const handlePerRowsChange = (newPerPage) => {
-    setLimit(newPerPage);
-  };
+  // Update review Status
+  const {
+    mutateAsync: updateReviewStatusData,
+    data: updatedData,
+    isPending: updateLoading,
+    error: updateError,
+  } = useMutation({
+    mutationFn: updateReviewStatus,
+    onSuccess: (data) => {
+      queryClient.setQueryData(
+        [
+          "reviews",
+          {
+            search: searchTerm,
+            status,
+            typeFilter,
+            page,
+            limit,
+          },
+        ],
+        (oldData = { reviews: [] }) => ({
+          ...oldData,
+          reviews: oldData.reviews.map((item) =>
+            item.id === data?.review.id ? data?.review : item
+          ),
+        })
+      );
+    },
+  });
 
   const calculateItemIndex = (page, rowPage, index) => {
     return (page - 1) * rowPage + index + 1;
   };
 
   const handleStatusChange = async (id, status = "APPROVED" | "REJECTED") => {
-    try {
-      const res = await updateReviewStatus({
-        id,
-        status,
-      }).unwrap();
-      if (res?.message) {
-        sonner("Success", {
-          description: `${res?.message}`,
-        });
-      }
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: `${error?.data?.message}`,
-      });
-    }
+    await updateReviewStatusData({
+      id,
+      status,
+    });
   };
 
   const handleViewDriverInfo = (driver) => {
     setSelectedDriver(driver);
     setIsViewDialogOpen(true);
   };
+
+  useEffect(() => {
+    if (updatedData) {
+      sonner("Success", {
+        description: `${updatedData?.message}`,
+      });
+    }
+    if (updateError) {
+      toast({
+        variant: "destructive",
+        title: `${updateError?.message}`,
+      });
+    }
+  }, [updateError, updatedData]);
 
   const columns = [
     {
@@ -115,9 +147,7 @@ const Review = () => {
     {
       name: "Reviewer",
       cell: (row) => (
-        <p>
-          {row?.reviewer?.firstName ? row.reviewer?.firstName : "Anonymous"}
-        </p>
+        <p>{(row?.reviewer?.firstName || row.name) ?? "Anonymous"}</p>
       ),
       sortable: true,
     },
@@ -298,17 +328,17 @@ const Review = () => {
         columns={columns}
         data={data?.reviews}
         responsive
-        progressPending={isLoading || isFetching}
+        progressPending={isLoading}
         progressComponent={
           <div className="h-[50vh] flex items-center justify-center">
-            <LoadingComponent loader={isLoading || isFetching} />
+            <LoadingComponent loader={isLoading} />
           </div>
         }
         pagination
         paginationServer
         paginationTotalRows={data?.totalReviews}
-        onChangeRowsPerPage={handlePerRowsChange}
-        onChangePage={handlePageChange}
+        onChangeRowsPerPage={(value) => setLimit(value)}
+        onChangePage={(page) => setPage(page)}
         paginationRowsPerPageOptions={[10, 20, 50, 100, 125, 150, 175, 200]}
       />
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>

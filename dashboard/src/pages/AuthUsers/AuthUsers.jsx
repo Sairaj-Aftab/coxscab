@@ -1,6 +1,5 @@
 import DialogBox from "@/components/DialogBox/DialogBox";
 import PageHeader from "@/components/PageHeader/PageHeader";
-import { BiTrash, BiEditAlt } from "react-icons/bi";
 import { Button } from "@/components/ui/Button";
 import {
   Table,
@@ -31,17 +30,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Loader2 } from "lucide-react";
+import { Edit, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { formatDateTime } from "@/utils/timeAgo";
-import {
-  useCreateAuthMutation,
-  useGetAuthUsersQuery,
-  useUpdateAuthMutation,
-} from "@/app/services/authUsersApi";
 import LoadingComponent from "@/components/LoadingComponents/LoadingComponent";
 import { useSelector } from "react-redux";
 import { getRolesData } from "@/features/rolesSlice";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  createAuth,
+  getAuthUsers,
+  updateAuth,
+} from "@/service/authUsers.service";
 
 const FormSchema = z.object({
   userName: z.string().min(2, {
@@ -57,12 +57,34 @@ const FormSchema = z.object({
 });
 
 const AuthUsers = () => {
+  const queryClient = useQueryClient();
   const { roles } = useSelector(getRolesData);
-  const { data: authUsers, isLoading } = useGetAuthUsersQuery();
-  const [createAuth, { isLoading: createLoading, isSuccess: createSuccess }] =
-    useCreateAuthMutation();
-  const [updateAuth, { isLoading: updateLoading, isSuccess: updateSuccess }] =
-    useUpdateAuthMutation();
+  const { data: authUsers, isLoading } = useQuery({
+    queryKey: ["authUsers"],
+    queryFn: () => getAuthUsers(),
+  });
+  const {
+    mutateAsync: createNewAuth,
+    data: createData,
+    error: createError,
+    isPending: createLoading,
+  } = useMutation({
+    mutationFn: createAuth,
+    onSuccess: () => {
+      queryClient.invalidateQueries("authUsers");
+    },
+  });
+  const {
+    mutateAsync: updateAuthData,
+    data: updatedData,
+    isPending: updateLoading,
+    error: updateError,
+  } = useMutation({
+    mutationFn: updateAuth,
+    onSuccess: () => {
+      queryClient.invalidateQueries("authUsers");
+    },
+  });
 
   // State to track if editing mode is active
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -79,31 +101,17 @@ const AuthUsers = () => {
   });
   async function onSubmit(data) {
     if (isEditing) {
-      try {
-        await updateAuth({
-          id: currentAuth.id,
-          data: {
-            userName: data.userName,
-            phone: data.phone,
-            password: data.password,
-            roleId: data.roleId,
-          },
-        }).unwrap();
-      } catch (error) {
-        toast({
-          variant: "destructive",
-          title: `${error?.data?.message}`,
-        });
-      }
+      await updateAuthData({
+        id: currentAuth.id,
+        data: {
+          userName: data.userName,
+          phone: data.phone,
+          password: data.password,
+          roleId: data.roleId,
+        },
+      });
     } else {
-      try {
-        await createAuth(data).unwrap();
-      } catch (error) {
-        toast({
-          variant: "destructive",
-          title: `${error?.data?.message}`,
-        });
-      }
+      await createNewAuth(data);
     }
   }
 
@@ -121,12 +129,18 @@ const AuthUsers = () => {
   };
 
   useEffect(() => {
-    if (createSuccess || updateSuccess) {
+    if (createData || updatedData) {
       setIsDialogOpen(false);
       setIsEditing(false);
       form.reset();
     }
-  }, [createSuccess, form, updateSuccess]);
+    if (createError || updateError) {
+      toast({
+        variant: "destructive",
+        title: `${createError?.message || updateError?.message}`,
+      });
+    }
+  }, [createData, createError, form, updateError, updatedData]);
 
   const createAuthUserDialogComponent = () => {
     return (
@@ -291,8 +305,8 @@ const AuthUsers = () => {
                   <TableCell>{data.phone}</TableCell>
                   {/* <TableCell>{data.password}</TableCell> */}
                   <TableCell className="flex gap-2 items-center">
-                    <BiEditAlt
-                      className="text-primary text-xl cursor-pointer"
+                    <Edit
+                      className="text-primary cursor-pointer w-4 h-4"
                       onClick={() => handleEdit(data)}
                     />
                     {/* <BiTrash className="text-red-500 text-xl cursor-pointer" /> */}
@@ -328,8 +342,8 @@ const AuthUsers = () => {
                   <TableCell>{data.phone}</TableCell>
                   {/* <TableCell>{data.password}</TableCell> */}
                   <TableCell className="flex gap-2 items-center">
-                    <BiEditAlt
-                      className="text-primary text-xl cursor-pointer"
+                    <Edit
+                      className="text-primary cursor-pointer w-4 h-4"
                       onClick={() => handleEdit(data)}
                     />
                     {/* <BiTrash className="text-red-500 text-xl cursor-pointer" /> */}

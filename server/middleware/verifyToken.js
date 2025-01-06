@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
 const prisma = new PrismaClient();
 
+// This is for Admin Dashboard
 const verifyToken = async (req, res, next) => {
   const auth_token =
     req.cookies.auth_token || req.headers.authorization?.split(" ")[1];

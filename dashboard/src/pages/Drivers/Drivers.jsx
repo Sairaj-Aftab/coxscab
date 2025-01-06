@@ -31,22 +31,11 @@ import {
 } from "@/components/ui/popover";
 
 import DialogBox from "@/components/DialogBox/DialogBox";
-import { useState } from "react";
-import { useSelector } from "react-redux";
-import { getDriverActivitiesData } from "@/features/driverActivitiesSlice";
-import { getDriverStatusData } from "@/features/driverStatusSlice";
-import { getVehicleTypeData } from "@/features/vehicleTypeSlice";
+import { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
 import LoadingComponent from "@/components/LoadingComponents/LoadingComponent";
-import {
-  useCreateDriverMutation,
-  useGetDriversQuery,
-  useUpdateDriverMutation,
-} from "@/app/services/driverApi";
 import { Link, useParams } from "react-router-dom";
-import { useGetVehiclesQuery } from "@/app/services/vehicleApi";
 import { Checkbox } from "@/components/ui/checkbox";
-import { authData } from "@/features/auth/authSlice";
 import {
   Dialog,
   DialogContent,
@@ -56,6 +45,17 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import useAuth from "@/store/useAuth";
+import useDriverActivities from "@/store/useDriverActivities";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  createDriver,
+  getDrivers,
+  updateDriver,
+} from "@/service/driver.service";
+import { getVehicles } from "@/service/vehicle.service";
+import useDriverStatus from "@/store/useDriverStatus";
+import useVehicleType from "@/store/useVehicleType";
 
 const FormSchema = z.object({
   name: z.string().nonempty("Name is required"),
@@ -86,6 +86,7 @@ const FormSchema = z.object({
 });
 
 const Drivers = () => {
+  const queryClient = useQueryClient();
   const form = useForm({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -135,50 +136,104 @@ const Drivers = () => {
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [currentData, setCurrentData] = useState(null);
   // Get Data
-  const { auth } = useSelector(authData);
-  const { activities } = useSelector(getDriverActivitiesData);
-  const { status } = useSelector(getDriverStatusData);
-  const { types } = useSelector(getVehicleTypeData);
-  const {
-    data: drivers,
-    isLoading,
-    isFetching,
-  } = useGetDriversQuery({
-    typeId: params?.id !== "all" ? params?.id : undefined,
-    search,
-    page,
-    limit,
+  const { auth } = useAuth();
+  const { activities } = useDriverActivities();
+  const { status } = useDriverStatus();
+  const { types } = useVehicleType();
+  // Get Drivers
+  const { data: drivers, isLoading } = useQuery({
+    queryKey: [
+      "drivers",
+      {
+        typeId: params?.id !== "all" ? params?.id : undefined,
+        search,
+        page,
+        limit,
+      },
+    ],
+    queryFn: () =>
+      getDrivers({
+        typeId: params?.id !== "all" ? params?.id : undefined,
+        search,
+        page,
+        limit,
+      }),
   });
-  const {
-    data: vehicles,
-    isLoading: vehiclesLoading,
-    isFetching: vehiclesFetching,
-  } = useGetVehiclesQuery({
-    typeId: form.watch("vehicleTypeId")
-      ? form.watch("vehicleTypeId")
-      : undefined,
-    search: searchVehicle,
-    limit: 5,
+  // Get Vehicle
+  const { data: vehicles, isLoading: vehiclesLoading } = useQuery({
+    queryKey: [
+      "vehicles",
+      {
+        typeId: form.watch("vehicleTypeId")
+          ? form.watch("vehicleTypeId")
+          : undefined,
+        search: searchVehicle,
+        limit: 5,
+      },
+    ],
+    queryFn: () =>
+      getVehicles({
+        typeId: form.watch("vehicleTypeId")
+          ? form.watch("vehicleTypeId")
+          : undefined,
+        search: searchVehicle,
+        limit: 5,
+      }),
   });
-  const [createDriver, { isLoading: createLoading }] =
-    useCreateDriverMutation();
-  const [updateDriver, { isLoading: updateLoading }] =
-    useUpdateDriverMutation();
-
-  // const [deleteDriver] = useDeleteDriverMutation();
-
-  // Handle Search, pagination and filtering data using react table
-  const handlePageChange = (page) => {
-    setPage(page);
-  };
-
-  const handlePerRowsChange = (newPerPage) => {
-    setLimit(newPerPage);
-  };
-
-  const handleSearchChange = (e) => {
-    setSearch(e.target.value);
-  };
+  // Create Driver
+  const {
+    mutateAsync: createNewDriver,
+    data: createData,
+    error: createError,
+    isPending: createLoading,
+  } = useMutation({
+    mutationFn: createDriver,
+    onSuccess: (data) => {
+      queryClient.setQueryData(
+        [
+          "drivers",
+          {
+            typeId: params?.id !== "all" ? params?.id : undefined,
+            search,
+            page,
+            limit,
+          },
+        ],
+        (oldData = { drivers: [] }) => ({
+          ...oldData,
+          drivers: [data.driver, ...oldData.drivers],
+        })
+      );
+    },
+  });
+  // Update Driver
+  const {
+    mutateAsync: updateDriverData,
+    data: updatedData,
+    isPending: updateLoading,
+    error: updateError,
+  } = useMutation({
+    mutationFn: updateDriver,
+    onSuccess: (data) => {
+      queryClient.setQueryData(
+        [
+          "drivers",
+          {
+            typeId: params?.id !== "all" ? params?.id : undefined,
+            search,
+            page,
+            limit,
+          },
+        ],
+        (oldData = { drivers: [] }) => ({
+          ...oldData,
+          drivers: oldData.drivers.map((item) =>
+            item.id === data?.driver.id ? data?.driver : item
+          ),
+        })
+      );
+    },
+  });
   const handleSearchChangeVehicle = (e) => {
     setSearchVehicle(e.target.value);
   };
@@ -274,81 +329,37 @@ const Drivers = () => {
         formData.append(key, data[key]);
       }
     }
-
-    try {
-      const res = isEditing
-        ? await updateDriver({
-            id: currentData.id,
-            formData,
-          }).unwrap()
-        : await createDriver({ ...data }).unwrap();
-
-      if (res?.message) {
-        sonner("Success", {
-          description: `${res?.message}`,
-        });
-        setIsDialogOpen(false);
-        form.reset();
-      }
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: `${error?.data?.message}`,
+    if (isEditing) {
+      await updateDriverData({
+        id: currentData.id,
+        formData,
       });
+    } else {
+      await createNewDriver({ ...data });
     }
-    // if (isEditing) {
-    //   try {
-    //     const res = await updateDriver({
-    //       id: currentData.id,
-    //       ...data,
-    //     }).unwrap();
-    //     if (res?.message) {
-    //       sonner("Success", {
-    //         description: `${res?.message}`,
-    //       });
-    //       setIsDialogOpen(false);
-    //       form.reset();
-    //     }
-    //   } catch (error) {
-    //     toast({
-    //       variant: "destructive",
-    //       title: `${error?.data?.message}`,
-    //     });
-    //   }
-    // } else {
-    //   try {
-    //     const res = await createDriver({ ...data }).unwrap();
-    //     if (res?.message) {
-    //       sonner("Success", {
-    //         description: `${res?.message}`,
-    //       });
-    //       setIsDialogOpen(false);
-    //       form.reset();
-    //     }
-    //   } catch (error) {
-    //     toast({
-    //       variant: "destructive",
-    //       title: `${error?.data?.message}`,
-    //     });
-    //   }
-    // }
   }
 
-  // const handleDelete = async (id) => {
-  //   try {
-  //     const res = await deleteDriver(id).unwrap();
-  //     if (res?.success) {
-  //       toast({
-  //         title: `${res?.message}`,
-  //       });
-  //     }
-  //   } catch (error) {
-  //     toast({
-  //       variant: "destructive",
-  //       title: `${error?.data?.message}`,
-  //     });
-  //   }
-  // };
+  useEffect(() => {
+    if (createData?.message || updatedData?.message) {
+      sonner("Success", {
+        description: `${createData?.message || updatedData?.message}`,
+      });
+      setIsDialogOpen(false);
+      form.reset();
+    }
+    if (createError || updateError) {
+      toast({
+        variant: "destructive",
+        title: `${createError?.message || updateError?.message}`,
+      });
+    }
+  }, [
+    createData?.message,
+    createError,
+    form,
+    updateError,
+    updatedData?.message,
+  ]);
 
   const columns = [
     {
@@ -589,27 +600,6 @@ const Drivers = () => {
     //   width: "150px",
     // },
   ];
-
-  // const viewDriverDialogComponent = () => {
-  //   return (
-  //     <DialogBox
-  //       open={isDialogOpenView}
-  //       onOpenChange={setIsDialogOpenView}
-  //       title="Details"
-  //     >
-  //       <div>
-  //         <div className="flex gap-2">
-  //           <img src="https://picsum.photos/200" alt="" />
-  //           {/* <div>
-  //             <h3>{data.name}</h3>
-  //             <h3>{data?.drivingLicenseNo}</h3>
-  //             <h3>{data?.mobileNo}</h3>
-  //           </div> */}
-  //         </div>
-  //       </div>
-  //     </DialogBox>
-  //   );
-  // };
   const createDriverDialogComponent = () => {
     return (
       <DialogBox
@@ -1179,11 +1169,9 @@ const Drivers = () => {
                         </div>
 
                         <div className="h-[120px] w-full">
-                          {vehiclesLoading || vehiclesFetching ? (
+                          {vehiclesLoading ? (
                             <div className="h-[150px] w-full flex items-center justify-center">
-                              <LoadingComponent
-                                loader={vehiclesLoading || vehiclesFetching}
-                              />
+                              <LoadingComponent loader={vehiclesLoading} />
                             </div>
                           ) : (
                             vehicles?.vehicles?.map((item) => (
@@ -1230,8 +1218,7 @@ const Drivers = () => {
                               />
                             ))
                           )}
-                          {!vehiclesFetching &&
-                            !vehiclesLoading &&
+                          {!vehiclesLoading &&
                             vehicles?.vehicles.length < 1 && (
                               <div className="h-[150px] w-full flex justify-center items-center">
                                 <p className="text-sm font-semibold text-red-500">
@@ -1385,7 +1372,7 @@ const Drivers = () => {
             placeholder={`Search driver of ${
               types?.find((type) => type.id === params?.id)?.name || ""
             }`}
-            onChange={handleSearchChange}
+            onChange={(e) => setSearch(e.target.value)}
             className="w-full px-3 py-1 rounded-md border border-gray-300 outline-gray-400 text-base text-gray-800"
           />
         </div>
@@ -1393,17 +1380,17 @@ const Drivers = () => {
           columns={columns}
           data={drivers?.drivers}
           responsive
-          progressPending={isLoading || isFetching}
+          progressPending={isLoading}
           progressComponent={
             <div className="h-[50vh] flex items-center justify-center">
-              <LoadingComponent loader={isLoading || isFetching} />
+              <LoadingComponent loader={isLoading} />
             </div>
           }
           pagination
           paginationServer
           paginationTotalRows={drivers?.totalDrivers}
-          onChangeRowsPerPage={handlePerRowsChange}
-          onChangePage={handlePageChange}
+          onChangeRowsPerPage={(perPage) => setLimit(perPage)}
+          onChangePage={(page) => setPage(page)}
           paginationRowsPerPageOptions={[10, 20, 50, 100, 125, 150, 175, 200]}
         />
       </div>

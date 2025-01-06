@@ -1,4 +1,5 @@
 import { RouterProvider } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import router from "./routes/router";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster as CustomToaster } from "./components/ui/toaster";
@@ -10,52 +11,76 @@ import { useGetPermissionsQuery } from "./app/services/permissionsApi";
 import { useGetRolesQuery } from "./app/services/rolesApi";
 import { getRoles } from "./features/rolesSlice";
 import { getPermissions } from "./features/permissionsSlice";
-import { getLogedInUser } from "./features/auth/authApiSlice";
-import { useGetVehicleTypesQuery } from "./app/services/vehicleTypeApi";
-import { useGetVehicleConditionsQuery } from "./app/services/vehicleConditionApi";
-import { getTypes } from "./features/vehicleTypeSlice";
-import { getConditions } from "./features/vehicleConditionSlice";
-import { useGetDriverStatusQuery } from "./app/services/driverStatusApi";
-import { useGetDriverActivitiesQuery } from "./app/services/driverActivitiesApi";
-import { getStatus } from "./features/driverStatusSlice";
-import { getActivities } from "./features/driverActivitiesSlice";
+import useAuth from "./store/useAuth";
+import { getDriverActivities, getDriverStatus } from "./service/driver.service";
+import useDriverActivities from "./store/useDriverActivities";
+import useDriverStatus from "./store/useDriverStatus";
+import {
+  getVehicleConditions,
+  getVehicleTypes,
+} from "./service/vehicle.service";
+import useVehicleCondition from "./store/useVehicleCondition";
+import useVehicleType from "./store/useVehicleType";
 
 function App() {
   const dispatch = useDispatch();
+  const { setLogedInUser } = useAuth();
+  const { setActivities } = useDriverActivities();
+  const { setDriverStatus } = useDriverStatus();
+  const { setVehicleConditions } = useVehicleCondition();
+  const { setVehicleTypes } = useVehicleType();
 
-  const { data: types, isLoading: typesLoading } = useGetVehicleTypesQuery();
-  const { data: conditions, isLoading: conditionsLoading } =
-    useGetVehicleConditionsQuery();
-
-  const { data: status, isLoading: statusLoading } = useGetDriverStatusQuery();
-  const { data: activities, isLoading: activitiesLoading } =
-    useGetDriverActivitiesQuery();
+  const { data: activities, isLoading: activitiesLoading } = useQuery({
+    queryKey: ["driverActivities"],
+    queryFn: () => getDriverActivities(),
+  });
+  const { data: status, isLoading: statusLoading } = useQuery({
+    queryKey: ["driverStatus"],
+    queryFn: () => getDriverStatus(),
+  });
+  const { data: conditions, isLoading: conditionsLoading } = useQuery({
+    queryKey: ["vehicleConditions"],
+    queryFn: () => getVehicleConditions(),
+  });
+  const { data: types, isLoading: typesLoading } = useQuery({
+    queryKey: ["vehicleTypes"],
+    queryFn: () => getVehicleTypes(),
+  });
 
   const { data: permissions, isLoading: permissionsLoading } =
     useGetPermissionsQuery();
   const { data: roles, isLoading: rolesLoading } = useGetRolesQuery();
 
   useEffect(() => {
-    if (localStorage.getItem("auth")) {
-      dispatch(getLogedInUser());
-    }
-  }, [dispatch]);
+    const fetchUser = async () => {
+      await setLogedInUser();
+    };
+    fetchUser();
+  }, [setLogedInUser]);
+  // Set Driver Activities
+  useEffect(() => {
+    setActivities({ data: activities?.activities, loader: activitiesLoading });
+  }, [activities?.activities, activitiesLoading, setActivities]);
+  // Set Driver Status
+  useEffect(() => {
+    setDriverStatus({ data: status?.status, loader: statusLoading });
+  }, [setDriverStatus, status?.status, statusLoading]);
+  // Set Vehicle Condition
+  useEffect(() => {
+    setVehicleConditions({
+      data: conditions?.conditions,
+      loader: conditionsLoading,
+    });
+  }, [conditions?.conditions, conditionsLoading, setVehicleConditions]);
+  // Set Vehicle Types
+  useEffect(() => {
+    setVehicleTypes({
+      data: types?.types,
+      loader: typesLoading,
+    });
+  }, [setVehicleTypes, types?.types, typesLoading]);
 
   useEffect(() => {
-    dispatch(getTypes({ loader: typesLoading, types: types?.types }));
-    dispatch(
-      getConditions({
-        loader: conditionsLoading,
-        conditions: conditions?.conditions,
-      })
-    );
-    dispatch(getStatus({ loader: statusLoading, status: status?.status }));
-    dispatch(
-      getActivities({
-        loader: activitiesLoading,
-        activities: activities?.activities,
-      })
-    );
     dispatch(getRoles({ loader: rolesLoading, roles: roles?.roles }));
     dispatch(
       getPermissions({

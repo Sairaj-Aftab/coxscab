@@ -1,11 +1,9 @@
 import PageHeader from "@/components/PageHeader/PageHeader";
-import {
-  useGetDriverChartsQuery,
-  useGetVehicleChartsQuery,
-} from "@/app/services/chartApi";
 import LoadingComponent from "@/components/LoadingComponents/LoadingComponent";
 import RoundedChart from "@/components/RoundedChart/RoundedChart";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getDriverCharts, getVehicleCharts } from "@/service/chart.service";
 import {
   Card,
   CardContent,
@@ -36,6 +34,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+
 const rideData = [
   { date: "2023-06-01", rides: 1200, revenue: 15000 },
   { date: "2023-06-02", rides: 1300, revenue: 16500 },
@@ -64,14 +63,21 @@ const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
-  const { data, isLoading, error } = useGetVehicleChartsQuery();
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["vehicleCharts"],
+    queryFn: () => getVehicleCharts(),
+  });
   const {
     data: driver,
     isLoading: driverLoading,
     error: driverError,
-  } = useGetDriverChartsQuery();
+  } = useQuery({
+    queryKey: ["driverCharts"],
+    queryFn: () => getDriverCharts(),
+  });
 
-  if (error) return <div>Error: {error.message}</div>;
+  if (error || driverError)
+    return <div>Error: {error?.message || driverError?.message}</div>;
 
   // Prepare data for the Pie chart
   const vehicleTypes = data?.vehicleTypeCounts?.map((type) => type.type);

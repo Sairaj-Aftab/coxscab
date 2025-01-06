@@ -22,9 +22,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import LoadingComponent from "../LoadingComponents/LoadingComponent";
-import { useSelector } from "react-redux";
-import { getDriverActivitiesData } from "@/features/driverActivitiesSlice";
-import { useCreateDriverActivitiesMutation } from "@/app/services/driverActivitiesApi";
+import useDriverActivities from "@/store/useDriverActivities";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createDriverActivitie } from "@/service/driver.service";
+import { useEffect } from "react";
 
 const FormSchema = z.object({
   name: z.string().min(1, {
@@ -33,9 +34,19 @@ const FormSchema = z.object({
 });
 
 const DriverActivities = () => {
-  const { activities, loader } = useSelector(getDriverActivitiesData);
-  const [createDriverActivities, { isLoading }] =
-    useCreateDriverActivitiesMutation();
+  const queryClient = useQueryClient();
+  const { activities, loader } = useDriverActivities();
+  const {
+    mutateAsync: createActivities,
+    data: createData,
+    error: createError,
+    isPending: isLoading,
+  } = useMutation({
+    mutationFn: createDriverActivitie,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["driverActivities"]);
+    },
+  });
   const form = useForm({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -44,15 +55,21 @@ const DriverActivities = () => {
   });
 
   async function onSubmit(data) {
-    try {
-      await createDriverActivities({ name: data.name }).unwrap();
-    } catch (error) {
+    await createActivities({ name: data.name });
+  }
+  useEffect(() => {
+    if (createData?.message) {
       toast({
-        variant: "destructive",
-        title: `${error?.data?.message}`,
+        title: `${createData?.message}`,
       });
     }
-  }
+    if (createError) {
+      toast({
+        variant: "destructive",
+        title: `${createError?.message}`,
+      });
+    }
+  }, [createData?.message, createError]);
   return (
     <div className="w-full">
       <div className="flex flex-col gap-1">

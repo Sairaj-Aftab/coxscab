@@ -23,7 +23,7 @@ export const refreshToken = async (req, res) => {
 
     if (!user) {
       return res
-        .status(404)
+        .status(401)
         .json({ success: false, message: "User not found." });
     }
 
@@ -42,7 +42,7 @@ export const refreshToken = async (req, res) => {
         path: "/",
       });
       return res
-        .status(403)
+        .status(401)
         .json({ success: false, message: "Invalid or expired refresh token." });
     }
 
@@ -53,6 +53,6 @@ export const refreshToken = async (req, res) => {
       accessToken: newAccessToken,
     });
   } catch (error) {
-    return res.status(403).json({ message: "Invalid refresh token" });
+    return res.status(401).json({ message: "Invalid refresh token" });
   }
 };

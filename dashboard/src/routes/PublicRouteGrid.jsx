@@ -1,12 +1,11 @@
-import { authData } from "@/features/auth/authSlice";
-import { useSelector } from "react-redux";
+import useAuth from "@/store/useAuth";
 import { Navigate, Outlet } from "react-router-dom";
 
 const PublicRouteGrid = () => {
-  const { auth } = useSelector(authData);
+  const { isAuthenticated } = useAuth();
 
-  if (localStorage.getItem("auth")) {
-    return auth ? <Navigate to="/" /> : <Outlet />;
+  if (isAuthenticated) {
+    return isAuthenticated ? <Navigate to="/" /> : <Outlet />;
   }
   return <Outlet />;
 };

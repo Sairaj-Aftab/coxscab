@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PageHeader from "@/components/PageHeader/PageHeader";
 import { Button } from "@/components/ui/Button";
 import {
@@ -33,18 +33,18 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useGetVehiclesQuery } from "@/app/services/vehicleApi";
 import LoadingComponent from "@/components/LoadingComponents/LoadingComponent";
 import DataTable from "react-data-table-component";
 import { useParams } from "react-router-dom";
-import {
-  useCreateGarageMutation,
-  useGetGaragesQuery,
-  useUpdateGarageMutation,
-} from "@/app/services/garageApi";
 import AlertDialogMessage from "@/components/AlertDialogMessage/AlertDialogMessage";
-import { useSelector } from "react-redux";
-import { authData } from "@/features/auth/authSlice";
+import useAuth from "@/store/useAuth";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getVehicles } from "@/service/vehicle.service";
+import {
+  createGarage,
+  getGarages,
+  updateGarage,
+} from "@/service/garage.service";
 
 const FormSchema = z.object({
   coxscabId: z.string().nonempty("Coxscab ID is required"),
@@ -59,6 +59,7 @@ const FormSchema = z.object({
 });
 
 const Garage = () => {
+  const queryClient = useQueryClient();
   const form = useForm({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -73,7 +74,7 @@ const Garage = () => {
       note: "",
     },
   });
-  const { auth } = useSelector(authData);
+  const { auth } = useAuth();
   const params = useParams();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -89,32 +90,98 @@ const Garage = () => {
   const [currentData, setCurrentData] = useState(null);
 
   // Get Garages
-  const {
-    data: garages,
-    isLoading: getGarageLoading,
-    isFetching: garageFetching,
-  } = useGetGaragesQuery({
-    search: searchGarage,
-    page: pageGarage,
-    limit: limitGarage,
+
+  const { data: garages, isLoading: getGarageLoading } = useQuery({
+    queryKey: [
+      "garages",
+      {
+        search: searchGarage,
+        page: pageGarage,
+        limit: limitGarage,
+      },
+    ],
+    queryFn: () =>
+      getGarages({
+        search: searchGarage,
+        page: pageGarage,
+        limit: limitGarage,
+      }),
   });
 
   // Get Vehicles
-  const {
-    data: vehicles,
-    isLoading: vehiclesLoading,
-    isFetching: vehiclesFetching,
-  } = useGetVehiclesQuery({
-    typeId: params?.id,
-    search,
-    page,
-    limit,
+
+  const { data: vehicles, isLoading: vehiclesLoading } = useQuery({
+    queryKey: [
+      "vehicles",
+      {
+        typeId: params?.id,
+        search,
+        page,
+        limit,
+      },
+    ],
+    queryFn: () =>
+      getVehicles({
+        typeId: params?.id,
+        search,
+        page,
+        limit,
+      }),
   });
 
-  const [createGarage, { isLoading: createLoading }] =
-    useCreateGarageMutation();
-  const [updateGarage, { isLoading: updateLoading }] =
-    useUpdateGarageMutation();
+  // Create New Garage
+  const {
+    mutateAsync: createNewGarage,
+    data: createData,
+    error: createError,
+    isPending: createLoading,
+  } = useMutation({
+    mutationFn: createGarage,
+    onSuccess: (data) => {
+      queryClient.setQueryData(
+        [
+          "garages",
+          {
+            search: searchGarage,
+            page: pageGarage,
+            limit: limitGarage,
+          },
+        ],
+        (oldData = { garages: [] }) => ({
+          ...oldData,
+          garages: [data.garage, ...oldData.garages],
+        })
+      );
+    },
+  });
+
+  // Update Garage
+  const {
+    mutateAsync: updateGarageData,
+    data: updatedData,
+    isPending: updateLoading,
+    error: updateError,
+  } = useMutation({
+    mutationFn: updateGarage,
+    onSuccess: (data) => {
+      queryClient.setQueryData(
+        [
+          "garages",
+          {
+            search: searchGarage,
+            page: pageGarage,
+            limit: limitGarage,
+          },
+        ],
+        (oldData = { drivers: [] }) => ({
+          ...oldData,
+          garages: oldData.garages.map((item) =>
+            item.id === data?.garage.id ? data?.garage : item
+          ),
+        })
+      );
+    },
+  });
 
   // Handle Search, pagination and filtering data using react table
   const handlePageChange = (page) => {
@@ -127,18 +194,6 @@ const Garage = () => {
 
   const handleSearchChange = (e) => {
     setSearch(e.target.value);
-  };
-
-  const handlePageChangeGarage = (page) => {
-    setPageGarage(page);
-  };
-
-  const handlePerRowsChangeGarage = (newPerPage) => {
-    setLimitGarage(newPerPage);
-  };
-
-  const handleSearchChangeGarage = (e) => {
-    setSearchGarage(e.target.value);
   };
 
   // Handle row selection to capture selected IDs
@@ -155,46 +210,34 @@ const Garage = () => {
 
   async function onSubmit(data) {
     if (isEditing) {
-      try {
-        const res = await updateGarage({
-          id: currentData.id,
-          ...data,
-        }).unwrap();
-        if (res?.message) {
-          sonner("Success", {
-            description: `${res?.message}`,
-          });
-          setIsDialogOpen(false);
-          form.reset();
-        }
-      } catch (error) {
-        toast({
-          variant: "destructive",
-          title: `${error?.data?.message}`,
-        });
-      }
+      await updateGarageData({
+        id: currentData.id,
+        ...data,
+      });
     } else {
-      try {
-        const res = await createGarage({ ...data }).unwrap();
-        if (res?.message || res?.success) {
-          sonner("Success", {
-            description: `${res?.message}`,
-          });
-          setIsDialogOpen(false);
-          form.reset();
-        }
-      } catch (error) {
-        toast({
-          variant: "destructive",
-          title: `${error?.data?.message}`,
-        });
-      }
+      await createNewGarage({ ...data });
     }
   }
 
   const handleDelete = (id) => {
     console.log(id);
   };
+
+  useEffect(() => {
+    if (createData || updatedData) {
+      sonner("Success", {
+        description: `${createData?.message || updatedData?.message}`,
+      });
+      setIsDialogOpen(false);
+      form.reset();
+    }
+    if (createError || updateError) {
+      toast({
+        variant: "destructive",
+        title: `${createError?.message || updateError?.message}`,
+      });
+    }
+  }, [createData, createError, form, updateError, updatedData]);
 
   // Garage Column
 
@@ -625,24 +668,24 @@ const Garage = () => {
       <input
         type="text"
         placeholder="Search garage"
-        onChange={handleSearchChangeGarage}
+        onChange={(e) => setSearchGarage(e.target.value)}
         className="w-full px-3 py-1 rounded-md border border-gray-300 outline-gray-400 text-base text-gray-800"
       />
       <DataTable
         columns={garageColumns}
         data={garages?.garages}
         responsive
-        progressPending={getGarageLoading || garageFetching}
+        progressPending={getGarageLoading}
         progressComponent={
           <div className="h-[50vh] flex items-center justify-center">
-            <LoadingComponent loader={getGarageLoading || garageFetching} />
+            <LoadingComponent loader={getGarageLoading} />
           </div>
         }
         pagination
         paginationServer
         paginationTotalRows={garages?.totalGarage}
-        onChangeRowsPerPage={handlePerRowsChangeGarage}
-        onChangePage={handlePageChangeGarage}
+        onChangeRowsPerPage={(value) => setLimitGarage(value)}
+        onChangePage={(page) => setPageGarage(page)}
         paginationRowsPerPageOptions={[10, 20, 50, 100, 125, 150, 175, 200]}
       />
     </div>

@@ -3,9 +3,9 @@ import jwt from "jsonwebtoken";
 const prisma = new PrismaClient();
 
 const verifyUserToken = async (req, res, next) => {
-  // const authHeader = req.headers.authorization || req.headers.Authorization;
-
-  const token = req.headers.authorization?.split(" ")[1];
+  const token =
+    req.headers.authorization?.split(" ")[1] ||
+    req.headers.Authorization?.split(" ")[1];
 
   if (!token) {
     return res.status(401).json({ message: "Unauthorized" });
@@ -27,6 +27,7 @@ const verifyUserToken = async (req, res, next) => {
         ride: true,
       },
     });
+
     req.me = me;
     next();
   });

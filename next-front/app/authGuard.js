@@ -1,14 +1,25 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuthUser } from "@/store/authUser";
 import { usePathname, useRouter } from "next/navigation";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const protectedRoutes = ["/profile"];
-const publicRoutes = ["/"];
 
 export default function AuthGuard({ children }) {
-  const { user, setLogedInUser, refreshAccessToken } = useAuthUser();
+  const [loading, setLoading] = useState(true);
+  const { isAuthenticated, user, setLogedInUser, refreshAccessToken } =
+    useAuthUser();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -16,24 +27,35 @@ export default function AuthGuard({ children }) {
     const checkAuth = async () => {
       if (!user) {
         try {
+          // Refresh token and set user details
           await refreshAccessToken();
           await setLogedInUser();
         } catch (error) {
+          console.error("Authentication failed:", error);
           if (isProtectedRoute(pathname)) {
             router.push("/auth-login");
           }
+        } finally {
+          setLoading(false);
         }
+      } else {
+        setLoading(false);
       }
     };
 
     checkAuth();
   }, [user, setLogedInUser, refreshAccessToken, router, pathname]);
 
-  // if (isProtectedRoute(pathname) && !user) return <p>Loading...</p>;
+  if (loading) return <p>Loading...</p>;
 
-  return children;
+  return (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
 }
 
 function isProtectedRoute(pathname) {
-  return protectedRoutes.some((route) => pathname.startsWith(route));
+  return (
+    protectedRoutes.some((route) => pathname.startsWith(route)) &&
+    pathname !== "/auth-login"
+  );
 }

@@ -1,7 +1,3 @@
-import {
-  useGetAllUsersQuery,
-  useUpdateUserStatusMutation,
-} from "@/app/services/userApi";
 import { toast } from "@/components/hooks/use-toast";
 import { toast as sonner } from "sonner";
 import LoadingComponent from "@/components/LoadingComponents/LoadingComponent";
@@ -40,101 +36,87 @@ import {
   CheckCircle,
   MoreHorizontal,
   Search,
-  Shield,
   User,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
-
-const allPermissions = [
-  { id: "book_ride", label: "Book Ride" },
-  { id: "view_history", label: "View Ride History" },
-  { id: "rate_driver", label: "Rate Driver" },
-  { id: "accept_ride", label: "Accept Ride" },
-  { id: "view_earnings", label: "View Earnings" },
-];
+import { getAllUsers, updateUserStatus } from "@/service/users.service";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const Users = () => {
+  const queryClient = useQueryClient();
   const [status, setStatus] = useState("ALL");
   const [role, setRole] = useState("ALL");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
-  const [selectedUser, setSelectedUser] = useState(null);
   const [isViewDetailsOpen, setIsViewDetailsOpen] = useState(false);
   const [isEditPermissionsOpen, setIsEditPermissionsOpen] = useState(false);
-  const [editedPermissions, setEditedPermissions] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
 
-  const {
-    data: users,
-    isLoading,
-    isFetching,
-  } = useGetAllUsersQuery({
-    search,
-    status,
-    role,
-    page,
-    limit,
+  const { data: users, isLoading } = useQuery({
+    queryKey: [
+      "users",
+      {
+        search,
+        status,
+        role,
+        page,
+        limit,
+      },
+    ],
+    queryFn: () =>
+      getAllUsers({
+        search,
+        status,
+        role,
+        page,
+        limit,
+      }),
   });
-  const [updateUserStatus, { isLoading: updateLoading }] =
-    useUpdateUserStatusMutation();
 
-  const handlePageChange = (page) => {
-    setPage(page);
-  };
+  // Update user Status
+  const {
+    mutateAsync: updateUserStatusData,
+    error: updateError,
+    isPending: updateLoading,
+  } = useMutation({
+    mutationFn: updateUserStatus,
+    onSuccess: (data) => {
+      queryClient.setQueryData(
+        [
+          "users",
+          {
+            search,
+            status,
+            role,
+            page,
+            limit,
+          },
+        ],
+        (oldData = { users: [] }) => ({
+          ...oldData,
+          users: oldData.users.map((item) =>
+            item.id === data?.user.id ? data?.user : item
+          ),
+        })
+      );
+      sonner("Success", {
+        description: `${data?.message}`,
+      });
+    },
+  });
 
-  const handlePerRowsChange = (newPerPage) => {
-    setLimit(newPerPage);
-  };
   const calculateItemIndex = (page, rowPage, index) => {
     return (page - 1) * rowPage + index + 1;
   };
 
-  // const filteredUsers = users?.filter(
-  //   (user) =>
-  //     (filter === "all" || user.status === filter) &&
-  //     (typeFilter === "all" || user.type === typeFilter) &&
-  //     (user.name?.toLowerCase()?.includes(searchTerm.toLowerCase()) ||
-  //       user.email?.toLowerCase()?.includes(searchTerm.toLowerCase()))
-  // );
-
   const handleStatusChange = async (id, status = "APPROVED" | "REJECTED") => {
-    try {
-      const res = await updateUserStatus({
-        id,
-        status,
-      }).unwrap();
-      if (res?.message) {
-        sonner("Success", {
-          description: `${res?.message}`,
-        });
-      }
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: `${error?.data?.message}`,
-      });
-    }
+    await updateUserStatusData({
+      id,
+      status,
+    });
   };
-
-  // const handleViewDetails = (user) => {
-  //   setSelectedUser(user);
-  //   setIsViewDetailsOpen(true);
-  // };
-
-  // const handleEditPermissions = (user) => {
-  //   setSelectedUser(user);
-  //   setEditedPermissions(user.permissions);
-  //   setIsEditPermissionsOpen(true);
-  // };
-
-  // const handlePermissionChange = (permissionId) => {
-  //   setEditedPermissions((prev = []) =>
-  //     prev.includes(permissionId)
-  //       ? prev.filter((id) => id !== permissionId)
-  //       : [...prev, permissionId]
-  //   );
-  // };
 
   const handleSavePermissions = () => {
     // if (selectedUser) {
@@ -148,6 +130,15 @@ const Users = () => {
     //   setIsEditPermissionsOpen(false);
     // }
   };
+
+  useEffect(() => {
+    if (updateError) {
+      toast({
+        variant: "destructive",
+        title: `${updateError?.message}`,
+      });
+    }
+  }, [updateError]);
 
   const columns = [
     {
@@ -196,6 +187,7 @@ const Users = () => {
         </div>
       ),
       sortable: true,
+      width: "100px",
     },
     {
       name: "Status",
@@ -213,18 +205,19 @@ const Users = () => {
         </span>
       ),
       sortable: true,
+      width: "120px",
     },
     {
       name: "Join Date",
       selector: (row) => formatDateTime(row.createdAt),
       sortable: true,
-      width: "150px",
+      width: "170px",
     },
     {
       name: "Last Active",
       selector: (row) => formatDateTime(row.createdAt),
       sortable: true,
-      width: "150px",
+      width: "170px",
     },
     {
       name: "Actions",
@@ -239,13 +232,13 @@ const Users = () => {
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             {/* <DropdownMenuItem onClick={() => handleViewDetails(row)}>
-              <User className="w-4 h-4 mr-2" />
-              View Details
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleEditPermissions(row)}>
-              <Shield className="w-4 h-4 mr-2" />
-              Edit Permissions
-            </DropdownMenuItem> */}
+            <User className="w-4 h-4 mr-2" />
+            View Details
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleEditPermissions(row)}>
+            <Shield className="w-4 h-4 mr-2" />
+            Edit Permissions
+          </DropdownMenuItem> */}
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => handleStatusChange(row.id, "ACTIVE")}
@@ -321,17 +314,17 @@ const Users = () => {
         columns={columns}
         data={users?.users}
         responsive
-        progressPending={isLoading || isFetching}
+        progressPending={isLoading || updateLoading}
         progressComponent={
           <div className="h-[50vh] flex items-center justify-center">
-            <LoadingComponent loader={isLoading || isFetching} />
+            <LoadingComponent loader={isLoading || updateLoading} />
           </div>
         }
         pagination
         paginationServer
         paginationTotalRows={users?.totalUsers}
-        onChangePage={handlePageChange}
-        onChangeRowsPerPage={handlePerRowsChange}
+        onChangePage={(page) => setPage(page)}
+        onChangeRowsPerPage={(rowsPerPage) => setLimit(rowsPerPage)}
         paginationRowsPerPageOptions={[10, 20, 50, 100, 125, 150, 175, 200]}
       />
       {/* View Details Dialog */}

@@ -22,14 +22,17 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
-import { useSelector } from "react-redux";
-import { getVehicleTypeData } from "@/features/vehicleTypeSlice";
-import { getVehicleConditionData } from "@/features/vehicleConditionSlice";
-import { useCreateVehicleTypeMutation } from "@/app/services/vehicleTypeApi";
-import { useCreateVehicleConditionMutation } from "@/app/services/vehicleConditionApi";
 import LoadingComponent from "@/components/LoadingComponents/LoadingComponent";
 import DriverStatus from "@/components/DriverStatus/DriverStatus";
 import DriverActivities from "@/components/DriverActivities/DriverActivities";
+import useVehicleCondition from "@/store/useVehicleCondition";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  createVehicleCondition,
+  createVehicleType,
+} from "@/service/vehicle.service";
+import { useEffect } from "react";
+import useVehicleType from "@/store/useVehicleType";
 
 const FormSchemaType = z.object({
   name: z.string().min(1, {
@@ -43,14 +46,31 @@ const FormSchemaCondition = z.object({
 });
 
 const RequiredCategories = () => {
-  const { types, loader: typesLoader } = useSelector(getVehicleTypeData);
-  const { conditions, loader: conditionsLoader } = useSelector(
-    getVehicleConditionData
-  );
-  const [createVehicleType, { isLoading: typeLoading }] =
-    useCreateVehicleTypeMutation();
-  const [createVehicleCondition, { isLoading: conditionLoading }] =
-    useCreateVehicleConditionMutation();
+  const queryClient = useQueryClient();
+  const { types, loader: typesLoader } = useVehicleType();
+  const { conditions, loader: conditionsLoader } = useVehicleCondition();
+  // Create Vehicle Type
+  const {
+    mutateAsync: createType,
+    error: createTypeError,
+    isPending: typeLoading,
+  } = useMutation({
+    mutationFn: createVehicleType,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["vehicleTypes"]);
+    },
+  });
+  // Create Vehicle Condition
+  const {
+    mutateAsync: createCondition,
+    error: createConditionError,
+    isPending: conditionLoading,
+  } = useMutation({
+    mutationFn: createVehicleCondition,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["vehicleConditions"]);
+    },
+  });
   const formType = useForm({
     resolver: zodResolver(FormSchemaType),
     defaultValues: {
@@ -65,25 +85,19 @@ const RequiredCategories = () => {
   });
 
   async function onSubmitType(data) {
-    try {
-      await createVehicleType({ name: data.name }).unwrap();
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: `${error?.data?.message}`,
-      });
-    }
+    await createType({ name: data.name });
   }
   async function onSubmitCondition(data) {
-    try {
-      await createVehicleCondition({ name: data.name }).unwrap();
-    } catch (error) {
+    await createCondition({ name: data.name });
+  }
+  useEffect(() => {
+    if (createConditionError || createTypeError) {
       toast({
         variant: "destructive",
-        title: `${error?.data?.message}`,
+        title: `${createConditionError?.message || createTypeError?.message}`,
       });
     }
-  }
+  }, [createConditionError, createTypeError]);
   return (
     <div>
       <PageHeader

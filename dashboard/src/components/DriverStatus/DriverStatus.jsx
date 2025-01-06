@@ -22,9 +22,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import LoadingComponent from "../LoadingComponents/LoadingComponent";
-import { useCreateDriverStatusMutation } from "@/app/services/driverStatusApi";
-import { useSelector } from "react-redux";
-import { getDriverStatusData } from "@/features/driverStatusSlice";
+import useDriverStatus from "@/store/useDriverStatus";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createDriverStatus } from "@/service/driver.service";
+import { useEffect } from "react";
 
 const FormSchema = z.object({
   name: z.string().min(1, {
@@ -33,8 +34,18 @@ const FormSchema = z.object({
 });
 
 const DriverStatus = () => {
-  const { status, loader } = useSelector(getDriverStatusData);
-  const [createDriverStatus, { isLoading }] = useCreateDriverStatusMutation();
+  const queryClient = useQueryClient();
+  const { status, loader } = useDriverStatus();
+  const {
+    mutateAsync: createStatus,
+    error: createError,
+    isPending: isLoading,
+  } = useMutation({
+    mutationFn: createDriverStatus,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["driverStatus"]);
+    },
+  });
   const form = useForm({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -43,15 +54,16 @@ const DriverStatus = () => {
   });
 
   async function onSubmit(data) {
-    try {
-      await createDriverStatus({ name: data.name }).unwrap();
-    } catch (error) {
+    await createStatus({ name: data.name });
+  }
+  useEffect(() => {
+    if (createError) {
       toast({
         variant: "destructive",
-        title: `${error?.data?.message}`,
+        title: `${createError?.message}`,
       });
     }
-  }
+  }, [createError]);
   return (
     <div className="w-full">
       <div className="flex flex-col gap-1">

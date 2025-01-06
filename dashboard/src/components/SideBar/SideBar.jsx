@@ -9,10 +9,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { logoutAuthUser } from "@/features/auth/authApiSlice";
-import { authData, setLogoutUser } from "@/features/auth/authSlice";
-import { getVehicleTypeData } from "@/features/vehicleTypeSlice";
 import {
   Bell,
   Car,
@@ -28,21 +24,20 @@ import {
   Wallet,
   Warehouse,
 } from "lucide-react";
+import useAuth from "@/store/useAuth";
+import useVehicleType from "@/store/useVehicleType";
 
 const SideBar = () => {
   // const location = useLocation();
-
-  const dispatch = useDispatch();
-  const { auth } = useSelector(authData);
+  const { auth, setLogout } = useAuth();
   const permissions =
     auth?.role?.permissions?.map((permission) => permission.name) || [];
 
-  const { types } = useSelector(getVehicleTypeData);
+  const { types } = useVehicleType;
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const handleLogOut = () => {
-    dispatch(logoutAuthUser());
-    dispatch(setLogoutUser());
+  const handleLogOut = async () => {
+    await setLogout();
   };
 
   // Close the sidebar when a nav item is clicked
@@ -85,7 +80,7 @@ const SideBar = () => {
       permission: "RIDES",
     },
     {
-      to: "/package",
+      to: "/package/all",
       name: "Package",
       icon: <Package className="w-4 h-4" />,
       permission: "PACKAGE",

@@ -10,6 +10,8 @@ model Ride {
   endTime        DateTime?
   fare           Float
   status         String     @default("pending") // e.g., "pending", "ongoing", "completed", "cancelled"
+  package        Package? @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  packageId      String? @db.ObjectId
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
   reviews        Review[]   // Associated reviews

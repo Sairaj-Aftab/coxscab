@@ -1,9 +1,8 @@
-import { authData } from "@/features/auth/authSlice";
-import { useSelector } from "react-redux";
+import useAuth from "@/store/useAuth";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 
 const PrivateRouteGird = () => {
-  const { auth } = useSelector(authData);
+  const { auth } = useAuth();
 
   const location = useLocation();
 

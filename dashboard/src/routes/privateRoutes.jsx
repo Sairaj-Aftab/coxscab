@@ -46,7 +46,7 @@ const privateRoutes = [
             element: <Rides />,
           },
           {
-            path: "/package",
+            path: "/package/:id",
             element: <Package />,
           },
           {

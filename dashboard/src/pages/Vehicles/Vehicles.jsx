@@ -26,26 +26,14 @@ import {
 import DataTable from "react-data-table-component";
 import PageHeader from "@/components/PageHeader/PageHeader";
 import { Button } from "@/components/ui/Button";
-import {
-  useCreateVehicleMutation,
-  useGetVehiclesQuery,
-  useUpdateVehicleMutation,
-} from "@/app/services/vehicleApi";
 import LoadingComponent from "@/components/LoadingComponents/LoadingComponent";
-import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
-import { getVehicles } from "@/features/vehicleSlice";
 import DialogBox from "@/components/DialogBox/DialogBox";
 import { Input } from "@/components/ui/input";
 import { Edit, Eye, Loader2 } from "lucide-react";
-import { getVehicleTypeData } from "@/features/vehicleTypeSlice";
-import { getVehicleConditionData } from "@/features/vehicleConditionSlice";
 import { Label } from "@/components/ui/label";
 import { Link, useParams } from "react-router-dom";
-import { useGetGaragesQuery } from "@/app/services/garageApi";
-import { useGetDriversQuery } from "@/app/services/driverApi";
 import { Checkbox } from "@/components/ui/checkbox";
-import { authData } from "@/features/auth/authSlice";
 import {
   Dialog,
   DialogContent,
@@ -54,6 +42,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import useAuth from "@/store/useAuth";
+import { getDrivers } from "@/service/driver.service";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  createVehicle,
+  getVehicles,
+  updateVehicle,
+} from "@/service/vehicle.service";
+import { getGarages } from "@/service/garage.service";
+import useVehicleCondition from "@/store/useVehicleCondition";
+import useVehicleType from "@/store/useVehicleType";
 
 const FormSchema = z.object({
   vehicleTypeId: z.string().min(2, {
@@ -81,6 +80,7 @@ const FormSchema = z.object({
 });
 
 const Vehicles = () => {
+  const queryClient = useQueryClient();
   const form = useForm({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -105,7 +105,6 @@ const Vehicles = () => {
     },
   });
   const params = useParams();
-  const dispatch = useDispatch();
   // Vehicle State
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -122,56 +121,111 @@ const Vehicles = () => {
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [currentData, setCurrentData] = useState(null);
-  const { auth } = useSelector(authData);
-  const { types } = useSelector(getVehicleTypeData);
-  const { conditions } = useSelector(getVehicleConditionData);
-  const { data, isLoading, isFetching } = useGetVehiclesQuery({
-    typeId: params?.id,
-    search,
-    page,
-    limit,
+  const { auth } = useAuth();
+  const { types } = useVehicleType();
+  const { conditions } = useVehicleCondition();
+  const { data, isLoading } = useQuery({
+    queryKey: [
+      "vehicles",
+      {
+        typeId: params?.id,
+        search,
+        page,
+        limit,
+      },
+    ],
+    queryFn: () =>
+      getVehicles({
+        typeId: params?.id,
+        search,
+        page,
+        limit,
+      }),
+  });
+  const { data: garages, isLoading: garageLoading } = useQuery({
+    queryKey: [
+      "garages",
+      {
+        search: searchGarage,
+        limit: 5,
+      },
+    ],
+    queryFn: () =>
+      getGarages({
+        search: searchGarage,
+        limit: 5,
+      }),
+  });
+
+  const { data: drivers, isLoading: driversLoading } = useQuery({
+    queryKey: [
+      "drivers",
+      {
+        typeId: params?.id,
+        search: searchDriver,
+        limit: 5,
+      },
+    ],
+    queryFn: () =>
+      getDrivers({
+        typeId: params?.id,
+        search: searchDriver,
+        limit: 5,
+      }),
+  });
+
+  const {
+    mutateAsync: createNewVehicle,
+    data: createData,
+    error: createError,
+    isPending: createLoading,
+  } = useMutation({
+    mutationFn: createVehicle,
+    onSuccess: (data) => {
+      queryClient.setQueryData(
+        [
+          "vehicles",
+          {
+            typeId: params?.id,
+            search,
+            page,
+            limit,
+          },
+        ],
+        (oldData = { vehicles: [] }) => ({
+          ...oldData,
+          vehicles: [data.vehicle, ...oldData.vehicles],
+        })
+      );
+    },
   });
   const {
-    data: garages,
-    isLoading: garageLoading,
-    isFetching: isFetchingGarage,
-  } = useGetGaragesQuery({
-    search: searchGarage,
-    limit: 5,
+    mutateAsync: updateVehicleData,
+    data: updatedData,
+    isPending: updateLoading,
+    error: updateError,
+  } = useMutation({
+    mutationFn: updateVehicle,
+    onSuccess: (data) => {
+      queryClient.setQueryData(
+        [
+          "vehicles",
+          {
+            typeId: params?.id,
+            search,
+            page,
+            limit,
+          },
+        ],
+        (oldData = { vehicles: [] }) => ({
+          ...oldData,
+          vehicles: oldData.vehicles.map((item) =>
+            item.id === data?.vehicle.id ? data?.vehicle : item
+          ),
+        })
+      );
+    },
   });
-  const {
-    data: drivers,
-    isLoading: driversLoading,
-    isFetching: isFetchingDrivers,
-  } = useGetDriversQuery({
-    typeId: params?.id,
-    search: searchDriver,
-    limit: 5,
-  });
-
-  const [createVehicle, { isLoading: createLoading }] =
-    useCreateVehicleMutation();
-  const [updateVehicle, { isLoading: updateLoading }] =
-    useUpdateVehicleMutation();
-  useEffect(() => {
-    dispatch(getVehicles({ vehicles: data?.vehicles, loader: isLoading }));
-  }, [dispatch, data, isLoading]);
-
-  // Handle Search, pagination and filtering data using react table
-  // Vehicle
-  const handlePageChange = (page) => {
-    setPage(page);
-  };
-
-  const handlePerRowsChange = (newPerPage) => {
-    setLimit(newPerPage);
-  };
-
-  const handleSearchChange = (e) => {
-    setSearch(e.target.value);
-  };
-
-  // Garage
 
   const handleSearchChangeGarage = (e) => {
     setSearchGarage(e.target.value);
@@ -273,43 +327,30 @@ const Vehicles = () => {
 
   async function onSubmit(data) {
     if (isEditing) {
-      try {
-        const res = await updateVehicle({
-          id: currentData.id,
-          ...data,
-        }).unwrap();
-        if (res?.message) {
-          sonner("Success", {
-            description: `${res?.message}`,
-          });
-          setIsDialogOpen(false);
-          form.reset();
-        }
-      } catch (error) {
-        toast({
-          variant: "destructive",
-          title: `${error?.data?.message}`,
-        });
-      }
+      await updateVehicleData({
+        id: currentData.id,
+        ...data,
+      });
     } else {
-      try {
-        const res = await createVehicle(data).unwrap();
-        if (res?.message || res?.success) {
-          toast({
-            title: "Success!",
-            description: `${res?.message}`,
-          });
-          setIsDialogOpen(false);
-          form.reset();
-        }
-      } catch (error) {
-        toast({
-          variant: "destructive",
-          title: `${error?.data?.message}`,
-        });
-      }
+      await createNewVehicle(data);
     }
   }
+
+  useEffect(() => {
+    if (createData || updatedData) {
+      sonner("Success", {
+        description: `${createData?.message || updatedData?.message}`,
+      });
+      setIsDialogOpen(false);
+      form.reset();
+    }
+    if (createError || updateError) {
+      toast({
+        variant: "destructive",
+        title: `${createError?.message || updateError?.message}`,
+      });
+    }
+  }, [createData, createError, form, updateError, updatedData]);
 
   // const handleDelete = async (id) => {
   //   try {
@@ -888,11 +929,9 @@ const Vehicles = () => {
                         </div>
 
                         <div className="h-[120px] w-full">
-                          {garageLoading || isFetchingGarage ? (
+                          {garageLoading ? (
                             <div className="h-[150px] w-full flex items-center justify-center">
-                              <LoadingComponent
-                                loader={garageLoading || isFetchingGarage}
-                              />
+                              <LoadingComponent loader={garageLoading} />
                             </div>
                           ) : (
                             garages?.garages?.map((item) => (
@@ -942,15 +981,13 @@ const Vehicles = () => {
                               />
                             ))
                           )}
-                          {!isFetchingGarage &&
-                            !garageLoading &&
-                            garages?.garages.length < 1 && (
-                              <div className="h-[150px] w-full flex justify-center items-center">
-                                <p className="text-sm font-semibold text-red-500">
-                                  No garage found
-                                </p>
-                              </div>
-                            )}
+                          {!garageLoading && garages?.garages.length < 1 && (
+                            <div className="h-[150px] w-full flex justify-center items-center">
+                              <p className="text-sm font-semibold text-red-500">
+                                No garage found
+                              </p>
+                            </div>
+                          )}
                         </div>
                       </FormItem>
                     )}
@@ -991,11 +1028,9 @@ const Vehicles = () => {
                         </div>
 
                         <div className="h-[120px] w-full">
-                          {driversLoading || isFetchingDrivers ? (
+                          {driversLoading ? (
                             <div className="h-[150px] w-full flex items-center justify-center">
-                              <LoadingComponent
-                                loader={driversLoading || isFetchingDrivers}
-                              />
+                              <LoadingComponent loader={driversLoading} />
                             </div>
                           ) : (
                             drivers?.drivers?.map((item) => (
@@ -1060,15 +1095,13 @@ const Vehicles = () => {
                               />
                             ))
                           )}
-                          {!isFetchingDrivers &&
-                            !driversLoading &&
-                            drivers?.drivers.length < 1 && (
-                              <div className="h-[150px] w-full flex justify-center items-center">
-                                <p className="text-sm font-semibold text-red-500">
-                                  No driver found
-                                </p>
-                              </div>
-                            )}
+                          {!driversLoading && drivers?.drivers.length < 1 && (
+                            <div className="h-[150px] w-full flex justify-center items-center">
+                              <p className="text-sm font-semibold text-red-500">
+                                No driver found
+                              </p>
+                            </div>
+                          )}
                         </div>
                       </FormItem>
                     )}
@@ -1155,7 +1188,7 @@ const Vehicles = () => {
             placeholder={`Search vehicle of ${
               types?.find((type) => type.id === params?.id)?.name || ""
             }`}
-            onChange={handleSearchChange}
+            onChange={(e) => setSearch(e.target.value)}
             className="w-full px-3 py-1 rounded-md border border-gray-300 outline-gray-400 text-base text-gray-800"
           />
         </div>
@@ -1163,17 +1196,17 @@ const Vehicles = () => {
           columns={columns}
           data={data?.vehicles}
           responsive
-          progressPending={isLoading || isFetching}
+          progressPending={isLoading}
           progressComponent={
             <div className="h-[50vh] flex items-center justify-center">
-              <LoadingComponent loader={isLoading || isFetching} />
+              <LoadingComponent loader={isLoading} />
             </div>
           }
           pagination
           paginationServer
           paginationTotalRows={data?.totalVehicles}
-          onChangeRowsPerPage={handlePerRowsChange}
-          onChangePage={handlePageChange}
+          onChangeRowsPerPage={(value) => setLimit(value)}
+          onChangePage={(page) => setPage(page)}
           paginationRowsPerPageOptions={[10, 20, 50, 100, 125, 150, 175, 200]}
         />
       </div>

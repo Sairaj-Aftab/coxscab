@@ -190,7 +190,14 @@ export const logedInAuthAdminDashboard = async (req, res, next) => {
 export const logoutAuthAdminDashboard = async (req, res, next) => {
   try {
     res
-      .clearCookie("auth_token")
+      .clearCookie("auth_token", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV !== "Development", // Use secure cookies only in production
+        sameSite: process.env.NODE_ENV !== "Development" ? "none" : "lax",
+        domain:
+          process.env.NODE_ENV !== "Development" ? ".coxscab.com" : undefined,
+        path: "/",
+      })
       .status(200)
       .json({ message: "Successfully log out" });
   } catch (error) {

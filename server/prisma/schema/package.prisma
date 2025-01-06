@@ -3,33 +3,39 @@ model Package {
     packageName    String?
     price          Float
     description    String?
-    routes         PackageRoute[]
+    seat           Int?
+    startPoint     Place[] @relation( "startPoint", fields: [startPointId], references: [id])
+    startPointId   String[] @db.ObjectId
+    endPoint       Place[] @relation("endPoint", fields: [endPointId], references: [id])
+    endPointId     String[] @db.ObjectId
     vehicleType    VehicleType @relation(fields: [vehicleTypeId], references: [id], onDelete: Cascade)
     vehicleTypeId  String @db.ObjectId
-    seat           Int?
+    rides          Ride[]
     status          Boolean    @default(true)
     trash           Boolean    @default(false)
     createdAt      DateTime   @default(now())
     updatedAt      DateTime   @updatedAt
 }
 
-model Route {
+model Place {
     id             String     @id @default(auto()) @map("_id") @db.ObjectId
-    startPoint     Json? //{ latitude : [{name : String, nameBn : String, latitude : Float}], longitude : [{name : String, nameBn : String, longitude : Float}] }
-    endPoint       Json? //{ latitude : [{name : String, nameBn : String, latitude : Float}], longitude : [{name : String, nameBn : String, longitude : Float}] }
-    package        PackageRoute[]
+    mapId          Int?
+    address        String
+    address_bn     String?
+    city           String?
+    city_bn        String?
+    area           String?
+    area_bn        String?
+    district       String?
+    postcode       String?
+    location       Json
+    startFor       Package[] @relation("startPoint", fields: [startForId], references: [id])
+    startForId     String[] @db.ObjectId
+    endFor         Package[] @relation( "endPoint", fields: [endForId], references: [id])
+    endForId       String[] @db.ObjectId
     status         Boolean    @default(true)
     trash          Boolean    @default(false)
     createdAt      DateTime   @default(now())
     updatedAt      DateTime   @updatedAt
-}
-
-model PackageRoute {
-    id        String   @id @default(auto()) @map("_id") @db.ObjectId
-    package   Package  @relation(fields: [packageId], references: [id], onDelete: Cascade)
-    packageId String   @db.ObjectId
-    route     Route    @relation(fields: [routeId], references: [id], onDelete: Cascade)
-    routeId   String   @db.ObjectId
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    
 }

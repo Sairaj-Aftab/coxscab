@@ -5,9 +5,12 @@ import { Input } from "@/components/ui/input";
 import {
   BrainCog,
   Car,
+  Check,
+  ChevronsUpDown,
   CircleDot,
   Clock,
   MapPin,
+  Package,
   ScanEye,
   Search,
   SquareDot,
@@ -31,6 +34,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { usePackageData } from "@/hooks/useGlobalData";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { toast } from "@/hooks/use-toast";
 
 const vehicleType = [
   {
@@ -66,10 +89,21 @@ const vehicleType = [
 ];
 
 const Home = () => {
-  const { setPicupCoordinates, setDestinationCoordinates } =
-    useMapCoordinates();
+  const { data, isLoading, error } = usePackageData();
+  // console.log(data, isLoading, error);
+  const [showFindPackageSheet, setShowFindPackageSheet] = useState(false);
+  const [openDialog, setOpenDialog] = useState(null);
+  const [findPackage, setFindPackage] = useState([]);
+  const [selectedPackage, setSelectedPackage] = useState(null);
+
+  const {
+    setPicupCoordinates,
+    destinationCoordinates,
+    setDestinationCoordinates,
+  } = useMapCoordinates();
 
   const [takeVehicle, setTakeVehicle] = useState(null);
+
   const [pickup, setPickup] = useState("");
   const [destination, setDestination] = useState("");
   const [pickupSuggestions, setPickupSuggestions] = useState([]);
@@ -168,6 +202,37 @@ const Home = () => {
       setDestinationSuggestions([]);
     }
     setFocusedInput(null);
+  };
+
+  const handleFindRide = () => {
+    if (!destinationCoordinates) {
+      toast({
+        variant: "destructive",
+        title: `Please select a destination`,
+      });
+      return;
+    }
+    if (!takeVehicle) {
+      toast({
+        variant: "destructive",
+        title: `Please select a vehicle type`,
+      });
+      return;
+    }
+    setShowFindPackageSheet(true);
+    const filteredPackages = data?.packages?.filter((item) => {
+      const isCoordinatesMatch = item?.endPoint?.some((point) => {
+        const [longitude, latitude] = point?.location?.coordinates || [];
+        return (
+          Math.abs(longitude - destinationCoordinates?.lng) <= 0.0001 &&
+          Math.abs(latitude - destinationCoordinates?.lat) <= 0.0001
+        );
+      });
+      const isVehicleMatch = item?.vehicleType?.name?.includes(takeVehicle);
+      return isVehicleMatch && isCoordinatesMatch;
+    });
+
+    setFindPackage(filteredPackages);
   };
 
   return (
@@ -270,27 +335,7 @@ const Home = () => {
                   )}
               </AnimatePresence>
             </div>
-            {/* <div>
-              <h3 className="text-sm font-semibold text-primary mb-1">
-                Select Vehicle
-              </h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                {vehicleType.map((data) => (
-                  <span
-                    key={data.id}
-                    className={`rounded-md text-sm flex justify-center items-center cursor-pointer py-1 ${
-                      takeVehicle === data.id
-                        ? "border-2 border-primary text-primary font-bold"
-                        : "border font-semibold text-gray-800"
-                    }`}
-                    onClick={() => setTakeVehicle(data.id)}
-                  >
-                    {data.name}
-                  </span>
-                ))}
-              </div>
-            </div> */}
-            <Select>
+            <Select onValueChange={setTakeVehicle}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select vehicle type" />
               </SelectTrigger>
@@ -305,7 +350,11 @@ const Home = () => {
               </SelectContent>
             </Select>
           </div>
-          <Button className="w-full text-sm font-semibold h-10" size="lg">
+          <Button
+            onClick={handleFindRide}
+            className="w-full text-sm font-semibold h-10"
+            size="lg"
+          >
             <MapPin className="w-5 h-5 mr-2" />
             Find a ride
           </Button>
@@ -432,11 +481,11 @@ const Home = () => {
                     <span
                       key={data.id}
                       className={`rounded-md text-sm flex justify-center items-center cursor-pointer py-1 ${
-                        takeVehicle === data.id
+                        takeVehicle === data.name
                           ? "border-2 border-primary text-primary font-bold"
                           : "border font-semibold text-gray-800"
                       }`}
-                      onClick={() => setTakeVehicle(data.id)}
+                      onClick={() => setTakeVehicle(data.name)}
                     >
                       {data.name}
                     </span>
@@ -444,7 +493,12 @@ const Home = () => {
                 </div>
               </div>
             </div>
-            <Button className="w-full text-sm font-semibold h-10" size="lg">
+
+            <Button
+              onClick={handleFindRide}
+              className="w-full text-sm font-semibold h-10"
+              size="lg"
+            >
               <MapPin className="w-5 h-5 mr-2" />
               Find a ride
             </Button>
@@ -507,6 +561,84 @@ const Home = () => {
           </div>
         </motion.div>
       </div>
+      {/* Showing Package suggestion */}
+      <Sheet open={showFindPackageSheet} onOpenChange={setShowFindPackageSheet}>
+        <SheetContent side="bottom" className="h-[90vh] sm:h-[80vh]">
+          <SheetHeader>
+            <SheetTitle>Select a package</SheetTitle>
+          </SheetHeader>
+          <div className="mt-6 space-y-4 overflow-auto max-h-[calc(90vh-120px)] sm:max-h-[calc(80vh-120px)] pr-2">
+            {findPackage?.map((pkg) => (
+              <div key={pkg.id} className="bg-white rounded-lg shadow-md p-2">
+                <div className="flex flex-col gap-2">
+                  <div className="flex justify-between">
+                    <div className="flex gap-1">
+                      <Package className="h-6 w-6 mr-4" />
+                      <p className="text-sm text-muted-foreground">
+                        {pkg?.vehicleType?.name}
+                      </p>
+                    </div>
+                    <p className="font-semibold text-lg">
+                      ${pkg.price?.toFixed(2)}
+                    </p>
+                  </div>
+                  <div className="flex gap-1 flex-wrap py-1">
+                    {pkg?.endPoint?.map((point) => (
+                      <span
+                        key={point.id}
+                        className="text-sm text-white bg-primary/90 p-1 rounded-md"
+                      >
+                        {point?.address?.split(",")[0].trim()}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex justify-between items-center">
+                  <Dialog
+                    open={openDialog === pkg.id}
+                    onOpenChange={(isOpen) =>
+                      setOpenDialog(isOpen ? pkg.id : null)
+                    }
+                  >
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        Read More
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>{pkg?.name} Package</DialogTitle>
+                        <DialogDescription>
+                          {pkg?.description}
+                        </DialogDescription>
+                      </DialogHeader>
+                    </DialogContent>
+                  </Dialog>
+                  <Button
+                    // variant={
+                    //   selectedPackage?.id === pkg.id ? "default" : "outline"
+                    // }
+                    onClick={() => setSelectedPackage(pkg)}
+                  >
+                    {/* {selectedPackage?.id === pkg.id ? "Selected" : "Select"} */}
+                    Book
+                  </Button>
+                </div>
+              </div>
+            ))}
+            {findPackage?.length === 0 && (
+              <div className="flex flex-col gap-2">
+                <div className="flex justify-between">
+                  <div className="flex gap-1">
+                    <Package className="h-6 w-6 mr-4 text-red-600" />
+                    <p className="text-base text-red-600">No package found</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };
