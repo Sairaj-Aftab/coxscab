@@ -33,7 +33,7 @@ const SideBar = () => {
   const permissions =
     auth?.role?.permissions?.map((permission) => permission.name) || [];
 
-  const { types } = useVehicleType;
+  const { types } = useVehicleType();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const handleLogOut = async () => {

@@ -89,7 +89,7 @@ const vehicleType = [
 ];
 
 const Home = () => {
-  const { data, isLoading, error } = usePackageData();
+  const { data } = usePackageData();
   // console.log(data, isLoading, error);
   const [showFindPackageSheet, setShowFindPackageSheet] = useState(false);
   const [openDialog, setOpenDialog] = useState(null);
@@ -271,7 +271,7 @@ const Home = () => {
                       <MapPin className="w-4 h-4 mr-2 text-muted-foreground" />
                       <span>Your location</span>
                     </li>
-                    {pickupSuggestions.map((data, index) => (
+                    {pickupSuggestions?.map((data, index) => (
                       <li
                         key={index}
                         className="px-4 py-2 hover:bg-muted cursor-pointer flex items-center"

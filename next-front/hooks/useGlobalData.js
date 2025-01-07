@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 export function usePackageData() {
   return useQuery({
     queryKey: ["packages"],
-    queryFn: () =>
+    queryFn: async () =>
       getPackages({
         limit: 1000,
       }),

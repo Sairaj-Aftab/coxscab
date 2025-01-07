@@ -3,16 +3,6 @@
 import { useEffect, useState } from "react";
 import { useAuthUser } from "@/store/authUser";
 import { usePathname, useRouter } from "next/navigation";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-
-// Create a client
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-    },
-  },
-});
 
 const protectedRoutes = ["/profile"];
 
@@ -48,9 +38,7 @@ export default function AuthGuard({ children }) {
 
   if (loading) return <p>Loading...</p>;
 
-  return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
+  return children;
 }
 
 function isProtectedRoute(pathname) {
