@@ -6,7 +6,6 @@ import Header from "@/components/Header";
 import MainSidebar from "@/components/MainSidebar";
 import Footer from "@/components/Footer";
 import { Toaster } from "@/components/ui/toaster";
-import QueryProviders from "@/lib/query-provider";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -30,19 +29,17 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <QueryProviders>
-          <AuthGuard>
-            <Providers>
-              <Toaster />
-              <MainSidebar />
-              <div className="flex flex-col w-full">
-                <Header />
-                {children}
-                <Footer />
-              </div>
-            </Providers>
-          </AuthGuard>
-        </QueryProviders>
+        <AuthGuard>
+          <Providers>
+            <Toaster />
+            <MainSidebar />
+            <div className="flex flex-col w-full">
+              <Header />
+              {children}
+              <Footer />
+            </div>
+          </Providers>
+        </AuthGuard>
       </body>
     </html>
   );

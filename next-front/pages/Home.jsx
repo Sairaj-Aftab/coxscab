@@ -1,29 +1,13 @@
 "use client";
+
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  BrainCog,
-  Car,
-  Check,
-  ChevronsUpDown,
-  CircleDot,
-  Clock,
-  MapPin,
-  Package,
-  ScanEye,
-  Search,
-  SquareDot,
-  Star,
-} from "lucide-react";
+import { CircleDot, MapPin, Package, SquareDot } from "lucide-react";
 
 import MapComponent from "@/components/MapComponent";
-import { use, useEffect, useState } from "react";
-import Image from "next/image";
-import cngVehicle from "@/public/cng.png";
-import jeepVehicle from "@/public/jeep.png";
-import carVehicle from "@/public/car.png";
-import hiaceVehicle from "@/public/hiace.png";
+import { useState } from "react";
+
 import { useMapCoordinates } from "@/store/mapCoordinates";
 import axios from "axios";
 import {
@@ -34,17 +18,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { usePackageData } from "@/hooks/useGlobalData";
 import {
   Sheet,
-  SheetClose,
   SheetContent,
-  SheetDescription,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -54,43 +33,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
+import PopularDestination from "@/components/PopularDestination";
+import Quotes from "@/components/Quotes";
+import vehicleType from "@/data/vehicleType";
 
-const vehicleType = [
-  {
-    id: 1,
-    name: "TOMTOM",
-    path: cngVehicle,
-  },
-  {
-    id: 2,
-    name: "CNG",
-    path: cngVehicle,
-  },
-  {
-    id: 3,
-    name: "TOURIST JEEP",
-    path: jeepVehicle,
-  },
-  {
-    id: 4,
-    name: "CAR",
-    path: carVehicle,
-  },
-  {
-    id: 5,
-    name: "HIACE",
-    path: hiaceVehicle,
-  },
-  {
-    id: 6,
-    name: "MICRO",
-    path: hiaceVehicle,
-  },
-];
-
-const Home = () => {
-  const { data } = usePackageData();
-  // console.log(data, isLoading, error);
+const Home = ({ data }) => {
   const [showFindPackageSheet, setShowFindPackageSheet] = useState(false);
   const [openDialog, setOpenDialog] = useState(null);
   const [findPackage, setFindPackage] = useState([]);
@@ -229,6 +176,7 @@ const Home = () => {
         );
       });
       const isVehicleMatch = item?.vehicleType?.name?.includes(takeVehicle);
+
       return isVehicleMatch && isCoordinatesMatch;
     });
 
@@ -341,7 +289,7 @@ const Home = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  {vehicleType.map((data) => (
+                  {vehicleType?.map((data) => (
                     <SelectItem key={data.id} value={data.name}>
                       {data.name}
                     </SelectItem>
@@ -477,7 +425,7 @@ const Home = () => {
                   Select Vehicle
                 </h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                  {vehicleType.map((data) => (
+                  {vehicleType?.map((data) => (
                     <span
                       key={data.id}
                       className={`rounded-md text-sm flex justify-center items-center cursor-pointer py-1 ${
@@ -504,62 +452,10 @@ const Home = () => {
             </Button>
           </div>
         </motion.div>
-        <motion.div
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="rounded-lg border bg-card text-card-foreground shadow-sm"
-        >
-          <div className="p-2 lg:p-6 space-y-2 md:space-y-4">
-            <h2 className="text-lg font-semibold">Popular destinations</h2>
-            <div className="space-y-2">
-              <Button variant="outline" className="w-full justify-start">
-                <MapPin className="mr-2 h-4 w-4" />
-                Sugandha Sea Beach
-              </Button>
-              <Button variant="outline" className="w-full justify-start">
-                <MapPin className="mr-2 h-4 w-4" />
-                Dolphin Mor
-              </Button>
-              <Button variant="outline" className="w-full justify-start">
-                <MapPin className="mr-2 h-4 w-4" />
-                Laboni Beach
-              </Button>
-            </div>
-          </div>
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.6 }}
-          className="rounded-lg border bg-card text-card-foreground shadow-sm"
-        >
-          <div className="p-2 lg:p-6 space-y-2 md:space-y-4">
-            <h2 className="text-lg font-semibold">Why CoxsCab?</h2>
-            <div className="space-y-2">
-              <div className="flex items-center">
-                <ScanEye className="mr-2 h-4 w-4 text-blue-500" />
-                <span>Full security through District Police</span>
-              </div>
-              <div className="flex items-center">
-                <BrainCog className="mr-2 h-4 w-4 text-green-500" />
-                <span>Trained driver</span>
-              </div>
-              <div className="flex items-center">
-                <Star className="mr-2 h-4 w-4 text-yellow-400" />
-                <span>Top-rated drivers</span>
-              </div>
-              <div className="flex items-center">
-                <Car className="mr-2 h-4 w-4 text-green-500" />
-                <span>Wide range of vehicles</span>
-              </div>
-              <div className="flex items-center">
-                <Clock className="mr-2 h-4 w-4 text-blue-500" />
-                <span>24/7 availability</span>
-              </div>
-            </div>
-          </div>
-        </motion.div>
+        {/* Popular Destination Component */}
+        <PopularDestination />
+        {/* Why Coxscab components */}
+        <Quotes />
       </div>
       {/* Showing Package suggestion */}
       <Sheet open={showFindPackageSheet} onOpenChange={setShowFindPackageSheet}>
@@ -571,16 +467,21 @@ const Home = () => {
             {findPackage?.map((pkg) => (
               <div key={pkg.id} className="bg-white rounded-lg shadow-md p-2">
                 <div className="flex flex-col gap-2">
-                  <div className="flex justify-between">
-                    <div className="flex gap-1">
+                  <div className="flex justify-between items-center">
+                    <div className="flex gap-1 items-center">
                       <Package className="h-6 w-6 mr-4" />
-                      <p className="text-sm text-muted-foreground">
-                        {pkg?.vehicleType?.name}
-                      </p>
+                      <div>
+                        <p className="text-sm font-semibold text-muted-foreground">
+                          {pkg?.vehicleType?.name}
+                        </p>
+                        {pkg?.seat && (
+                          <p className="text-sm font-semibold text-muted-foreground">
+                            Seat: {pkg?.seat}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    <p className="font-semibold text-lg">
-                      ${pkg.price?.toFixed(2)}
-                    </p>
+                    <p className="font-semibold text-lg">&#2547;{pkg?.price}</p>
                   </div>
                   <div className="flex gap-1 flex-wrap py-1">
                     {pkg?.endPoint?.map((point) => (
