@@ -37,10 +37,12 @@ const PackagesPage = ({ data }) => {
     ),
   ];
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Packages from Cox's Bazar</h1>
+    <div className="p-3">
+      <h1 className="text-xl sm:text-2xl font-bold mb-3">
+        Packages from Cox's Bazar
+      </h1>
 
-      <div className="flex flex-col md:flex-row gap-4 mb-6">
+      <div className="flex flex-col md:flex-row gap-2 mb-3">
         <div>
           <Label htmlFor="vehicle-filter" className="mb-2 block">
             Filter by Vehicle
@@ -49,7 +51,7 @@ const PackagesPage = ({ data }) => {
             onValueChange={(value) => setVehicleFilter(value)}
             id="vehicle-filter"
           >
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="min-w-[200px]">
               <SelectValue placeholder="Select vehicle" />
             </SelectTrigger>
             <SelectContent>
@@ -69,7 +71,7 @@ const PackagesPage = ({ data }) => {
             onValueChange={(value) => setDestinationFilter(value)}
             id="destination-filter"
           >
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="min-w-[250px]">
               <SelectValue placeholder="Select destination" />
             </SelectTrigger>
             <SelectContent>

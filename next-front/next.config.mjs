@@ -10,6 +10,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "coxscab.s3.ap-southeast-2.amazonaws.com",
       },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
     ],
   },
 };

@@ -36,6 +36,7 @@ import { toast } from "@/hooks/use-toast";
 import PopularDestination from "@/components/PopularDestination";
 import Quotes from "@/components/Quotes";
 import vehicleType from "@/data/vehicleType";
+import { Badge } from "@/components/ui/badge";
 
 const Home = ({ data }) => {
   const [showFindPackageSheet, setShowFindPackageSheet] = useState(false);
@@ -484,17 +485,14 @@ const Home = ({ data }) => {
                     <p className="font-semibold text-lg">&#2547;{pkg?.price}</p>
                   </div>
                   <div className="flex gap-1 flex-wrap py-1">
-                    {pkg?.endPoint?.map((point) => (
-                      <span
-                        key={point.id}
-                        className="text-sm text-white bg-primary/90 p-1 rounded-md"
-                      >
-                        {point?.address?.split(",")[0].trim()}
-                      </span>
+                    {pkg?.endPoint?.map((destination, index) => (
+                      <Badge key={index} variant="secondary">
+                        {destination?.address?.split(",")[0].trim()}
+                      </Badge>
                     ))}
                   </div>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center mt-1">
                   <Dialog
                     open={openDialog === pkg.id}
                     onOpenChange={(isOpen) =>
