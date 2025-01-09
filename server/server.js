@@ -23,26 +23,6 @@ import packageItems from "./routes/package.js";
 import errorHandler from "./middleware/errorHandler.js";
 
 const app = express();
-const server = createServer(app);
-// dotenv config
-env.config();
-const PORT = process.env.PORT || 5000;
-const io = new Server(server, {
-  cors: {
-    origin: [
-      process.env.LOCAL_DOMAIN1,
-      process.env.LOCAL_DOMAIN2,
-      process.env.LOCAL_DOMAIN3,
-      process.env.ADMIN_DOMAIN1,
-      process.env.ADMIN_DOMAIN2,
-      process.env.MAIN_DOMAIN1,
-      process.env.MAIN_DOMAIN2,
-    ],
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    credentials: true,
-  },
-});
-
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -63,6 +43,26 @@ app.use(
     credentials: true,
   })
 );
+const server = createServer(app);
+// dotenv config
+env.config();
+const PORT = process.env.PORT || 5000;
+const io = new Server(server, {
+  cors: {
+    origin: [
+      process.env.LOCAL_DOMAIN1,
+      process.env.LOCAL_DOMAIN2,
+      process.env.LOCAL_DOMAIN3,
+      process.env.ADMIN_DOMAIN1,
+      process.env.ADMIN_DOMAIN2,
+      process.env.MAIN_DOMAIN1,
+      process.env.MAIN_DOMAIN2,
+      "http://192.168.160.166:8081",
+    ],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    credentials: true,
+  },
+});
 
 app.use("/api/v1/auth", authUser);
 app.use("/api/v1/user", user);
@@ -84,15 +84,25 @@ app.use("/api/v1/package", packageItems);
 app.use(errorHandler);
 
 // Socket Connection
+let connectedUsers = new Map();
 io.on("connection", (socket) => {
-  console.log("a user connected");
+  // console.log("a user connected:", socket.id);
+
+  socket.on("userActivity", (data) => {
+    if (data && typeof data === "object") {
+      connectedUsers.set(socket.id, data);
+    }
+    // Send to admin
+    io.emit("activeUsers", Array.from(connectedUsers.values()));
+  });
 
   socket.on("disconnect", () => {
-    console.log("A user disconnected:", socket.id);
+    connectedUsers.delete(socket.id); // Remove the user from the Map
+    // Send to admin
+    io.emit("activeUsers", Array.from(connectedUsers.values()));
   });
 });
 
-// Make io accessible in routes
 app.set("socketio", io);
 
 // App listen

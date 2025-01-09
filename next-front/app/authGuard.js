@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react";
 import { useAuthUser } from "@/store/authUser";
 import { usePathname, useRouter } from "next/navigation";
+import socket from "@/lib/socket";
 
 const protectedRoutes = ["/profile"];
 
 export default function AuthGuard({ children }) {
+  const [watchCoordinates, setWatchCoordinates] = useState(null);
   const [loading, setLoading] = useState(true);
   const { isAuthenticated, user, setLogedInUser, refreshAccessToken } =
     useAuthUser();
@@ -35,6 +37,44 @@ export default function AuthGuard({ children }) {
 
     checkAuth();
   }, [user, setLogedInUser, refreshAccessToken, router, pathname]);
+
+  useEffect(() => {
+    // Define success and error callbacks
+    const successCallback = (pos) => {
+      setWatchCoordinates({
+        latitude: pos.coords.latitude,
+        longitude: pos.coords.longitude,
+      });
+    };
+
+    const errorCallback = (err) => {
+      setError(err.message);
+    };
+
+    // Start watching the user's position
+    const watchId = navigator.geolocation.watchPosition(
+      successCallback,
+      errorCallback
+    );
+
+    // Cleanup: stop watching the position when the component unmounts
+    return () => {
+      navigator.geolocation.clearWatch(watchId);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (user) {
+      const interval = setInterval(() => {
+        socket.emit("userActivity", {
+          ...user,
+          location: watchCoordinates,
+        });
+      }, 1000); // Emit every 1 second
+
+      return () => clearInterval(interval); // Cleanup interval on component unmount
+    }
+  }, [watchCoordinates, user]);
 
   if (loading) return <p>Loading...</p>;
 
