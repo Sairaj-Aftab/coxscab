@@ -193,19 +193,27 @@ const SideBar = () => {
           } transition-transform lg:translate-x-0 lg:overflow-y-auto`}
         >
           {menuItem?.map(
-            ({ to, name, icon, permission }) =>
+            ({ to, name, icon, permission, count }) =>
               permissions.includes(permission) && (
                 <NavLink
                   key={to}
                   to={to}
                   onClick={handleNavItemClick}
                   className={({ isActive }) =>
-                    `flex items-center text-sm font-medium text-gray-100 ${
+                    `flex items-center text-sm font-medium text-gray-100 relative ${
                       isActive ? "bg-gray-600" : ""
                     } hover:bg-gray-600 hover:text-white px-3 py-3`
                   }
                 >
-                  {icon} <span className="ml-3">{name}</span>
+                  {icon}{" "}
+                  <p className="ml-3">
+                    <span>{name}</span>
+                    {count && (
+                      <span className="absolute right-3 top-3 p-1 text-xs bg-yellow-600 rounded-full flex justify-center items-center">
+                        {count}
+                      </span>
+                    )}
+                  </p>
                 </NavLink>
               )
           )}

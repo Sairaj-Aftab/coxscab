@@ -23,7 +23,7 @@ const DialogBox = ({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogTrigger asChild>{openButton}</DialogTrigger>
         <DialogContent
-          className="max-h-[95vh] overflow-y-auto"
+          className="max-h-[95vh] sm:max-w-[625px] overflow-y-auto"
           // onClick={(e) => e.stopPropagation()}
           onPointerDownOutside={onPointerDownOutside}
           onInteractOutside={onInteractOutside}

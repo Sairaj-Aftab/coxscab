@@ -234,6 +234,7 @@ const Drivers = () => {
       );
     },
   });
+
   const handleSearchChangeVehicle = (e) => {
     setSearchVehicle(e.target.value);
   };
@@ -329,6 +330,7 @@ const Drivers = () => {
         formData.append(key, data[key]);
       }
     }
+
     if (isEditing) {
       await updateDriverData({
         id: currentData.id,
