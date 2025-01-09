@@ -5,6 +5,7 @@ import { store } from "./app/store.js";
 import App from "./App.jsx";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import "leaflet/dist/leaflet.css";
 import "./index.css";
 
 // Create a client

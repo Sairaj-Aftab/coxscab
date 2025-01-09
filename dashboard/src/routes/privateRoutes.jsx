@@ -16,6 +16,7 @@ import Notification from "@/pages/Notification/Notification";
 import Payment from "@/pages/Payment/Payment";
 import Places from "@/pages/Places/Places";
 import Package from "@/pages/Package/Package";
+import MapPage from "@/pages/MapPage/MapPage";
 
 const privateRoutes = [
   {
@@ -84,6 +85,10 @@ const privateRoutes = [
           {
             path: "/auth-users",
             element: <AuthUsers />,
+          },
+          {
+            path: "/map/:id",
+            element: <MapPage />,
           },
         ],
       },

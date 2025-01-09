@@ -34,6 +34,8 @@ import {
   Ban,
   Car,
   CheckCircle,
+  Dot,
+  MapPin,
   MoreHorizontal,
   Search,
   User,
@@ -42,9 +44,14 @@ import { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
 import { getAllUsers, updateUserStatus } from "@/service/users.service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import socket from "@/lib/socket";
+import { useNavigate } from "react-router-dom";
 
 const Users = () => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const [onlineUsers, setOnlineUsers] = useState([]);
+  const [showTrackDialog, setShowTrackDialog] = useState(false);
   const [status, setStatus] = useState("ALL");
   const [role, setRole] = useState("ALL");
   const [search, setSearch] = useState("");
@@ -139,6 +146,17 @@ const Users = () => {
       });
     }
   }, [updateError]);
+  // Active Users from Socket
+  useEffect(() => {
+    if (socket) {
+      socket.on("activeUsers", (data) => {
+        setOnlineUsers(data);
+      });
+      return () => {
+        socket.off("activeUsers");
+      };
+    }
+  }, []);
 
   const columns = [
     {
@@ -177,17 +195,20 @@ const Users = () => {
     {
       name: "Type",
       cell: (row) => (
-        <div>
+        <div className="flex gap-1 items-center">
           {row.role === "DRIVER" ? (
             <Car className="w-4 h-4 text-green-500 inline mr-1" />
           ) : (
             <User className="w-4 h-4 text-blue-500 inline mr-1" />
           )}
           {row?.role === "DRIVER" ? "Driver" : "Rider"}
+          {onlineUsers?.find((user) => user.id === row.id) && (
+            <Dot className="w-10 h-10 text-green-500" />
+          )}
         </div>
       ),
       sortable: true,
-      width: "100px",
+      width: "130px",
     },
     {
       name: "Status",
@@ -239,6 +260,10 @@ const Users = () => {
             <Shield className="w-4 h-4 mr-2" />
             Edit Permissions
           </DropdownMenuItem> */}
+            <DropdownMenuItem onClick={() => navigate(`/map/${row.id}`)}>
+              <MapPin className="w-4 h-4 mr-2" />
+              Track User
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => handleStatusChange(row.id, "ACTIVE")}
@@ -273,7 +298,20 @@ const Users = () => {
   ];
   return (
     <div>
-      <PageHeader title1={"Dashboard/Users"} title2={"Users"} />
+      <PageHeader
+        title1={"Dashboard/Users"}
+        title2={"Users"}
+        button1={
+          <div>
+            <span className="text-sm font-semibold text-muted-foreground">
+              Online Users :
+            </span>{" "}
+            <span className="text-sm font-semibold text-green-500">
+              {onlineUsers?.length}
+            </span>
+          </div>
+        }
+      />
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-2 space-y-1 md:space-y-0">
         <div className="flex flex-col md:flex-row space-y-1 md:space-y-0 md:space-x-2 w-full md:w-auto">
           <Select value={status} onValueChange={(value) => setStatus(value)}>

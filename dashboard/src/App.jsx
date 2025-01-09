@@ -103,9 +103,7 @@ function App() {
     types,
     typesLoading,
   ]);
-  // useEffect(() => {
-  //   dispatch(getAllAuthUser());
-  // }, [dispatch, auth]);
+
   return (
     <>
       <Sonner />
