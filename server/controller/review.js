@@ -39,6 +39,10 @@ export const createReview = async (req, res, next) => {
       return next(createError(400, "Please try again!"));
     }
 
+    const io = req.app.get("socketio");
+    const toAdmin = io.of("/admin");
+    toAdmin.emit("newReview", review);
+
     return res.status(200).json({ review, message: "Successfully created!" });
   } catch (error) {
     return next(error);

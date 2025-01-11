@@ -16,7 +16,8 @@ import Notification from "@/pages/Notification/Notification";
 import Payment from "@/pages/Payment/Payment";
 import Places from "@/pages/Places/Places";
 import Package from "@/pages/Package/Package";
-import MapPage from "@/pages/MapPage/MapPage";
+import UsersMap from "@/pages/UsersMap/UsersMap";
+import TrackUserMap from "@/pages/TrackUserMap/TrackUserMap";
 
 const privateRoutes = [
   {
@@ -87,8 +88,12 @@ const privateRoutes = [
             element: <AuthUsers />,
           },
           {
+            path: "/users-map",
+            element: <UsersMap />,
+          },
+          {
             path: "/map/:id",
-            element: <MapPage />,
+            element: <TrackUserMap />,
           },
         ],
       },

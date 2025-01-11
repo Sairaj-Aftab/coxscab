@@ -9,6 +9,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { AlertTriangle, ChevronDown, Info, UserPlus } from "lucide-react";
 import { useState } from "react";
+import addNotification from "react-push-notification";
+import logo from "/logo1.png";
 
 const mockNotifications = [
   {
@@ -60,6 +62,19 @@ const Notification = () => {
       case "system_alert":
         return <Info className="h-5 w-5 text-red-500" />;
     }
+  };
+
+  const handleNotification = () => {
+    addNotification({
+      title: "New Review",
+      subtitle: "This is a subtitle",
+      message: "This is a very long",
+      theme: "darkblue",
+      native: true, // when using native, your OS will handle theming.
+      duration: 10000,
+      vibrate: [200, 100, 200],
+      icon: logo,
+    });
   };
 
   return (
@@ -120,7 +135,9 @@ const Notification = () => {
       </div>
 
       <div className="mt-6 flex justify-center">
-        <Button variant="outline">Load More</Button>
+        <Button variant="outline" onClick={handleNotification}>
+          Load More
+        </Button>
       </div>
     </div>
   );

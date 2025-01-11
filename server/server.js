@@ -5,7 +5,6 @@ import env from "dotenv";
 import cors from "cors";
 import { Server } from "socket.io";
 import { createServer } from "node:http";
-import { PrismaClient } from "@prisma/client";
 import authUser from "./routes/authUser.js";
 import user from "./routes/user.js";
 import review from "./routes/review.js";
@@ -22,11 +21,13 @@ import role from "./routes/role.js";
 import visitor from "./routes/visitorCount.js";
 import packageItems from "./routes/package.js";
 import errorHandler from "./middleware/errorHandler.js";
-import setupStream from "./utils/databaseStream.js";
+import socketHandler from "./utils/socketHandler.js";
 
-const prisma = new PrismaClient();
+env.config();
 
 const app = express();
+const server = createServer(app);
+const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -47,10 +48,7 @@ app.use(
     credentials: true,
   })
 );
-const server = createServer(app);
-// dotenv config
-env.config();
-const PORT = process.env.PORT || 5000;
+
 const io = new Server(server, {
   cors: {
     origin: [
@@ -68,6 +66,13 @@ const io = new Server(server, {
   },
 });
 
+// Error Handler
+app.use(errorHandler);
+
+// Socket Connection
+socketHandler(io);
+app.set("socketio", io);
+
 app.use("/api/v1/auth", authUser);
 app.use("/api/v1/user", user);
 app.use("/api/v1/review", review);
@@ -83,48 +88,6 @@ app.use("/api/v1/permission", permission);
 app.use("/api/v1/role", role);
 app.use("/api/v1/visitorcount", visitor);
 app.use("/api/v1/package", packageItems);
-
-// Error Handler
-app.use(errorHandler);
-
-// Socket Connection
-let connectedUsers = new Map();
-io.on("connection", (socket) => {
-  // console.log("a user connected:", socket.id);
-
-  socket.on("userActivity", async (data) => {
-    if (data && typeof data === "object") {
-      connectedUsers.set(socket.id, data);
-      try {
-        await prisma.user.update({
-          where: { id: data.id },
-          data: { isOnline: true },
-        });
-      } catch (error) {}
-    }
-    // Send to admin
-    io.emit("activeUsers", Array.from(connectedUsers.values()));
-  });
-
-  socket.on("disconnect", async () => {
-    const user = connectedUsers.get(socket.id);
-    connectedUsers.delete(socket.id); // Remove the user from the Map
-    if (user && user.id) {
-      try {
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { lastOnlineTime: new Date(), isOnline: false },
-        });
-      } catch (error) {}
-    }
-    // Send to admin
-    io.emit("activeUsers", Array.from(connectedUsers.values()));
-  });
-});
-
-app.set("socketio", io);
-
-setupStream();
 
 // App listen
 server.listen(PORT, () => {

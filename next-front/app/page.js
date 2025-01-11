@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import LoadingComponent from "@/components/LoadingComponent";
 import Home from "@/pages/Home";
 import { getPackages } from "@/service/package.service";
 
@@ -6,7 +8,9 @@ export default async function Main() {
 
   return (
     <main className="w-full">
-      <Home data={data} />
+      <Suspense fallback={<LoadingComponent />}>
+        <Home data={data} />
+      </Suspense>
     </main>
   );
 }

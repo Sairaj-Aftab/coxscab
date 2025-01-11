@@ -1,6 +1,7 @@
 import { RouterProvider } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import router from "./routes/router";
+import logoImg from "/logo1.png";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster as CustomToaster } from "./components/ui/toaster";
 import { Toaster } from "react-hot-toast";
@@ -21,6 +22,8 @@ import {
 } from "./service/vehicle.service";
 import useVehicleCondition from "./store/useVehicleCondition";
 import useVehicleType from "./store/useVehicleType";
+import socket from "./lib/socket";
+import addNotification, { Notifications } from "react-push-notification";
 
 function App() {
   const dispatch = useDispatch();
@@ -81,6 +84,37 @@ function App() {
   }, [setVehicleTypes, types?.types, typesLoading]);
 
   useEffect(() => {
+    if (socket) {
+      socket.on("newReview", (data) => {
+        addNotification({
+          title: "New Review",
+          message: data?.comment,
+          theme: "darkblue",
+          native: true, // when using native, your OS will handle theming.
+          duration: 10000,
+          vibrate: [200, 100, 200],
+          icon: logoImg,
+        });
+      });
+      socket.on("newUser", (data) => {
+        addNotification({
+          title: "Register New User",
+          message: data?.firstName,
+          theme: "darkblue",
+          native: true, // when using native, your OS will handle theming.
+          duration: 10000,
+          vibrate: [200, 100, 200],
+          icon: logoImg,
+        });
+      });
+      return () => {
+        socket.off("newReview");
+        socket.off("newUser");
+      };
+    }
+  }, []);
+
+  useEffect(() => {
     dispatch(getRoles({ loader: rolesLoading, roles: roles?.roles }));
     dispatch(
       getPermissions({
@@ -106,6 +140,7 @@ function App() {
 
   return (
     <>
+      <Notifications />
       <Sonner />
       <Toaster />
       <CustomToaster />

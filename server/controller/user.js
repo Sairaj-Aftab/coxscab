@@ -238,9 +238,15 @@ export const registerUser = async (req, res, next) => {
           otpExpiresAt: true,
         },
       });
+      if (!createUser) {
+        return next(createError(404, "Please try again!"));
+      }
       if (createUser) {
         await sendSMStoPhone(createUser.phone, `OTP is ${otp}`);
       }
+      const io = req.app.get("socketio");
+      const toAdmin = io.of("/admin");
+      toAdmin.emit("newUser", createUser);
       return res.status(200).json({
         user: createUser,
         success: true,

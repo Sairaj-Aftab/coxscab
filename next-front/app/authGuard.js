@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuthUser } from "@/store/authUser";
 import { usePathname, useRouter } from "next/navigation";
 import socket from "@/lib/socket";
+import LoadingComponent from "@/components/LoadingComponent";
 
 const protectedRoutes = ["/profile"];
 
@@ -66,7 +67,7 @@ export default function AuthGuard({ children }) {
   useEffect(() => {
     if (user) {
       const interval = setInterval(() => {
-        socket.emit("userActivity", {
+        socket.emit("joinRide", {
           ...user,
           location: watchCoordinates,
         });
@@ -76,7 +77,7 @@ export default function AuthGuard({ children }) {
     }
   }, [watchCoordinates, user]);
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <LoadingComponent />;
 
   return children;
 }

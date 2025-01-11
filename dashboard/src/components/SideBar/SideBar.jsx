@@ -15,6 +15,7 @@ import {
   LayoutDashboard,
   ListTodo,
   Lock,
+  Map,
   MapPin,
   Package,
   ShieldCheck,
@@ -109,6 +110,12 @@ const SideBar = () => {
       icon: <Wallet className="w-4 h-4" />,
       permission: "PAYMENT",
     },
+    {
+      to: "/users-map",
+      name: "Users Map",
+      icon: <Map className="w-4 h-4" />,
+      permission: "USERS-MAP",
+    },
     // {
     //   to: "/places",
     //   name: "Places",
@@ -143,7 +150,7 @@ const SideBar = () => {
   return (
     <>
       {/* Header Section */}
-      <div className="fixed top-0 left-0 w-full z-[99999] flex items-center justify-between bg-white shadow-md py-1 px-3">
+      <div className="fixed top-0 left-0 w-full z-[999999] flex items-center justify-between bg-white shadow-md py-1 px-3">
         <div className="flex items-center">
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -188,7 +195,7 @@ const SideBar = () => {
       <div className="flex mt-[48px] h-[calc(100vh-48px)]">
         <nav
           // style={{ height: "calc(100vh - 48px)" }}
-          className={`bg-[#3d464d] text-gray-100 w-64 lg:w-1/6 h-full fixed top-[48px] left-0 lg:static z-50 transform ${
+          className={`bg-[#3d464d] text-gray-100 w-64 lg:w-1/6 h-full fixed top-[48px] left-0 lg:static z-[99999] transform ${
             isSidebarOpen ? "translate-x-0" : "-translate-x-full"
           } transition-transform lg:translate-x-0 lg:overflow-y-auto`}
         >
