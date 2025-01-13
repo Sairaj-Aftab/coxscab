@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuthUser } from "@/store/authUser";
 import { usePathname, useRouter } from "next/navigation";
 import socket from "@/lib/socket";
 import LoadingComponent from "@/components/LoadingComponent";
+import { useMapCoordinates } from "@/store/mapCoordinates";
 
 const protectedRoutes = ["/profile"];
 
@@ -13,8 +14,16 @@ export default function AuthGuard({ children }) {
   const [loading, setLoading] = useState(true);
   const { isAuthenticated, user, setLogedInUser, refreshAccessToken } =
     useAuthUser();
+  const { setUserCoordinates } = useMapCoordinates();
   const router = useRouter();
   const pathname = usePathname();
+
+  const isProtectedRoute = useCallback(
+    (path) =>
+      protectedRoutes.some((route) => path.startsWith(route)) &&
+      path !== "/auth-login",
+    []
+  );
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -40,28 +49,32 @@ export default function AuthGuard({ children }) {
   }, [user, setLogedInUser, refreshAccessToken, router, pathname]);
 
   useEffect(() => {
-    // Define success and error callbacks
-    const successCallback = (pos) => {
-      setWatchCoordinates({
-        latitude: pos.coords.latitude,
-        longitude: pos.coords.longitude,
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function (pos) {
+        setUserCoordinates({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        });
       });
-    };
+      const watchId = navigator.geolocation.watchPosition(
+        (pos) => {
+          setWatchCoordinates({
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+          });
+        },
+        (err) => {
+          console.error("Geolocation error:", err.message);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 3000,
+          maximumAge: 0,
+        }
+      );
 
-    const errorCallback = (err) => {
-      setError(err.message);
-    };
-
-    // Start watching the user's position
-    const watchId = navigator.geolocation.watchPosition(
-      successCallback,
-      errorCallback
-    );
-
-    // Cleanup: stop watching the position when the component unmounts
-    return () => {
-      navigator.geolocation.clearWatch(watchId);
-    };
+      return () => navigator.geolocation.clearWatch(watchId);
+    }
   }, []);
 
   useEffect(() => {
@@ -80,11 +93,4 @@ export default function AuthGuard({ children }) {
   if (loading) return <LoadingComponent />;
 
   return children;
-}
-
-function isProtectedRoute(pathname) {
-  return (
-    protectedRoutes.some((route) => pathname.startsWith(route)) &&
-    pathname !== "/auth-login"
-  );
 }

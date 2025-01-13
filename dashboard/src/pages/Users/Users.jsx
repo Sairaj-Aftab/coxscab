@@ -229,13 +229,14 @@ const Users = () => {
       width: "120px",
     },
     {
-      name: "Join Date",
-      selector: (row) => formatDateTime(row.createdAt),
+      name: "Last Active",
+      selector: (row) =>
+        formatDateTime(row.lastOnlineTime ? row.lastOnlineTime : row.createdAt),
       sortable: true,
       width: "170px",
     },
     {
-      name: "Last Active",
+      name: "Join Date",
       selector: (row) => formatDateTime(row.createdAt),
       sortable: true,
       width: "170px",

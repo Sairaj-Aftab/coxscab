@@ -75,6 +75,24 @@ const endPlaceSchema = z.object({
 });
 
 const formSchema = z.object({
+  vehicleTypeId: z.string().min(1, {
+    message: "Please select a vehicle type.",
+  }),
+  endAddress: z.string().min(5, {
+    message: "Please enter an destination.",
+  }),
+  duration: z
+    .string()
+    .transform((value) => parseFloat(value))
+    .optional(),
+  extraCharge: z
+    .object({
+      price: z
+        .string()
+        .transform((value) => parseInt(value))
+        .optional(),
+    })
+    .optional(),
   price: z
     .string()
     .regex(/^\d+(\.\d{1,2})?$/, {
@@ -84,10 +102,10 @@ const formSchema = z.object({
   description: z.string().min(10, {
     message: "Description must be at least 10 characters.",
   }),
-  vehicleTypeId: z.string().min(1, {
-    message: "Please select a vehicle type.",
-  }),
-  seat: z.number().int().positive().nullish().optional(),
+  seat: z
+    .string()
+    .transform((value) => parseInt(value))
+    .optional(),
   endPlaces: z
     .array(endPlaceSchema)
     .min(1, "At least one destination is required"),
@@ -230,7 +248,10 @@ const Package = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       vehicleTypeId: "",
+      endAddress: "",
       price: undefined,
+      duration: undefined,
+      extraCharge: { price: undefined }, // 15 min
       description: "",
       seat: undefined,
       endPlaces: [],
@@ -320,9 +341,12 @@ const Package = () => {
     }));
 
     form.setValue("vehicleTypeId", data?.vehicleTypeId);
+    form.setValue("endAddress", data?.endAddress);
     form.setValue("price", String(data.price));
+    form.setValue("duration", String(data?.duration));
+    form.setValue("extraCharge.price", String(data?.extraCharge?.price));
     form.setValue("description", data?.description);
-    form.setValue("seat", data?.seat);
+    form.setValue("seat", String(data?.seat));
     form.setValue("status", data?.status);
     form.setValue("endPlaces", mappedEndPlaces);
 
@@ -368,11 +392,19 @@ const Package = () => {
       selector: (data, index) => calculateItemIndex(page, limit, index),
       width: "60px",
     },
+    // {
+    //   name: "Vehicle Type",
+    //   selector: (row) => row.vehicleType?.name,
+    //   sortable: true,
+    //   width: "150px",
+    // },
     {
-      name: "Vehicle Type",
-      selector: (row) => row.vehicleType?.name,
-      sortable: true,
-      width: "150px",
+      name: "Destination",
+      selector: (row) => row.endAddress,
+    },
+    {
+      name: "Duration",
+      cell: (row) => <p>{row.duration ? row.duration + " min" : ""}</p>,
     },
     {
       name: "Seat",
@@ -380,8 +412,14 @@ const Package = () => {
       width: "60px",
     },
     {
-      name: "Price",
+      name: "Fare",
       selector: (row) => row.price,
+      sortable: true,
+      width: "80px",
+    },
+    {
+      name: "Extra Charge",
+      selector: (row) => row?.extraCharge?.price,
       sortable: true,
       width: "80px",
     },
@@ -624,45 +662,104 @@ const Package = () => {
                         </FormItem>
                       )}
                     />
-                    {/* Seat */}
+                    {/* Destination */}
                     <FormField
                       control={form.control}
-                      name="seat"
+                      name="endAddress"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Seat Count</FormLabel>
+                          <FormLabel>Destination</FormLabel>
                           <FormControl>
-                            <Input
-                              type="number"
-                              placeholder="Enter seat count (Optional)"
-                              {...field}
-                              onChange={(e) =>
-                                field.onChange(e.target.valueAsNumber)
-                              }
-                            />
+                            <Input placeholder="Enter destination" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                    {/* Price */}
-                    <FormField
-                      control={form.control}
-                      name="price"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Price</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              placeholder="Enter price"
-                              {...field}
+                    <div className="flex gap-1">
+                      {/* Seat */}
+                      <FormField
+                        control={form.control}
+                        name="seat"
+                        render={({ field }) => (
+                          <FormItem className="flex-1">
+                            <FormLabel>Seat Count</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                placeholder="Enter seat count (Optional)"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      {/* Duration */}
+                      <FormField
+                        control={form.control}
+                        name="duration"
+                        render={({ field }) => (
+                          <FormItem className="flex-1">
+                            <FormLabel>Duration</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                placeholder="Enter duration (Optional)"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <div className="flex gap-1">
+                      {/* Price */}
+                      <FormField
+                        control={form.control}
+                        name="price"
+                        render={({ field }) => (
+                          <FormItem className="flex-1">
+                            <FormLabel>Fare</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                placeholder="Enter fare"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      {/* Extra Charge */}
+                      <FormField
+                        control={form.control}
+                        name="extraCharge"
+                        render={({ field }) => (
+                          <FormItem className="flex-1">
+                            <FormLabel>Extra Charge (15 min)</FormLabel>
+                            <FormField
+                              control={form.control}
+                              name="extraCharge.price"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <Input
+                                      type="number"
+                                      placeholder="Extra Fare"
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                </FormItem>
+                              )}
                             />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
                     {/* End Places */}
                     <FormField
                       control={form.control}

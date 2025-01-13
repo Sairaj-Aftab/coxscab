@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import MainSidebar from "@/components/MainSidebar";
 import Footer from "@/components/Footer";
 import { Toaster } from "@/components/ui/toaster";
+import logo from "@/public/logo.png";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",

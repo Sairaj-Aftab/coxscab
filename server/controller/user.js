@@ -187,8 +187,15 @@ export const logOut = async (req, res, next) => {
 // Register public user
 export const registerUser = async (req, res, next) => {
   try {
-    const { driverId, role, name, phone, device, ipAddress, location } =
-      req.body;
+    const {
+      driverId,
+      role = "CUSTOMER",
+      name,
+      phone,
+      device,
+      ipAddress,
+      location,
+    } = req.body;
 
     const otp = generateOtp();
     const otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000); // OTP valid for 5 minutes
@@ -410,9 +417,11 @@ export const getAllUsers = async (req, res, next) => {
       skip: offset,
       take: limit,
       where: filters,
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy: [
+        { isOnline: "desc" },
+        { lastOnlineTime: "desc" },
+        { createdAt: "desc" },
+      ],
     });
     const totalUsers = await prisma.user.count({
       where: filters,

@@ -7,8 +7,12 @@ export const createPackage = async (req, res, next) => {
     const {
       price,
       description,
-      startPlaces,
-      endPlaces,
+      endAddress,
+      category,
+      duration,
+      extraCharge,
+      startPlaces, // array
+      endPlaces, // array
       vehicleTypeId,
       seat,
       status,
@@ -88,6 +92,13 @@ export const createPackage = async (req, res, next) => {
       data: {
         vehicleTypeId,
         price: parseFloat(price),
+        endAddress,
+        category,
+        duration,
+        extraCharge: {
+          price: parseFloat(extraCharge.price),
+          duration: 1000 * 60 * 15, // for 15 mins
+        },
         description,
         seat,
         status,
@@ -123,6 +134,10 @@ export const updatePackage = async (req, res, next) => {
     const {
       price,
       description,
+      endAddress,
+      category,
+      duration,
+      extraCharge,
       startPlaces,
       endPlaces,
       vehicleTypeId,
@@ -206,6 +221,13 @@ export const updatePackage = async (req, res, next) => {
       data: {
         vehicleTypeId,
         price: parseFloat(price),
+        endAddress,
+        category,
+        duration,
+        extraCharge: {
+          price: parseFloat(extraCharge.price),
+          duration: 1000 * 60 * 15, // for 15 mins
+        },
         description,
         seat,
         status,

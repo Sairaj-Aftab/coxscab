@@ -8,6 +8,11 @@ model Package {
     startPointId   String[] @db.ObjectId
     endPoint       Place[] @relation("endPoint", fields: [endPointId], references: [id])
     endPointId     String[] @db.ObjectId
+    startAddress   String?
+    endAddress     String?
+    category       String?
+    duration       Float?
+    extraCharge    Json? // price, time
     vehicleType    VehicleType @relation(fields: [vehicleTypeId], references: [id], onDelete: Cascade)
     vehicleTypeId  String @db.ObjectId
     rides          Ride[]

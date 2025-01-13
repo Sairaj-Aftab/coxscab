@@ -61,17 +61,21 @@ const UsersMap = () => {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        {activeUsers?.map((user) => (
-          <Marker
-            key={user.id}
-            position={[user?.location.latitude, user?.location.longitude]}
-            icon={userIcon}
-          >
-            <Popup>
-              A pretty CSS3 popup. <br /> Easily customizable.
-            </Popup>
-          </Marker>
-        ))}
+        {activeUsers
+          ?.filter(
+            (user) =>
+              user?.location?.latitude !== undefined &&
+              user?.location?.longitude !== undefined
+          )
+          .map((user) => (
+            <Marker
+              key={user.id}
+              position={[user?.location.latitude, user?.location.longitude]}
+              icon={userIcon}
+            >
+              <Popup>{user?.firstName || "Unknown"}</Popup>
+            </Marker>
+          ))}
       </MapContainer>
     </div>
   );
