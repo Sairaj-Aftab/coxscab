@@ -150,7 +150,7 @@ const SideBar = () => {
   return (
     <>
       {/* Header Section */}
-      <div className="fixed top-0 left-0 w-full z-[999999] flex items-center justify-between bg-white shadow-md py-1 px-3">
+      <div className="fixed top-0 left-0 w-full z-[99999] flex items-center justify-between bg-white shadow-md py-1 px-3">
         <div className="flex items-center">
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}

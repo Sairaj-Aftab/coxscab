@@ -169,20 +169,25 @@ const Users = () => {
       name: "User",
       cell: (row) => (
         <div className="flex items-center space-x-3">
-          <Avatar>
-            <AvatarImage
-              src={`https://api.dicebear.com/6.x/initials/svg?seed=${row.firstName}`}
-              alt={row.firstName}
-              className="object-cover"
-            />
-            <AvatarFallback>
-              {row?.firstName
-                ?.split(" ")
-                .map((n) => n[0])
-                .join("")
-                .toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+          <div className="relative">
+            <Avatar>
+              <AvatarImage
+                src={`https://api.dicebear.com/6.x/initials/svg?seed=${row.firstName}`}
+                alt={row.firstName}
+                className="object-cover"
+              />
+              <AvatarFallback>
+                {row?.firstName
+                  ?.split(" ")
+                  .map((n) => n[0])
+                  .join("")
+                  .toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            {onlineUsers?.find((user) => user.id === row.id) && (
+              <span className="absolute top-0 right-0 bg-green-600 w-3 h-3 rounded-full z-50 border-2 border-white"></span>
+            )}
+          </div>
           <div>
             <div className="font-medium">{row.firstName}</div>
             <div className="text-sm text-gray-500">{row?.phone}</div>
@@ -202,13 +207,10 @@ const Users = () => {
             <User className="w-4 h-4 text-blue-500 inline mr-1" />
           )}
           {row?.role === "DRIVER" ? "Driver" : "Rider"}
-          {onlineUsers?.find((user) => user.id === row.id) && (
-            <Dot className="w-10 h-10 text-green-500" />
-          )}
         </div>
       ),
       sortable: true,
-      width: "130px",
+      width: "100px",
     },
     {
       name: "Status",
