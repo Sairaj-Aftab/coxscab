@@ -140,7 +140,13 @@ const Review = () => {
       name: "Type",
       selector: (row) => row.type,
       cell: (row) => (
-        <p>{row.type === "RIDER" ? "Rider → Driver" : "Public → Driver"}</p>
+        <p>
+          {row.type === "RIDER"
+            ? "Rider → Driver"
+            : row.type === "ADMIN"
+            ? "Admin → Driver"
+            : "Public → Driver"}
+        </p>
       ),
       sortable: true,
     },
@@ -310,6 +316,7 @@ const Review = () => {
               <SelectItem value="RIDER">Rider Reviews</SelectItem>
               <SelectItem value="PUBLIC">Public Reviews</SelectItem>
               <SelectItem value="DRIVER">Driver Reviews</SelectItem>
+              <SelectItem value="ADMIN">Admin Reviews</SelectItem>
             </SelectContent>
           </Select>
         </div>

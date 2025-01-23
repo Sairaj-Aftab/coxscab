@@ -50,12 +50,6 @@ export default function AuthGuard({ children }) {
 
   useEffect(() => {
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(function (pos) {
-        setUserCoordinates({
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude,
-        });
-      });
       const watchId = navigator.geolocation.watchPosition(
         (pos) => {
           setWatchCoordinates({

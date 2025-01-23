@@ -3,7 +3,6 @@ import bcrypt from "bcrypt";
 import createError from "../utils/createError.js";
 import { createRefreshToken, createToken } from "../utils/token.js";
 import { sendSMStoPhone } from "../utils/sendSmsToPhone.js";
-import generateOtp from "../utils/generateOtp.js";
 const prisma = new PrismaClient();
 
 /**

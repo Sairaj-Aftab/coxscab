@@ -29,14 +29,14 @@ const MapComponent = () => {
     setDirectionData,
   } = useMapCoordinates();
 
-  // useEffect(() => {
-  //   navigator.geolocation.getCurrentPosition(function (pos) {
-  //     setUserCoordinates({
-  //       lat: pos.coords.latitude,
-  //       lng: pos.coords.longitude,
-  //     });
-  //   });
-  // }, []);
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition(function (pos) {
+      setUserCoordinates({
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude,
+      });
+    });
+  }, []);
   // Fly to picup location
   useEffect(() => {
     if (userCoordinates) {

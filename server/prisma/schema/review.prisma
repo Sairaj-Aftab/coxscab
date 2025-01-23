@@ -22,6 +22,7 @@ model Review {
   aspects        Json?
   tags           String[]
   ipAddress      String?
+  location       Json?   // type : "Point", coordinates : [longitude, latitude]
   isAnonymous    Boolean    @default(true)
   status         ReviewStatus @default(PENDING)
   createdAt      DateTime   @default(now())

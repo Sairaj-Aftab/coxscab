@@ -4,6 +4,7 @@ import {
   logedInUser,
   loginUser,
   logOut,
+  registerAdminUser,
   registerDriverUser,
   registerUser,
   sendLoginOtpToUser,
@@ -18,6 +19,7 @@ const router = express.Router();
 // User
 router.post("/register-user", registerUser);
 router.post("/register-driver-user", registerDriverUser);
+router.post("/register-admin-user", registerAdminUser);
 router.post("/login-user", loginUser);
 router.post("/auth-refresh", refreshToken);
 router.post("/send-otp", sendLoginOtpToUser);

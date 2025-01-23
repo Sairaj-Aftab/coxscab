@@ -4,6 +4,16 @@ import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import L from "leaflet";
 import { useParams } from "react-router-dom";
 import userIconSvg from "../../assets/svg/userIcon.svg";
+import policeUserIconSvg from "../../assets/svg/policeUserIcon.svg";
+
+const setIcon = (icon) => {
+  return L.icon({
+    iconUrl: icon,
+    iconSize: [30, 30], // size of the icon
+    popupAnchor: [-3, -20], // point from which the popup should open relative to the iconAnchor
+    className: "marker",
+  });
+};
 
 // Utility to dynamically update the map center
 const DynamicCenter = ({ center }) => {
@@ -17,23 +27,17 @@ const DynamicCenter = ({ center }) => {
 };
 
 const TrackUserMap = () => {
-  const userIcon = L.icon({
-    iconUrl: userIconSvg,
-    iconSize: [30, 30], // size of the icon
-    popupAnchor: [-3, -20], // point from which the popup should open relative to the iconAnchor
-    className: "marker",
-  });
   const params = useParams();
   const [activeUser, setActiveUser] = useState(null);
 
   useEffect(() => {
     if (socket) {
-      socket.on("activeUsers", (data) => {
+      socket.on("allUsers", (data) => {
         const user = data?.find((user) => user.id === params.id);
         setActiveUser(user);
       });
       return () => {
-        socket.off("activeUsers");
+        socket.off("allUsers");
       };
     }
   }, [params.id]);
@@ -71,7 +75,9 @@ const TrackUserMap = () => {
         {hasLocation && (
           <Marker
             position={[userLocation.latitude, userLocation.longitude]}
-            icon={userIcon}
+            icon={setIcon(
+              activeUser?.role === "CUSTOMER" ? userIconSvg : policeUserIconSvg
+            )}
           >
             <Popup>{activeUser?.firstName || "Unknown"}</Popup>
           </Marker>

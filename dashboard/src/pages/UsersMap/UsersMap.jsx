@@ -1,28 +1,29 @@
 import socket from "@/lib/socket";
-import { Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import L from "leaflet";
 import userIconSvg from "../../assets/svg/userIcon.svg";
+import policeUserIconSvg from "../../assets/svg/policeUserIcon.svg";
 import { Badge } from "@/components/ui/badge";
 
-const userIcon = L.icon({
-  iconUrl: userIconSvg,
-  iconSize: [30, 30], // size of the icon
-  popupAnchor: [-3, -20], // point from which the popup should open relative to the iconAnchor
-  className: "marker",
-});
+const setIcon = (icon) => {
+  return L.icon({
+    iconUrl: icon,
+    iconSize: [30, 30], // size of the icon
+    popupAnchor: [-3, -20], // point from which the popup should open relative to the iconAnchor
+    className: "marker",
+  });
+};
 const UsersMap = () => {
   const [activeUsers, setActiveUsers] = useState([]);
-  const [activeDrivers, setActiveDrivers] = useState([]);
-  const [activeAdmins, setActiveAdmins] = useState([]);
 
   useEffect(() => {
     if (socket) {
-      socket.on("activeUsers", (data) => {
+      socket.on("allUsers", (data) => {
         setActiveUsers(data);
       });
       return () => {
-        socket.off("activeUsers");
+        socket.off("allUsers");
       };
     }
   }, []);
@@ -34,9 +35,9 @@ const UsersMap = () => {
           className="text-sm font-semibold bg-black/50 text-white px-2 py-1"
         >
           Users:{" "}
-          <span className="text-green-400 ml-1">{activeUsers?.length}</span>
+          <span className="text-green-400 ml-1">{activeUsers.length}</span>
         </Badge>
-        <Badge
+        {/* <Badge
           variant="secondary"
           className="text-sm font-semibold bg-black/50 text-white px-2 py-1"
         >
@@ -49,7 +50,7 @@ const UsersMap = () => {
         >
           Admins:{" "}
           <span className="text-green-400 ml-1">{activeAdmins?.length}</span>
-        </Badge>
+        </Badge> */}
       </div>
       <MapContainer
         className="w-full h-full"
@@ -71,7 +72,9 @@ const UsersMap = () => {
             <Marker
               key={user.id}
               position={[user?.location.latitude, user?.location.longitude]}
-              icon={userIcon}
+              icon={setIcon(
+                user?.role === "CUSTOMER" ? userIconSvg : policeUserIconSvg
+              )}
             >
               <Popup>{user?.firstName || "Unknown"}</Popup>
             </Marker>

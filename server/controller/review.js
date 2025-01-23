@@ -16,6 +16,7 @@ export const createReview = async (req, res, next) => {
       reviewerPhone,
       aspects,
       ipAddress,
+      coordinates,
     } = req.body;
 
     const review = await prisma.review.create({
@@ -32,6 +33,12 @@ export const createReview = async (req, res, next) => {
         aspects,
         isAnonymous: reviewerId ? false : true,
         ipAddress,
+        ...(coordinates && {
+          location: {
+            type: "Point",
+            coordinates: [coordinates.longitude, coordinates.latitude],
+          },
+        }),
       },
     });
 

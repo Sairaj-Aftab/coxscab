@@ -66,13 +66,6 @@ const io = new Server(server, {
   },
 });
 
-// Error Handler
-app.use(errorHandler);
-
-// Socket Connection
-socketHandler(io);
-app.set("socketio", io);
-
 app.use("/api/v1/auth", authUser);
 app.use("/api/v1/user", user);
 app.use("/api/v1/review", review);
@@ -88,6 +81,13 @@ app.use("/api/v1/permission", permission);
 app.use("/api/v1/role", role);
 app.use("/api/v1/visitorcount", visitor);
 app.use("/api/v1/package", packageItems);
+
+// Socket Connection
+socketHandler(io);
+app.set("socketio", io);
+
+// Error Handler
+app.use(errorHandler);
 
 // App listen
 server.listen(PORT, () => {

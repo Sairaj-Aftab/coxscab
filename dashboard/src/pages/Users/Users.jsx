@@ -34,11 +34,11 @@ import {
   Ban,
   Car,
   CheckCircle,
-  Dot,
   MapPin,
   MoreHorizontal,
   Search,
   User,
+  UserCog,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
@@ -149,11 +149,11 @@ const Users = () => {
   // Active Users from Socket
   useEffect(() => {
     if (socket) {
-      socket.on("activeUsers", (data) => {
+      socket.on("allUsers", (data) => {
         setOnlineUsers(data);
       });
       return () => {
-        socket.off("activeUsers");
+        socket.off("allUsers");
       };
     }
   }, []);
@@ -171,11 +171,19 @@ const Users = () => {
         <div className="flex items-center space-x-3">
           <div className="relative">
             <Avatar>
-              <AvatarImage
-                src={`https://api.dicebear.com/6.x/initials/svg?seed=${row.firstName}`}
-                alt={row.firstName}
-                className="object-cover"
-              />
+              {row?.pictureUrl ? (
+                <img
+                  src={row.pictureUrl}
+                  alt={row.firstName}
+                  className="object-cover rounded-full"
+                />
+              ) : (
+                <AvatarImage
+                  src={`https://api.dicebear.com/6.x/initials/svg?seed=${row.firstName}`}
+                  alt={row.firstName}
+                  className="object-cover"
+                />
+              )}
               <AvatarFallback>
                 {row?.firstName
                   ?.split(" ")
@@ -203,10 +211,16 @@ const Users = () => {
         <div className="flex gap-1 items-center">
           {row.role === "DRIVER" ? (
             <Car className="w-4 h-4 text-green-500 inline mr-1" />
+          ) : row.role === "ADMIN" ? (
+            <UserCog className="w-4 h-4 text-red-500 inline mr-1" />
           ) : (
             <User className="w-4 h-4 text-blue-500 inline mr-1" />
           )}
-          {row?.role === "DRIVER" ? "Driver" : "Rider"}
+          {row?.role === "DRIVER"
+            ? "Driver"
+            : row?.role === "ADMIN"
+            ? "Admin"
+            : "Rider"}
         </div>
       ),
       sortable: true,
@@ -324,6 +338,7 @@ const Users = () => {
             <SelectContent>
               <SelectItem value="ALL">All Users</SelectItem>
               <SelectItem value="ACTIVE">Active</SelectItem>
+              <SelectItem value="PENDING">Pending</SelectItem>
               <SelectItem value="INACTIVE">Inactive</SelectItem>
               <SelectItem value="SUSPENDED">Suspended</SelectItem>
               <SelectItem value="BLOCKED">Blocked</SelectItem>
@@ -337,6 +352,7 @@ const Users = () => {
               <SelectItem value="ALL">All Types</SelectItem>
               <SelectItem value="CUSTOMER">Riders</SelectItem>
               <SelectItem value="DRIVER">Drivers</SelectItem>
+              <SelectItem value="ADMIN">Admin</SelectItem>
             </SelectContent>
           </Select>
         </div>

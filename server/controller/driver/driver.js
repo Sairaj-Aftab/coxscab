@@ -159,7 +159,12 @@ export const getDrivers = async (req, res, next) => {
         { coxscabId: { contains: search, mode: "insensitive" } },
         { name: { contains: search, mode: "insensitive" } },
         { nidNo: { contains: search, mode: "insensitive" } },
-        { fatherName: { contains: search, mode: "insensitive" } },
+        { drivingLicenseNo: { contains: search, mode: "insensitive" } },
+        {
+          vehicle: {
+            registrationNo: { contains: search, mode: "insensitive" },
+          },
+        },
       ],
     }),
   };
@@ -382,6 +387,51 @@ export const updateDriver = async (req, res, next) => {
       driver,
       success: true,
       message: "Successfully updated!",
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+// Find nearby drivers
+export const findNearbyDrivers = async (req, res, next) => {
+  try {
+    const { latitude, longitude, radiusInKm } = req.query;
+
+    // Ensure longitude and latitude are numbers
+    const numericLatitude = parseFloat(latitude);
+    const numericLongitude = parseFloat(longitude);
+
+    if (isNaN(numericLatitude) || isNaN(numericLongitude)) {
+      throw new Error("Invalid longitude or latitude. They must be numeric.");
+    }
+
+    const nearbyPlaces = await prisma.place.findRaw({
+      filter: {
+        location: {
+          $nearSphere: {
+            $geometry: {
+              type: "Point",
+              coordinates: [numericLongitude, numericLatitude], // Longitude and Latitude
+            },
+            $maxDistance: radiusInKm * 1000, // Radius in meters
+          },
+        },
+        status: true, // Optional filter: Only active places
+        trash: false, // Optional filter: Exclude trashed places
+      },
+      // options: {
+      //   projection: { address: 1, location: 1 }, // Optional: Specify fields to return
+      // },
+    });
+    console.log(nearbyPlaces?.length);
+
+    console.log(nearbyPlaces);
+
+    return res.status(200).json({
+      nearbyPlaces,
+      success: true,
+      message: "Successfully found!",
     });
   } catch (error) {
     return next(error);

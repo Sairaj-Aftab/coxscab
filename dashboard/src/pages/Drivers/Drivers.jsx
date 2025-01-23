@@ -29,8 +29,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-
-import DialogBox from "@/components/DialogBox/DialogBox";
 import { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
 import LoadingComponent from "@/components/LoadingComponents/LoadingComponent";
@@ -602,14 +600,14 @@ const Drivers = () => {
     //   width: "150px",
     // },
   ];
-  const createDriverDialogComponent = () => {
-    return (
-      <DialogBox
-        open={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
-        openButton={
+
+  return (
+    <div>
+      <PageHeader
+        title1={"Dashboard/Drivers"}
+        title2={"Drivers"}
+        button1={
           <Button
-            disabled={auth?.role?.name === "VIEWER"}
             onClick={() => {
               setIsEditing(false); // Reset editing mode
               form.reset(); // Reset form
@@ -617,733 +615,741 @@ const Drivers = () => {
               setIsDialogOpen(true);
             }}
           >
-            Create driver
+            Create Driver
           </Button>
         }
-        title={isEditing ? "Update driver" : "Create driver"}
-        onPointerDownOutside={(event) => event.preventDefault()}
-        onInteractOutside={(event) => event.preventDefault()}
-      >
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            encType="multipart/form-data"
-            className="space-y-2"
-          >
-            {/* Driver name */}
-            <div className="flex flex-col md:flex-row gap-2">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel
-                      className={`${
-                        (createLoading || updateLoading) &&
-                        "cursor-not-allowed text-gray-400"
-                      }`}
-                    >
-                      Driver Name (চালকের নাম ইংরেজি)*
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        disabled={createLoading || updateLoading}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="nameBn"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel
-                      className={`${
-                        (createLoading || updateLoading) &&
-                        "cursor-not-allowed text-gray-400"
-                      }`}
-                    >
-                      Driver Name (চালকের নাম বাংলা)*
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        disabled={createLoading || updateLoading}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            {/* Father & Mother name */}
-            <div className="flex flex-col md:flex-row gap-2">
-              <FormField
-                control={form.control}
-                name="fatherName"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel
-                      className={`${
-                        (createLoading || updateLoading) &&
-                        "cursor-not-allowed text-gray-400"
-                      }`}
-                    >
-                      Father Name
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        disabled={createLoading || updateLoading}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="motherName"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel
-                      className={`${
-                        (createLoading || updateLoading) &&
-                        "cursor-not-allowed text-gray-400"
-                      }`}
-                    >
-                      Mother Name
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        disabled={createLoading || updateLoading}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            {/* NID NO and Nid DOB */}
-            <div className="flex flex-col md:flex-row gap-2">
-              <FormField
-                control={form.control}
-                name="nidNo"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel
-                      className={`${
-                        (createLoading || updateLoading) &&
-                        "cursor-not-allowed text-gray-400"
-                      }`}
-                    >
-                      Driver NID NO.
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        disabled={createLoading || updateLoading}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="nidDob"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel
-                      className={`${
-                        (createLoading || updateLoading) &&
-                        "cursor-not-allowed text-gray-400"
-                      }`}
-                    >
-                      Driver NID DOB
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="date"
-                        {...field}
-                        value={field.value}
-                        disabled={createLoading || updateLoading}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            {/* Mobile No & Licence No */}
-            <div className="flex flex-col md:flex-row gap-2">
-              <FormField
-                control={form.control}
-                name="mobileNo"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel
-                      className={`${
-                        (createLoading || updateLoading) &&
-                        "cursor-not-allowed text-gray-400"
-                      }`}
-                    >
-                      Driver Mobile No
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        disabled={createLoading || updateLoading}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="drivingLicenseNo"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel
-                      className={`${
-                        (createLoading || updateLoading) &&
-                        "cursor-not-allowed text-gray-400"
-                      }`}
-                    >
-                      Driving License No
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        disabled={createLoading || updateLoading}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            {/* Blood group & Educational Qulification */}
-            <div className="flex flex-col md:flex-row gap-2">
-              <FormField
-                control={form.control}
-                name="bloodGroup"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>Blood Group</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      disabled={createLoading || updateLoading}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a blood group" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="A+">A+</SelectItem>
-                        <SelectItem value="A-">A-</SelectItem>
-                        <SelectItem value="B+">B+</SelectItem>
-                        <SelectItem value="B-">B-</SelectItem>
-                        <SelectItem value="AB+">AB+</SelectItem>
-                        <SelectItem value="AB-">AB-</SelectItem>
-                        <SelectItem value="O+">O+</SelectItem>
-                        <SelectItem value="O-">O-</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="educationalQualification"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel
-                      className={`${
-                        (createLoading || updateLoading) &&
-                        "cursor-not-allowed text-gray-400"
-                      }`}
-                    >
-                      Educational Qualification
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        disabled={createLoading || updateLoading}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            {/* Permannet address and current address */}
-            <div className="flex flex-col md:flex-row gap-2">
-              {/* Permanent Address */}
-              <Popover>
-                <PopoverTrigger className="flex-1 flex gap-2 flex-col justify-start">
-                  <Label htmlFor="permanent">Permanent Address</Label>
-                  <Input
-                    value={`${form.watch("perVillage") || ""} ${
-                      form.watch("perPo") || ""
-                    } ${form.watch("perThana") || ""} ${
-                      form.watch("perDistrict") || ""
-                    }`}
-                    readOnly
-                    disabled={createLoading || updateLoading}
-                  />
-                </PopoverTrigger>
-                <PopoverContent className="flex flex-col gap-2">
-                  <FormField
-                    control={form.control}
-                    name="perVillage"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="Village (গ্রাম)"
-                            disabled={createLoading || updateLoading}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="perPo"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="P.O. (ডাকঘর)"
-                            disabled={createLoading || updateLoading}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="perThana"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="Thana (থানা)"
-                            disabled={createLoading || updateLoading}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="perDistrict"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="District (জেলা)"
-                            disabled={createLoading || updateLoading}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </PopoverContent>
-              </Popover>
-              {/* Current Address */}
-              <Popover>
-                <PopoverTrigger className="flex-1 flex gap-2 flex-col justify-start">
-                  <Label htmlFor="current">Current Address</Label>
-                  <Input
-                    value={`${form.watch("currVillage") || ""} ${
-                      form.watch("currHoldingNo") || ""
-                    } ${form.watch("currWardNo") || ""} ${
-                      form.watch("currThana") || ""
-                    } ${form.watch("currDistrict") || ""}`}
-                    readOnly
-                    disabled={createLoading || updateLoading}
-                  />
-                </PopoverTrigger>
-                <PopoverContent className="flex flex-col gap-2">
-                  <FormField
-                    control={form.control}
-                    name="currVillage"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="Village (গ্রাম)"
-                            disabled={createLoading || updateLoading}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="currHoldingNo"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="Holding No (হোল্ডিং নং)"
-                            disabled={createLoading || updateLoading}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="currWardNo"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="Ward No (ওয়ার্ড নং)"
-                            disabled={createLoading || updateLoading}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="currThana"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="Thana (থানা)"
-                            disabled={createLoading || updateLoading}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="currDistrict"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="District (জেলা)"
-                            disabled={createLoading || updateLoading}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            {/* Activities and Status */}
-            <div className="flex flex-col md:flex-row gap-2">
-              <FormField
-                control={form.control}
-                name="driverActivitiesId"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>Driver Activities</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      disabled={createLoading || updateLoading}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select activities" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {activities?.map((data) => (
-                          <SelectItem key={data.id} value={data.id}>
-                            {data.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="driverStatusId"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>Driver Status</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      disabled={createLoading || updateLoading}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {status?.map((data) => (
-                          <SelectItem key={data.id} value={data.id}>
-                            {data.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            {/* Vehicle type and Reg no. */}
-            <div className="flex flex-col md:flex-row gap-2">
-              <FormField
-                control={form.control}
-                name="vehicleTypeId"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>Vehicle Type</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      disabled={createLoading || updateLoading}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {types?.map((data) => (
-                          <SelectItem key={data.id} value={data.id}>
-                            {data.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormItem>
-                )}
-              />
-              {/* Vehicle Id */}
-              <Popover>
-                <PopoverTrigger className="flex-1 flex gap-2 flex-col justify-start">
-                  <Label htmlFor="vehicle">Vehicle Reg. No.</Label>
-                  <Input
-                    value={`${vehicle?.regNo || ""} ${
-                      vehicle?.ownerName || ""
-                    }`}
-                    readOnly
-                    disabled={createLoading || updateLoading}
-                  />
-                </PopoverTrigger>
-                <PopoverContent className="w-[360px] sm:w-[420px] p-2">
-                  <input
-                    type="text"
-                    placeholder="Search vehicle"
-                    onChange={handleSearchChangeVehicle}
-                    className="w-full px-3 py-1 rounded-md border border-gray-300 outline-gray-400 text-base text-gray-800"
-                  />
-                  <FormField
-                    control={form.control}
-                    name="vehicleId"
-                    render={() => (
-                      <FormItem className="w-full mt-1">
-                        <div className="flex space-x-5 font-semibold text-sm">
-                          <span>#</span>
-                          <div className="flex w-full">
-                            <span className="w-6/12">Reg. No.</span>
-                            <span className="w-6/12">Owner Name</span>
-                          </div>
-                        </div>
-
-                        <div className="h-[120px] w-full">
-                          {vehiclesLoading ? (
-                            <div className="h-[150px] w-full flex items-center justify-center">
-                              <LoadingComponent loader={vehiclesLoading} />
-                            </div>
-                          ) : (
-                            vehicles?.vehicles?.map((item) => (
-                              <FormField
-                                key={item.id}
-                                control={form.control}
-                                name="vehicleId"
-                                render={({ field }) => {
-                                  const handleCheckboxChange = () => {
-                                    // If the selected ID is the same as the current ID, deselect it
-                                    const newValue =
-                                      field.value === item.id ? "" : item.id;
-
-                                    // Update the form field
-                                    field.onChange(newValue);
-
-                                    // Call handleSelectedGarage with the selected or deselected ID
-                                    handleSelectedVehicle(newValue);
-                                  };
-
-                                  return (
-                                    <FormItem
-                                      key={item.id}
-                                      className="w-full flex space-x-3 space-y-0 mb-2"
-                                    >
-                                      <FormControl>
-                                        <Checkbox
-                                          checked={field.value === item.id}
-                                          onCheckedChange={handleCheckboxChange}
-                                        />
-                                      </FormControl>
-
-                                      <FormLabel className="font-normal w-full flex">
-                                        <span className="w-2/12">
-                                          {item.registrationNo}
-                                        </span>
-                                        <span className="w-5/12">
-                                          {item?.ownerName}
-                                        </span>
-                                      </FormLabel>
-                                    </FormItem>
-                                  );
-                                }}
-                              />
-                            ))
-                          )}
-                          {!vehiclesLoading &&
-                            vehicles?.vehicles.length < 1 && (
-                              <div className="h-[150px] w-full flex justify-center items-center">
-                                <p className="text-sm font-semibold text-red-500">
-                                  No vehicle found
-                                </p>
-                              </div>
-                            )}
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            {/* Follow Up By Authority */}
-            <div className="flex flex-col md:flex-row gap-2">
-              <FormField
-                control={form.control}
-                name="note"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel
-                      className={`${
-                        (createLoading || updateLoading) &&
-                        "cursor-not-allowed text-gray-400"
-                      }`}
-                    >
-                      Note
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        disabled={createLoading || updateLoading}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            {/* Driver Photo */}
-            <div>
-              <FormField
-                control={form.control}
-                name="picture"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel
-                      className={`${
-                        (createLoading || updateLoading) &&
-                        "cursor-not-allowed text-gray-400"
-                      }`}
-                    >
-                      Driver Photo
-                    </FormLabel>
-                    <FormControl>
-                      <div className="outline-dashed outline-1 outline-slate-500 relative cursor-pointer rounded-lg h-[130px] flex items-center justify-center">
-                        <Input
-                          {...fileRef}
-                          onChange={(e) => setFile(e.target.files[0])}
-                          type="file"
-                          accept=".jpeg, .jpg, .png, .gif, .tiff, .tif, .webp, .svg"
-                          disabled={createLoading || updateLoading}
-                          className="absolute top-0 left-0 bottom-0 right-0 w-full h-full opacity-0"
-                        />
-                        {file || existImgUrl ? (
-                          <img
-                            src={file ? URL.createObjectURL(file) : existImgUrl}
-                            alt=""
-                            className="h-full"
-                          />
-                        ) : (
-                          <div className="flex items-center justify-center flex-col p-8 w-full">
-                            <CloudUpload className="text-gray-500 w-10 h-10" />
-                            <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">
-                              <span className="font-semibold">
-                                Click to upload
-                              </span>
-                              &nbsp; or drag and drop
-                            </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                              PNG, JPG, JPEG, GIF, TIFF,TIF, WEBP or SVG
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            {/* Add other fields as necessary */}
-            <Button
-              type="submit"
-              disabled={
-                createLoading ||
-                updateLoading ||
-                auth?.role?.name === "VIEWER" ||
-                auth?.role?.name === "DEMO"
-              }
-            >
-              {createLoading || updateLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please
-                  wait...
-                </>
-              ) : (
-                "Submit"
-              )}
-            </Button>
-          </form>
-        </Form>
-      </DialogBox>
-    );
-  };
-  return (
-    <div>
-      <PageHeader
-        title1={"Dashboard/Drivers"}
-        title2={"Drivers"}
-        button1={createDriverDialogComponent()}
       />
+      {/* Create and update driver dialog and form */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent
+          className="max-h-[95vh] sm:max-w-[625px] overflow-y-auto"
+          // onClick={(e) => e.stopPropagation()}
+          onPointerDownOutside={(event) => event.preventDefault()}
+          onInteractOutside={(event) => event.preventDefault()}
+        >
+          <DialogHeader>
+            <DialogTitle>
+              {isEditing ? "Update driver" : "Create driver"}
+            </DialogTitle>
+          </DialogHeader>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              encType="multipart/form-data"
+              className="space-y-2"
+            >
+              {/* Driver name */}
+              <div className="flex flex-col md:flex-row gap-2">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel
+                        className={`${
+                          (createLoading || updateLoading) &&
+                          "cursor-not-allowed text-gray-400"
+                        }`}
+                      >
+                        Driver Name (চালকের নাম ইংরেজি)*
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          disabled={createLoading || updateLoading}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="nameBn"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel
+                        className={`${
+                          (createLoading || updateLoading) &&
+                          "cursor-not-allowed text-gray-400"
+                        }`}
+                      >
+                        Driver Name (চালকের নাম বাংলা)*
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          disabled={createLoading || updateLoading}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              {/* Father & Mother name */}
+              <div className="flex flex-col md:flex-row gap-2">
+                <FormField
+                  control={form.control}
+                  name="fatherName"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel
+                        className={`${
+                          (createLoading || updateLoading) &&
+                          "cursor-not-allowed text-gray-400"
+                        }`}
+                      >
+                        Father Name
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          disabled={createLoading || updateLoading}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="motherName"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel
+                        className={`${
+                          (createLoading || updateLoading) &&
+                          "cursor-not-allowed text-gray-400"
+                        }`}
+                      >
+                        Mother Name
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          disabled={createLoading || updateLoading}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              {/* NID NO and Nid DOB */}
+              <div className="flex flex-col md:flex-row gap-2">
+                <FormField
+                  control={form.control}
+                  name="nidNo"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel
+                        className={`${
+                          (createLoading || updateLoading) &&
+                          "cursor-not-allowed text-gray-400"
+                        }`}
+                      >
+                        Driver NID NO.
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          disabled={createLoading || updateLoading}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="nidDob"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel
+                        className={`${
+                          (createLoading || updateLoading) &&
+                          "cursor-not-allowed text-gray-400"
+                        }`}
+                      >
+                        Driver NID DOB
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="date"
+                          {...field}
+                          value={field.value}
+                          disabled={createLoading || updateLoading}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              {/* Mobile No & Licence No */}
+              <div className="flex flex-col md:flex-row gap-2">
+                <FormField
+                  control={form.control}
+                  name="mobileNo"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel
+                        className={`${
+                          (createLoading || updateLoading) &&
+                          "cursor-not-allowed text-gray-400"
+                        }`}
+                      >
+                        Driver Mobile No
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          disabled={createLoading || updateLoading}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="drivingLicenseNo"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel
+                        className={`${
+                          (createLoading || updateLoading) &&
+                          "cursor-not-allowed text-gray-400"
+                        }`}
+                      >
+                        Driving License No
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          disabled={createLoading || updateLoading}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              {/* Blood group & Educational Qulification */}
+              <div className="flex flex-col md:flex-row gap-2">
+                <FormField
+                  control={form.control}
+                  name="bloodGroup"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel>Blood Group</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        disabled={createLoading || updateLoading}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a blood group" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="A+">A+</SelectItem>
+                          <SelectItem value="A-">A-</SelectItem>
+                          <SelectItem value="B+">B+</SelectItem>
+                          <SelectItem value="B-">B-</SelectItem>
+                          <SelectItem value="AB+">AB+</SelectItem>
+                          <SelectItem value="AB-">AB-</SelectItem>
+                          <SelectItem value="O+">O+</SelectItem>
+                          <SelectItem value="O-">O-</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="educationalQualification"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel
+                        className={`${
+                          (createLoading || updateLoading) &&
+                          "cursor-not-allowed text-gray-400"
+                        }`}
+                      >
+                        Educational Qualification
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          disabled={createLoading || updateLoading}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              {/* Permannet address and current address */}
+              <div className="flex flex-col md:flex-row gap-2">
+                {/* Permanent Address */}
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div className="flex-1 flex gap-2 flex-col justify-start">
+                      <Label htmlFor="permanent">Permanent Address</Label>
+                      <Input
+                        value={`${form.watch("perVillage") || ""} ${
+                          form.watch("perPo") || ""
+                        } ${form.watch("perThana") || ""} ${
+                          form.watch("perDistrict") || ""
+                        }`}
+                        readOnly
+                        disabled={createLoading || updateLoading}
+                      />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="flex flex-col gap-2">
+                    <FormField
+                      control={form.control}
+                      name="perVillage"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Village (গ্রাম)"
+                              disabled={createLoading || updateLoading}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="perPo"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="P.O. (ডাকঘর)"
+                              disabled={createLoading || updateLoading}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="perThana"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Thana (থানা)"
+                              disabled={createLoading || updateLoading}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="perDistrict"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="District (জেলা)"
+                              disabled={createLoading || updateLoading}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </PopoverContent>
+                </Popover>
+                {/* Current Address */}
+                <Popover>
+                  <PopoverTrigger className="flex-1 flex gap-2 flex-col justify-start">
+                    <Label htmlFor="current">Current Address</Label>
+                    <Input
+                      value={`${form.watch("currVillage") || ""} ${
+                        form.watch("currHoldingNo") || ""
+                      } ${form.watch("currWardNo") || ""} ${
+                        form.watch("currThana") || ""
+                      } ${form.watch("currDistrict") || ""}`}
+                      readOnly
+                      disabled={createLoading || updateLoading}
+                    />
+                  </PopoverTrigger>
+                  <PopoverContent className="flex flex-col gap-2">
+                    <FormField
+                      control={form.control}
+                      name="currVillage"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Village (গ্রাম)"
+                              disabled={createLoading || updateLoading}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="currHoldingNo"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Holding No (হোল্ডিং নং)"
+                              disabled={createLoading || updateLoading}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="currWardNo"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Ward No (ওয়ার্ড নং)"
+                              disabled={createLoading || updateLoading}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="currThana"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Thana (থানা)"
+                              disabled={createLoading || updateLoading}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="currDistrict"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="District (জেলা)"
+                              disabled={createLoading || updateLoading}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              {/* Activities and Status */}
+              <div className="flex flex-col md:flex-row gap-2">
+                <FormField
+                  control={form.control}
+                  name="driverActivitiesId"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel>Driver Activities</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        disabled={createLoading || updateLoading}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select activities" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {activities?.map((data) => (
+                            <SelectItem key={data.id} value={data.id}>
+                              {data.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="driverStatusId"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel>Driver Status</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        disabled={createLoading || updateLoading}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {status?.map((data) => (
+                            <SelectItem key={data.id} value={data.id}>
+                              {data.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              {/* Vehicle type and Reg no. */}
+              <div className="flex flex-col md:flex-row gap-2">
+                <FormField
+                  control={form.control}
+                  name="vehicleTypeId"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel>Vehicle Type</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        disabled={createLoading || updateLoading}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {types?.map((data) => (
+                            <SelectItem key={data.id} value={data.id}>
+                              {data.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+                {/* Vehicle Id */}
+                <Popover>
+                  <PopoverTrigger className="flex-1 flex gap-2 flex-col justify-start">
+                    <Label htmlFor="vehicle">Vehicle Reg. No.</Label>
+                    <Input
+                      value={`${vehicle?.regNo || ""} ${
+                        vehicle?.ownerName || ""
+                      }`}
+                      readOnly
+                      disabled={createLoading || updateLoading}
+                    />
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[360px] sm:w-[420px] p-2">
+                    <input
+                      type="text"
+                      placeholder="Search vehicle"
+                      onChange={handleSearchChangeVehicle}
+                      className="w-full px-3 py-1 rounded-md border border-gray-300 outline-gray-400 text-base text-gray-800"
+                    />
+                    <FormField
+                      control={form.control}
+                      name="vehicleId"
+                      render={() => (
+                        <FormItem className="w-full mt-1">
+                          <div className="flex space-x-5 font-semibold text-sm">
+                            <span>#</span>
+                            <div className="flex w-full">
+                              <span className="w-6/12">Reg. No.</span>
+                              <span className="w-6/12">Owner Name</span>
+                            </div>
+                          </div>
+
+                          <div className="h-[120px] w-full">
+                            {vehiclesLoading ? (
+                              <div className="h-[150px] w-full flex items-center justify-center">
+                                <LoadingComponent loader={vehiclesLoading} />
+                              </div>
+                            ) : (
+                              vehicles?.vehicles?.map((item) => (
+                                <FormField
+                                  key={item.id}
+                                  control={form.control}
+                                  name="vehicleId"
+                                  render={({ field }) => {
+                                    const handleCheckboxChange = () => {
+                                      // If the selected ID is the same as the current ID, deselect it
+                                      const newValue =
+                                        field.value === item.id ? "" : item.id;
+
+                                      // Update the form field
+                                      field.onChange(newValue);
+
+                                      // Call handleSelectedGarage with the selected or deselected ID
+                                      handleSelectedVehicle(newValue);
+                                    };
+
+                                    return (
+                                      <FormItem
+                                        key={item.id}
+                                        className="w-full flex space-x-3 space-y-0 mb-2"
+                                      >
+                                        <FormControl>
+                                          <Checkbox
+                                            checked={field.value === item.id}
+                                            onCheckedChange={
+                                              handleCheckboxChange
+                                            }
+                                          />
+                                        </FormControl>
+
+                                        <FormLabel className="font-normal w-full flex">
+                                          <span className="w-2/12">
+                                            {item.registrationNo}
+                                          </span>
+                                          <span className="w-5/12">
+                                            {item?.ownerName}
+                                          </span>
+                                        </FormLabel>
+                                      </FormItem>
+                                    );
+                                  }}
+                                />
+                              ))
+                            )}
+                            {!vehiclesLoading &&
+                              vehicles?.vehicles.length < 1 && (
+                                <div className="h-[150px] w-full flex justify-center items-center">
+                                  <p className="text-sm font-semibold text-red-500">
+                                    No vehicle found
+                                  </p>
+                                </div>
+                              )}
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              {/* Follow Up By Authority */}
+              <div className="flex flex-col md:flex-row gap-2">
+                <FormField
+                  control={form.control}
+                  name="note"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel
+                        className={`${
+                          (createLoading || updateLoading) &&
+                          "cursor-not-allowed text-gray-400"
+                        }`}
+                      >
+                        Note
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          disabled={createLoading || updateLoading}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              {/* Driver Photo */}
+              <div>
+                <FormField
+                  control={form.control}
+                  name="picture"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel
+                        className={`${
+                          (createLoading || updateLoading) &&
+                          "cursor-not-allowed text-gray-400"
+                        }`}
+                      >
+                        Driver Photo
+                      </FormLabel>
+                      <FormControl>
+                        <div className="outline-dashed outline-1 outline-slate-500 relative cursor-pointer rounded-lg h-[130px] flex items-center justify-center">
+                          <Input
+                            {...fileRef}
+                            onChange={(e) => setFile(e.target.files[0])}
+                            type="file"
+                            accept=".jpeg, .jpg, .png, .gif, .tiff, .tif, .webp, .svg"
+                            disabled={createLoading || updateLoading}
+                            className="absolute top-0 left-0 bottom-0 right-0 w-full h-full opacity-0"
+                          />
+                          {file || existImgUrl ? (
+                            <img
+                              src={
+                                file ? URL.createObjectURL(file) : existImgUrl
+                              }
+                              alt=""
+                              className="h-full"
+                            />
+                          ) : (
+                            <div className="flex items-center justify-center flex-col p-8 w-full">
+                              <CloudUpload className="text-gray-500 w-10 h-10" />
+                              <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">
+                                <span className="font-semibold">
+                                  Click to upload
+                                </span>
+                                &nbsp; or drag and drop
+                              </p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                                PNG, JPG, JPEG, GIF, TIFF,TIF, WEBP or SVG
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              {/* Add other fields as necessary */}
+              <Button
+                type="submit"
+                disabled={
+                  createLoading ||
+                  updateLoading ||
+                  auth?.role?.name === "VIEWER" ||
+                  auth?.role?.name === "DEMO"
+                }
+              >
+                {createLoading || updateLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please
+                    wait...
+                  </>
+                ) : (
+                  "Submit"
+                )}
+              </Button>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
       <div className="bg-white shadow-md rounded-md">
         <div className="p-1">
           <ul className="flex flex-wrap justify-center gap-3 items-center pb-2 text-sm font-semibold">
@@ -1402,7 +1408,10 @@ const Drivers = () => {
           <DialogHeader>
             <DialogTitle>Driver Details</DialogTitle>
             <DialogDescription>
-              View details for driver {selectedDriver?.coxscabId}
+              View details for driver{" "}
+              <span className="text-primary font-bold">
+                {selectedDriver?.coxscabId}
+              </span>
             </DialogDescription>
           </DialogHeader>
           <ScrollArea className="max-h-[60vh] pr-2">
@@ -1542,7 +1551,10 @@ const Drivers = () => {
           <DialogHeader>
             <DialogTitle>Vehicle Details</DialogTitle>
             <DialogDescription>
-              View details for vehicle {selectedVehicle?.registrationNo}
+              View details for vehicle{" "}
+              <span className="text-primary font-bold">
+                {selectedVehicle?.registrationNo}
+              </span>
             </DialogDescription>
           </DialogHeader>
           {selectedVehicle && (

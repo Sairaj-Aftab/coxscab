@@ -33,7 +33,7 @@ model Place {
     area_bn        String?
     district       String?
     postcode       String?
-    location       Json
+    location       Json     // {type : "Point", coordinates : [longitude, latitude] }
     startFor       Package[] @relation("startPoint", fields: [startForId], references: [id])
     startForId     String[] @db.ObjectId
     endFor         Package[] @relation( "endPoint", fields: [endForId], references: [id])

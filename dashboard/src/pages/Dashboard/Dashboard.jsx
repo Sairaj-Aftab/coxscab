@@ -161,11 +161,11 @@ const Dashboard = () => {
           labels={vehicleTypes}
           data={vehicleCounts}
         />
-        <RoundedChart
+        {/* <RoundedChart
           title={"Vehicle Conditions"}
           labels={vehicleConditions}
           data={vehicleCountsConditions}
-        />
+        /> */}
         <RoundedChart
           title={"Driver"}
           labels={driverTypes}

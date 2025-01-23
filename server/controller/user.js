@@ -3,7 +3,11 @@ import bcrypt from "bcrypt";
 import createError from "../utils/createError.js";
 import { createRefreshToken, createToken } from "../utils/token.js";
 import { sendSMStoPhone } from "../utils/sendSmsToPhone.js";
-import generateOtp from "../utils/generateOtp.js";
+import {
+  generateSixDigitOtp,
+  generateFourDigitOtp,
+} from "../utils/generateOtp.js";
+import { getObjectSignedUrl } from "../utils/s3.js";
 const prisma = new PrismaClient();
 
 export const sendLoginOtpToUser = async (req, res, next) => {
@@ -18,7 +22,9 @@ export const sendLoginOtpToUser = async (req, res, next) => {
     if (!user) {
       return next(createError(404, "User not found"));
     }
-    const otp = generateOtp();
+
+    const otp =
+      role === "DRIVER" ? generateFourDigitOtp() : generateSixDigitOtp();
     const otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000); // OTP valid for 5 minutes
 
     const updatedUser = await prisma.user.update({
@@ -51,25 +57,48 @@ export const sendLoginOtpToUser = async (req, res, next) => {
 // login user through phone number and otp
 export const loginUser = async (req, res, next) => {
   try {
-    const { role, phone, otp, device, ipAddress, location, platform } =
-      req.body;
+    const {
+      role,
+      phone,
+      bpNo,
+      password,
+      otp,
+      device,
+      ipAddress,
+      location,
+      platform,
+    } = req.body;
 
     const user = await prisma.user.findFirst({
-      where: {
-        phone,
-        role,
-      },
+      where: role === "ADMIN" ? { bpNo } : { phone, role },
     });
-    if (!user) {
-      return next(createError(404, "User not found"));
-    }
+    if (!user) return next(createError(404, "User not found"));
 
-    if (!user.otp || new Date() > user.otpExpiresAt) {
-      return next(createError(401, "OTP has expired."));
-    }
+    if (role === "ADMIN") {
+      const statusMessages = {
+        PENDING:
+          "Your account is pending approval. Please wait for admin verification.",
+        INACTIVE:
+          "Your account is inactive. Please contact support for assistance.",
+        SUSPENDED:
+          "Your account has been suspended due to policy violations. Please contact support.",
+        BLOCKED:
+          "Your account is blocked. Please reach out to support for more information.",
+      };
 
-    if (user.otp !== otp) {
-      return next(createError(404, "Wrong OTP"));
+      const isPasswordCorrect = await bcrypt.compare(password, user.password);
+      if (!isPasswordCorrect) return next(createError(401, "Wrong password"));
+      if (user.status !== "ACTIVE") {
+        return next(createError(400, statusMessages[user.status]));
+      }
+    } else {
+      if (!user.otp || new Date() > user.otpExpiresAt) {
+        return next(createError(401, "OTP has expired."));
+      }
+
+      if (user.otp !== otp) {
+        return next(createError(404, "Wrong OTP"));
+      }
     }
 
     // Update lastLoginDate and lastLoginIp
@@ -197,7 +226,7 @@ export const registerUser = async (req, res, next) => {
       location,
     } = req.body;
 
-    const otp = generateOtp();
+    const otp = generateSixDigitOtp();
     const otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000); // OTP valid for 5 minutes
 
     const user = await prisma.user.findFirst({
@@ -267,10 +296,9 @@ export const registerUser = async (req, res, next) => {
 // Register driver user account for providing services to riders
 export const registerDriverUser = async (req, res, next) => {
   try {
-    const { coxscabId, phone } = req.body;
-    console.log(req.body);
+    const { coxscabId, phone, device, ipAddress, location } = req.body;
 
-    const otp = generateOtp();
+    const otp = generateFourDigitOtp();
     const otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000); // OTP valid for 5 minutes
 
     const coxscabDriverId = await prisma.driver.findUnique({
@@ -307,10 +335,11 @@ export const registerDriverUser = async (req, res, next) => {
         role: "DRIVER",
       },
     });
+
     if (user) {
       const updatedUser = await prisma.user.update({
         where: {
-          phone: user.phone,
+          id: user.id,
         },
         data: {
           firstName: driver.name,
@@ -322,6 +351,11 @@ export const registerDriverUser = async (req, res, next) => {
         select: {
           phone: true,
           otpExpiresAt: true,
+          driver: {
+            select: {
+              coxscabId: true,
+            },
+          },
         },
       });
       if (updatedUser) {
@@ -340,15 +374,78 @@ export const registerDriverUser = async (req, res, next) => {
         otp,
         otpExpiresAt,
         driverId: driver.id,
+        registerDevice: device,
+        registeredLocation: location,
+        registerIp: ipAddress,
       },
       select: {
         phone: true,
         otpExpiresAt: true,
+        driver: {
+          select: {
+            coxscabId: true,
+          },
+        },
       },
     });
     if (createUser) {
       await sendSMStoPhone(createUser.phone, `OTP is ${otp}`);
     }
+
+    return res
+      .status(200)
+      .json({ user: createUser, message: "User created successfully" });
+  } catch (error) {
+    return next(error);
+  }
+};
+// Register admin user for managing mobile account for providing services to riders
+export const registerAdminUser = async (req, res, next) => {
+  try {
+    const {
+      name,
+      mobileNumber,
+      bpNo,
+      rank,
+      unit,
+      password,
+      device,
+      ipAddress,
+      location,
+    } = req.body;
+
+    const existingAdmin = await prisma.user.findFirst({
+      where: {
+        phone: mobileNumber,
+        role: "ADMIN",
+        bpNo,
+      },
+    });
+
+    if (existingAdmin) {
+      return next(
+        createError(400, "Admin account already exists. Please log in")
+      );
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const createUser = await prisma.user.create({
+      data: {
+        firstName: name,
+        phone: mobileNumber,
+        role: "ADMIN",
+        bpNo,
+        rank,
+        unit,
+        status: "PENDING",
+        password: hashedPassword,
+        registerDevice: device,
+        registeredLocation: location,
+        registerIp: ipAddress,
+      },
+    });
+
     return res
       .status(200)
       .json({ user: createUser, message: "User created successfully" });
@@ -422,11 +519,30 @@ export const getAllUsers = async (req, res, next) => {
         { lastOnlineTime: "desc" },
         { createdAt: "desc" },
       ],
+      include: {
+        driver: true,
+      },
     });
+
+    const userInfoWithUrls = await Promise.all(
+      users.map(async (user) => {
+        if (user?.driver?.picture) {
+          try {
+            user.pictureUrl = await getObjectSignedUrl(user.driver.picture);
+          } catch (err) {
+            user.pictureUrl = null; // Set to null if URL generation fails
+          }
+        }
+        return user;
+      })
+    );
+
     const totalUsers = await prisma.user.count({
       where: filters,
     });
-    return res.status(200).json({ users, totalUsers, success: true });
+    return res
+      .status(200)
+      .json({ users: userInfoWithUrls, totalUsers, success: true });
   } catch (error) {
     return next(error);
   }
