@@ -8,7 +8,8 @@ import {
   registerDriverUser,
   registerUser,
   sendLoginOtpToUser,
-  updateUserLocation,
+  updateLocation,
+  updateUserData,
   updateUserStatus,
 } from "../controller/user.js";
 import { refreshToken } from "../middleware/refreshToken.js";
@@ -25,7 +26,8 @@ router.post("/auth-refresh", refreshToken);
 router.post("/send-otp", sendLoginOtpToUser);
 router.get("/user", verifyUserToken, logedInUser);
 router.post("/logout-user/:id", logOut);
-router.patch("/user-location/:id", updateUserLocation);
+router.patch("/update-user/:id", updateUserData);
+router.patch("/update-location/:id", updateLocation);
 
 // Get All users
 router.get("/all-users", getAllUsers);

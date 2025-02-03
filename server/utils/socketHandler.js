@@ -186,7 +186,7 @@ const socketHandler = (io) => {
               id: disconnectedUser.id,
             },
             data: {
-              isOnline: false,
+              // isOnline: false,
               lastOnlineTime: new Date(),
             },
           });

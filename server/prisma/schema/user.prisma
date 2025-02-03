@@ -28,6 +28,7 @@ model User {
   registerIp         String?
   lastLoginDevice    Json?
   refreshToken   UserRefreshToken[]
+  login          Boolean?
   lastLoginTime  DateTime?
   lastLoginIp    String?
   lastLogoutTime DateTime?
@@ -46,6 +47,8 @@ model User {
   bpNo           String? // For Admin
   rank           String? // For Admin
   unit           String? // For Admin
+  callSign       String? // For Admin
+  aor            String? // For Admin
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
   paymentMethods Payment[]   @relation("UserPayments")

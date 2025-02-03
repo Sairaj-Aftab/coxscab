@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
-import { createToken } from "../utils/token.js";
+import { createRefreshToken, createToken } from "../utils/token.js";
 const prisma = new PrismaClient();
 // Refresh Token
 export const refreshToken = async (req, res) => {
@@ -47,10 +47,24 @@ export const refreshToken = async (req, res) => {
     }
 
     const newAccessToken = createToken({ id: user.id });
+    const newRefreshToken = createRefreshToken({ id: user.id }, "1y");
+    // console.log(isValidToken);
+    // const ref = await prisma.userRefreshToken.update({
+    //   where: { token: userRefreshToken },
+    //   data: {
+    //     token: newRefreshToken,
+    //     expiresAt: new Date(Date.now() + 1 * 365 * 24 * 60 * 60 * 1000),
+    //   },
+    //   include: {
+    //     user: true,
+    //   },
+    // });
+
     return res.status(200).json({
       success: true,
       message: "Access token refreshed successfully.",
       accessToken: newAccessToken,
+      refreshToken: userRefreshToken,
     });
   } catch (error) {
     return res.status(401).json({ message: "Invalid refresh token" });

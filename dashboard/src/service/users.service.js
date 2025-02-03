@@ -1,9 +1,16 @@
 import axiosInstance from "./url.service";
 
-export const getAllUsers = async ({ search, status, role, page, limit }) => {
+export const getAllUsers = async ({
+  search,
+  status,
+  role,
+  activity,
+  page,
+  limit,
+}) => {
   try {
     const response = await axiosInstance.get(`/user/all-users`, {
-      params: { search, status, role, page, limit },
+      params: { search, status, role, activity, page, limit },
     });
 
     return response.data;

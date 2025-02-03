@@ -22,6 +22,10 @@ import visitor from "./routes/visitorCount.js";
 import packageItems from "./routes/package.js";
 import errorHandler from "./middleware/errorHandler.js";
 import socketHandler from "./utils/socketHandler.js";
+import notice from "./routes/notice.js";
+import { EventEmitter } from "events";
+
+export const eventEmitter = new EventEmitter();
 
 env.config();
 
@@ -42,7 +46,6 @@ app.use(
       process.env.ADMIN_DOMAIN2,
       process.env.MAIN_DOMAIN1,
       process.env.MAIN_DOMAIN2,
-      "http://192.168.160.166:8081",
     ],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     credentials: true,
@@ -59,7 +62,6 @@ const io = new Server(server, {
       process.env.ADMIN_DOMAIN2,
       process.env.MAIN_DOMAIN1,
       process.env.MAIN_DOMAIN2,
-      "http://192.168.160.166:8081",
     ],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     credentials: true,
@@ -81,6 +83,7 @@ app.use("/api/v1/permission", permission);
 app.use("/api/v1/role", role);
 app.use("/api/v1/visitorcount", visitor);
 app.use("/api/v1/package", packageItems);
+app.use("/api/v1/notice", notice);
 
 // Socket Connection
 socketHandler(io);

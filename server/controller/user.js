@@ -105,6 +105,7 @@ export const loginUser = async (req, res, next) => {
     const updatedUser = await prisma.user.update({
       where: { id: user.id },
       data: {
+        login: true,
         lastLoginLocation: location,
         lastLoginDevice: device,
         lastLoginTime: new Date(),
@@ -190,6 +191,7 @@ export const logOut = async (req, res, next) => {
     await prisma.user.update({
       where: { id },
       data: {
+        login: false,
         otp: null,
         otpExpiresAt: null,
         lastLogoutTime: new Date(),
@@ -454,17 +456,39 @@ export const registerAdminUser = async (req, res, next) => {
   }
 };
 
-export const updateUserLocation = async (req, res, next) => {
+// Update user data
+export const updateUserData = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { locationData } = req.body;
+    const { callSign, aor } = req.body;
     const user = await prisma.user.update({
       where: { id },
       data: {
-        location: locationData,
+        callSign,
+        aor,
       },
     });
-    return res.status(200).json({ user, message: "User location updated" });
+    return res.status(200).json({ user, message: "Successfully updated" });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+// Update Location
+export const updateLocation = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { location } = req.body;
+    const user = await prisma.user.update({
+      where: { id },
+      data: {
+        location: {
+          type: "Point",
+          coordinates: [location.longitude, location.latitude],
+        },
+      },
+    });
+    return res.status(200).json({ user, message: "Successfully updated" });
   } catch (error) {
     return next(error);
   }
@@ -479,6 +503,7 @@ export const getAllUsers = async (req, res, next) => {
     const searchQuery = req.query.search;
     const role = req.query.role;
     const status = req.query.status;
+    const activity = req.query.activity;
 
     const filters = {
       ...(searchQuery || status || role
@@ -488,6 +513,9 @@ export const getAllUsers = async (req, res, next) => {
                 ? [{ status: { equals: status } }]
                 : []), // Match enum value if not "ALL"
               ...(role && role !== "ALL" ? [{ role: { equals: role } }] : []), // Match type if not "ALL"
+              ...(activity && activity !== "ALL"
+                ? [{ login: activity === "LOGIN" ? true : false }]
+                : []),
               ...(searchQuery
                 ? [
                     {

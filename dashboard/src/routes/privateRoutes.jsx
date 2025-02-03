@@ -18,6 +18,7 @@ import Places from "@/pages/Places/Places";
 import Package from "@/pages/Package/Package";
 import UsersMap from "@/pages/UsersMap/UsersMap";
 import TrackUserMap from "@/pages/TrackUserMap/TrackUserMap";
+import Notice from "@/pages/Notice/Notice";
 
 const privateRoutes = [
   {
@@ -58,6 +59,10 @@ const privateRoutes = [
           {
             path: "/review",
             element: <Review />,
+          },
+          {
+            path: "/notice",
+            element: <Notice />,
           },
           {
             path: "/places",

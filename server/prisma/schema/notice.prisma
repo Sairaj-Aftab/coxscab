@@ -1,0 +1,10 @@
+
+
+model Notice {
+    id             String     @id @default(auto()) @map("_id") @db.ObjectId
+    title       String
+    user        UserRole @unique  // for CUSTOMER, DRIVER, or ADMIN
+    status      Boolean   @default(true)
+    createdAt   DateTime   @default(now())
+    updatedAt   DateTime   @updatedAt
+}

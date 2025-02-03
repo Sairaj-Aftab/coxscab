@@ -17,6 +17,7 @@ import {
   Lock,
   Map,
   MapPin,
+  NotepadTextIcon,
   Package,
   ShieldCheck,
   Star,
@@ -97,6 +98,12 @@ const SideBar = () => {
       name: "Review",
       icon: <Star className="w-4 h-4" />,
       permission: "REVIEW",
+    },
+    {
+      to: "/notice",
+      name: "Notice",
+      icon: <NotepadTextIcon className="w-4 h-4" />,
+      permission: "NOTICE",
     },
     {
       to: "/notification",

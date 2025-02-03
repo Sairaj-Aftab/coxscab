@@ -34,6 +34,9 @@ import {
   Ban,
   Car,
   CheckCircle,
+  Filter,
+  LogIn,
+  LogOut,
   MapPin,
   MoreHorizontal,
   Search,
@@ -54,6 +57,7 @@ const Users = () => {
   const [showTrackDialog, setShowTrackDialog] = useState(false);
   const [status, setStatus] = useState("ALL");
   const [role, setRole] = useState("ALL");
+  const [activity, setActivity] = useState("ALL");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -68,6 +72,7 @@ const Users = () => {
         search,
         status,
         role,
+        activity,
         page,
         limit,
       },
@@ -77,6 +82,7 @@ const Users = () => {
         search,
         status,
         role,
+        activity,
         page,
         limit,
       }),
@@ -97,6 +103,7 @@ const Users = () => {
             search,
             status,
             role,
+            activity,
             page,
             limit,
           },
@@ -245,18 +252,31 @@ const Users = () => {
       width: "120px",
     },
     {
+      name: "CallSign",
+      selector: (row) => row.callSign,
+      sortable: true,
+      width: "80px",
+    },
+    {
+      name: "AoR",
+      selector: (row) => row.aor,
+      sortable: true,
+      width: "170px",
+    },
+    {
       name: "Last Active",
       selector: (row) =>
         formatDateTime(row.lastOnlineTime ? row.lastOnlineTime : row.createdAt),
       sortable: true,
       width: "170px",
     },
-    {
-      name: "Join Date",
-      selector: (row) => formatDateTime(row.createdAt),
-      sortable: true,
-      width: "170px",
-    },
+
+    // {
+    //   name: "Join Date",
+    //   selector: (row) => formatDateTime(row.createdAt),
+    //   sortable: true,
+    //   width: "170px",
+    // },
     {
       name: "Actions",
       cell: (row) => (
@@ -353,6 +373,43 @@ const Users = () => {
               <SelectItem value="CUSTOMER">Riders</SelectItem>
               <SelectItem value="DRIVER">Drivers</SelectItem>
               <SelectItem value="ADMIN">Admin</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select
+            value={activity}
+            onValueChange={(value) => setActivity(value)}
+          >
+            <SelectTrigger className="w-full md:w-[180px]">
+              <div className="flex items-center gap-2">
+                <Filter className="h-4 w-4 opacity-50" />
+                <SelectValue placeholder="Filter activity" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">
+                <span className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-gray-400" />
+                  All Activity
+                </span>
+              </SelectItem>
+              <SelectItem value="LOGIN">
+                <span className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-green-500" />
+                  <span className="flex items-center gap-1">
+                    <LogIn className="h-4 w-4" />
+                    Logins
+                  </span>
+                </span>
+              </SelectItem>
+              <SelectItem value="LOGOUT">
+                <span className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-red-500" />
+                  <span className="flex items-center gap-1">
+                    <LogOut className="h-4 w-4" />
+                    Logouts
+                  </span>
+                </span>
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
