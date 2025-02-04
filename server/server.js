@@ -24,6 +24,7 @@ import errorHandler from "./middleware/errorHandler.js";
 import socketHandler from "./utils/socketHandler.js";
 import notice from "./routes/notice.js";
 import { EventEmitter } from "events";
+import { setupLocationStream } from "./utils/changeStream.js";
 
 export const eventEmitter = new EventEmitter();
 
@@ -98,3 +99,4 @@ server.listen(PORT, () => {
     `Server running in ${process.env.NODE_ENV} mode on port ${PORT}`.yellow.bold
   );
 });
+setupLocationStream();

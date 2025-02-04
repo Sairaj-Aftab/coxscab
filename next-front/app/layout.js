@@ -3,7 +3,6 @@ import localFont from "next/font/local";
 import "./globals.css";
 import Providers from "./providers";
 import Header from "@/components/Header";
-import MainSidebar from "@/components/MainSidebar";
 import Footer from "@/components/Footer";
 import { Toaster } from "@/components/ui/toaster";
 import logo from "@/public/logo.png";
@@ -30,17 +29,12 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthGuard>
-          <Providers>
-            <Toaster />
-            <MainSidebar />
-            <div className="flex flex-col w-full">
-              <Header />
-              {children}
-              <Footer />
-            </div>
-          </Providers>
-        </AuthGuard>
+        <Toaster />
+        <div className="flex flex-col w-full">
+          <Header />
+          {children}
+          <Footer />
+        </div>
       </body>
     </html>
   );

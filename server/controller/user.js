@@ -479,6 +479,7 @@ export const updateLocation = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { location } = req.body;
+
     const user = await prisma.user.update({
       where: { id },
       data: {
@@ -488,6 +489,8 @@ export const updateLocation = async (req, res, next) => {
         },
       },
     });
+    // console.log(user?.location);
+
     return res.status(200).json({ user, message: "Successfully updated" });
   } catch (error) {
     return next(error);
