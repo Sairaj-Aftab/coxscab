@@ -1,10 +1,10 @@
-import socket from "@/lib/socket";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect } from "react";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import L from "leaflet";
 import { useParams } from "react-router-dom";
 import userIconSvg from "../../assets/svg/userIcon.svg";
 import policeUserIconSvg from "../../assets/svg/policeUserIcon.svg";
+import useUsers from "@/store/useUsers";
 
 const setIcon = (icon) => {
   return L.icon({
@@ -27,25 +27,29 @@ const DynamicCenter = ({ center }) => {
 };
 
 const TrackUserMap = () => {
+  const { onlineUsers } = useUsers();
   const params = useParams();
-  const [activeUser, setActiveUser] = useState(null);
 
-  useEffect(() => {
-    if (socket) {
-      socket.on("allUsers", (data) => {
-        const user = data?.find((user) => user.id === params.id);
-        setActiveUser(user);
-      });
-      return () => {
-        socket.off("allUsers");
-      };
-    }
-  }, [params.id]);
+  // useEffect(() => {
+  //   if (socket) {
+  //     socket.on("allUsers", (data) => {
+  //       const user = ;
+  //       setActiveUser(user);
+  //     });
+  //     return () => {
+  //       socket.off("allUsers");
+  //     };
+  //   }
+  // }, [params.id]);
+
+  const activeUser = onlineUsers?.find((user) => user._id === params.id);
 
   const userLocation = activeUser?.location;
   const hasLocation =
-    userLocation?.latitude !== undefined &&
-    userLocation?.longitude !== undefined;
+    userLocation?.coordinates[0] !== undefined &&
+    userLocation?.coordinates[1] !== undefined;
+
+  console.log("hello map", hasLocation);
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
@@ -53,7 +57,7 @@ const TrackUserMap = () => {
         className="w-full h-full mt-4 rounded-lg"
         center={
           hasLocation
-            ? [userLocation.latitude, userLocation.longitude]
+            ? [userLocation.coordinates[1], userLocation.coordinates[0]]
             : [21.446717897966725, 91.97569339597321]
         }
         zoom={15}
@@ -67,14 +71,17 @@ const TrackUserMap = () => {
         {/* Dynamically update the center */}
         {hasLocation && (
           <DynamicCenter
-            center={[userLocation.latitude, userLocation.longitude]}
+            center={[userLocation.coordinates[1], userLocation.coordinates[0]]}
           />
         )}
 
         {/* Marker for active user */}
         {hasLocation && (
           <Marker
-            position={[userLocation.latitude, userLocation.longitude]}
+            position={[
+              userLocation.coordinates[1],
+              userLocation.coordinates[0],
+            ]}
             icon={setIcon(
               activeUser?.role === "CUSTOMER" ? userIconSvg : policeUserIconSvg
             )}

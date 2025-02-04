@@ -1,10 +1,9 @@
-import socket from "@/lib/socket";
-import { useEffect, useState } from "react";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import L from "leaflet";
 import userIconSvg from "../../assets/svg/userIcon.svg";
 import policeUserIconSvg from "../../assets/svg/policeUserIcon.svg";
 import { Badge } from "@/components/ui/badge";
+import useUsers from "@/store/useUsers";
 
 const setIcon = (icon) => {
   return L.icon({
@@ -15,18 +14,8 @@ const setIcon = (icon) => {
   });
 };
 const UsersMap = () => {
-  const [activeUsers, setActiveUsers] = useState([]);
+  const { onlineUsers } = useUsers();
 
-  useEffect(() => {
-    if (socket) {
-      socket.on("allUsers", (data) => {
-        setActiveUsers(data);
-      });
-      return () => {
-        socket.off("allUsers");
-      };
-    }
-  }, []);
   return (
     <div className="w-full h-full relative">
       <div className="absolute bottom-3 left-3 z-[9999] flex gap-1">
@@ -35,7 +24,7 @@ const UsersMap = () => {
           className="text-sm font-semibold bg-black/50 text-white px-2 py-1"
         >
           Users:{" "}
-          <span className="text-green-400 ml-1">{activeUsers.length}</span>
+          <span className="text-green-400 ml-1">{onlineUsers.length}</span>
         </Badge>
         {/* <Badge
           variant="secondary"
@@ -62,16 +51,19 @@ const UsersMap = () => {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        {activeUsers
+        {onlineUsers
           ?.filter(
             (user) =>
-              user?.location?.latitude !== undefined &&
-              user?.location?.longitude !== undefined
+              user?.location?.coordinates[1] !== undefined &&
+              user?.location?.coordinates[0] !== undefined
           )
           .map((user) => (
             <Marker
-              key={user.id}
-              position={[user?.location.latitude, user?.location.longitude]}
+              key={user._id}
+              position={[
+                user?.location.coordinates[1],
+                user?.location.coordinates[0],
+              ]}
               icon={setIcon(
                 user?.role === "CUSTOMER" ? userIconSvg : policeUserIconSvg
               )}

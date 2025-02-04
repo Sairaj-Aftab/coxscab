@@ -489,9 +489,10 @@ export const updateLocation = async (req, res, next) => {
         },
       },
     });
-    // console.log(user?.location);
 
-    return res.status(200).json({ user, message: "Successfully updated" });
+    return res
+      .status(200)
+      .json({ success: true, message: "Successfully updated" });
   } catch (error) {
     return next(error);
   }
@@ -545,11 +546,7 @@ export const getAllUsers = async (req, res, next) => {
       skip: offset,
       take: limit,
       where: filters,
-      orderBy: [
-        { isOnline: "desc" },
-        { lastOnlineTime: "desc" },
-        { createdAt: "desc" },
-      ],
+      orderBy: [{ updatedAt: "desc" }, { createdAt: "desc" }],
       include: {
         driver: true,
       },

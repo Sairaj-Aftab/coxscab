@@ -1,73 +1,44 @@
-// streams.js
 import { connectDB, usersCollection } from "./db.js";
-// import { io } from "./socket.js"; // Your Socket.io instance
 
-export async function setupLocationStream() {
+let updatedUsers = new Map(); // Use a Map for O(1) lookups
+
+export async function setupLocationStream(io) {
   await connectDB();
-  console.log("Connected to MongoDB");
 
-  const pipeline = [
-    {
-      $match: {
-        $and: [
-          { operationType: "update" },
-          {
-            $or: [
-              {
-                "updateDescription.updatedFields.location.coordinates.0": {
-                  $exists: true,
-                },
-              },
-              {
-                "updateDescription.updatedFields.location.coordinates.1": {
-                  $exists: true,
-                },
-              },
-              {
-                "updateDescription.updatedFields.location.coordinates": {
-                  $exists: true,
-                },
-              },
-            ],
-          },
-        ],
-      },
-    },
-  ];
-
-  const changeStream = usersCollection.watch();
-  //   console.log("Change Stream started", changeStream);
+  const changeStream = usersCollection.watch([], {
+    fullDocument: "updateLookup",
+  });
 
   changeStream.on("change", (change) => {
-    // console.log("Change detected:", change);
-    // console.log("Full Document:", change.fullDocument);
-    const updatedFields = change.updateDescription?.updatedFields;
+    if (change.fullDocument) {
+      const now = new Date();
 
-    // Check for updates in the entire location object or coordinates
-    const coordinates =
-      updatedFields?.["location.coordinates"] ||
-      updatedFields?.location?.coordinates;
+      // Ensure `updatedAt` exists, otherwise use current time
+      change.fullDocument.updatedAt =
+        change.fullDocument.updatedAt || now.toISOString();
 
-    if (coordinates) {
-      console.log("Updated Fields:", coordinates);
-    } else {
-      console.log("No coordinate updates detected.");
+      // Store user in the Map with `_id` as key
+      updatedUsers.set(change.fullDocument._id.toString(), change.fullDocument);
+
+      // Emit only this updated user to reduce data load
+      io.of("/admin").emit("userUpdated", change.fullDocument);
     }
-
-    // const userId = change.documentKey;
-    // const coordinates =
-    //   change.updateDescription.updatedFields["location.coordinates"];
-    // console.log(userId);
-
-    // Emit to all clients listening to this user's updates
-    // io.emit(`location:update:${userId}`, {
-    //   userId,
-    //   coordinates: newLocation.coordinates,
-    //   timestamp: new Date(),
-    // });
   });
 
   changeStream.on("error", (error) => {
     console.error("Change Stream error:", error);
   });
+
+  // Cleanup function running every 30 seconds
+  setInterval(() => {
+    const now = new Date();
+    updatedUsers.forEach((user, key) => {
+      if (!user.updatedAt || now - new Date(user.updatedAt) > 60 * 1000) {
+        updatedUsers.delete(key); // Remove expired users
+      }
+    });
+
+    // Emit only if there are updates
+    io.of("/admin").emit("allUsers", Array.from(updatedUsers.values()));
+  }, 30 * 1000); // Cleanup every 30 seconds
 }

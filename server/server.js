@@ -87,7 +87,7 @@ app.use("/api/v1/package", packageItems);
 app.use("/api/v1/notice", notice);
 
 // Socket Connection
-socketHandler(io);
+// socketHandler(io);
 app.set("socketio", io);
 
 // Error Handler
@@ -99,4 +99,4 @@ server.listen(PORT, () => {
     `Server running in ${process.env.NODE_ENV} mode on port ${PORT}`.yellow.bold
   );
 });
-setupLocationStream();
+setupLocationStream(io);

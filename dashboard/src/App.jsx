@@ -24,10 +24,12 @@ import useVehicleCondition from "./store/useVehicleCondition";
 import useVehicleType from "./store/useVehicleType";
 import socket from "./lib/socket";
 import addNotification, { Notifications } from "react-push-notification";
+import useUsers from "./store/useUsers";
 
 function App() {
   const dispatch = useDispatch();
   const { setLogedInUser } = useAuth();
+  const { setOnlineUsers } = useUsers();
   const { setActivities } = useDriverActivities();
   const { setDriverStatus } = useDriverStatus();
   const { setVehicleConditions } = useVehicleCondition();
@@ -82,6 +84,14 @@ function App() {
       loader: typesLoading,
     });
   }, [setVehicleTypes, types?.types, typesLoading]);
+
+  useEffect(() => {
+    if (socket) {
+      socket.on("allUsers", (data) => {
+        setOnlineUsers(data);
+      });
+    }
+  }, [setOnlineUsers]);
 
   useEffect(() => {
     if (socket) {

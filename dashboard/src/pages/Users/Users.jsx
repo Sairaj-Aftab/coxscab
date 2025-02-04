@@ -47,13 +47,13 @@ import { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
 import { getAllUsers, updateUserStatus } from "@/service/users.service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import socket from "@/lib/socket";
 import { useNavigate } from "react-router-dom";
+import useUsers from "@/store/useUsers";
 
 const Users = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const [onlineUsers, setOnlineUsers] = useState([]);
+  const { onlineUsers } = useUsers();
   const [showTrackDialog, setShowTrackDialog] = useState(false);
   const [status, setStatus] = useState("ALL");
   const [role, setRole] = useState("ALL");
@@ -153,17 +153,6 @@ const Users = () => {
       });
     }
   }, [updateError]);
-  // Active Users from Socket
-  useEffect(() => {
-    if (socket) {
-      socket.on("allUsers", (data) => {
-        setOnlineUsers(data);
-      });
-      return () => {
-        socket.off("allUsers");
-      };
-    }
-  }, []);
 
   const columns = [
     {
@@ -199,7 +188,7 @@ const Users = () => {
                   .toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            {onlineUsers?.find((user) => user.id === row.id) && (
+            {onlineUsers?.find((user) => user._id === row.id) && (
               <span className="absolute top-0 right-0 bg-green-600 w-3 h-3 rounded-full z-50 border-2 border-white"></span>
             )}
           </div>
@@ -266,7 +255,7 @@ const Users = () => {
     {
       name: "Last Active",
       selector: (row) =>
-        formatDateTime(row.lastOnlineTime ? row.lastOnlineTime : row.createdAt),
+        formatDateTime(row.updatedAt ? row.updatedAt : row.createdAt),
       sortable: true,
       width: "170px",
     },
