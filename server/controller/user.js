@@ -418,16 +418,22 @@ export const registerAdminUser = async (req, res, next) => {
 
     const existingAdmin = await prisma.user.findFirst({
       where: {
-        phone: mobileNumber,
         role: "ADMIN",
-        bpNo,
+        OR: [{ bpNo }, { phone: mobileNumber }],
       },
     });
 
     if (existingAdmin) {
-      return next(
-        createError(400, "Admin account already exists. Please log in")
-      );
+      if (existingAdmin.bpNo === bpNo) {
+        return next(
+          createError(400, "BP Number already exists. Please log in")
+        );
+      }
+      if (existingAdmin.phone === mobileNumber) {
+        return next(
+          createError(400, "Mobile number already exists. Please log in")
+        );
+      }
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -480,8 +486,8 @@ export const updateLocation = async (req, res, next) => {
     const { id } = req.params;
     const { location } = req.body;
 
-    const user = await prisma.user.update({
-      where: { id },
+    await prisma.user.update({
+      where: { id: String(id) },
       data: {
         location: {
           type: "Point",
@@ -490,9 +496,7 @@ export const updateLocation = async (req, res, next) => {
       },
     });
 
-    return res
-      .status(200)
-      .json({ success: true, message: "Successfully updated" });
+    return res.status(200).json({ success: true });
   } catch (error) {
     return next(error);
   }

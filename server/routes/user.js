@@ -27,7 +27,7 @@ router.post("/send-otp", sendLoginOtpToUser);
 router.get("/user", verifyUserToken, logedInUser);
 router.post("/logout-user/:id", logOut);
 router.patch("/update-user/:id", updateUserData);
-router.patch("/update-location/:id", updateLocation);
+router.patch("/location/:id", updateLocation);
 
 // Get All users
 router.get("/all-users", getAllUsers);

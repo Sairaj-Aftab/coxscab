@@ -86,12 +86,15 @@ function App() {
   }, [setVehicleTypes, types?.types, typesLoading]);
 
   useEffect(() => {
-    if (socket) {
+    socket.on("connect", () => {
       socket.on("allUsers", (data) => {
         setOnlineUsers(data);
       });
-    }
-  }, [setOnlineUsers]);
+    });
+    return () => {
+      socket.off("allUsers");
+    };
+  }, [socket]);
 
   useEffect(() => {
     if (socket) {

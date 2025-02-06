@@ -24,7 +24,8 @@ import errorHandler from "./middleware/errorHandler.js";
 import socketHandler from "./utils/socketHandler.js";
 import notice from "./routes/notice.js";
 import { EventEmitter } from "events";
-import { setupLocationStream } from "./utils/changeStream.js";
+import { setupChangeStream } from "./utils/changeStream.js";
+import { connectDB } from "./utils/db.js";
 
 export const eventEmitter = new EventEmitter();
 
@@ -94,9 +95,10 @@ app.set("socketio", io);
 app.use(errorHandler);
 
 // App listen
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
+  await connectDB();
+  setupChangeStream(io);
   console.log(
     `Server running in ${process.env.NODE_ENV} mode on port ${PORT}`.yellow.bold
   );
 });
-setupLocationStream(io);
