@@ -132,17 +132,9 @@ const Users = () => {
     });
   };
 
-  const handleSavePermissions = () => {
-    // if (selectedUser) {
-    //   setUsers(
-    //     users.map((user) =>
-    //       user.id === selectedUser.id
-    //         ? { ...user, permissions: editedPermissions }
-    //         : user
-    //     )
-    //   );
-    //   setIsEditPermissionsOpen(false);
-    // }
+  const handleViewDetails = (data) => {
+    setIsViewDetailsOpen(true);
+    setSelectedUser(data);
   };
 
   useEffect(() => {
@@ -253,19 +245,23 @@ const Users = () => {
       width: "170px",
     },
     {
+      name: "Track",
+      // selector: (row) => row.aor,
+      cell: (row) => (
+        <div onClick={() => navigate(`/map/${row.id}`)}>
+          <MapPin className="w-4 h-4" />
+        </div>
+      ),
+      sortable: true,
+      width: "40px",
+    },
+    {
       name: "Last Active",
       selector: (row) =>
         formatDateTime(row.updatedAt ? row.updatedAt : row.createdAt),
       sortable: true,
       width: "170px",
     },
-
-    // {
-    //   name: "Join Date",
-    //   selector: (row) => formatDateTime(row.createdAt),
-    //   sortable: true,
-    //   width: "170px",
-    // },
     {
       name: "Actions",
       cell: (row) => (
@@ -278,14 +274,10 @@ const Users = () => {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            {/* <DropdownMenuItem onClick={() => handleViewDetails(row)}>
-            <User className="w-4 h-4 mr-2" />
-            View Details
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleEditPermissions(row)}>
-            <Shield className="w-4 h-4 mr-2" />
-            Edit Permissions
-          </DropdownMenuItem> */}
+            <DropdownMenuItem onClick={() => handleViewDetails(row)}>
+              <User className="w-4 h-4 mr-2" />
+              View Details
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate(`/map/${row.id}`)}>
               <MapPin className="w-4 h-4 mr-2" />
               Track User
@@ -376,27 +368,18 @@ const Users = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="ALL">
-                <span className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-gray-400" />
-                  All Activity
-                </span>
+                <span className="flex items-center gap-2">All Activity</span>
               </SelectItem>
               <SelectItem value="LOGIN">
-                <span className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-green-500" />
-                  <span className="flex items-center gap-1">
-                    <LogIn className="h-4 w-4" />
-                    Logins
-                  </span>
+                <span className="flex items-center gap-1">
+                  <LogIn className="h-4 w-4" />
+                  Logins
                 </span>
               </SelectItem>
               <SelectItem value="LOGOUT">
-                <span className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-red-500" />
-                  <span className="flex items-center gap-1">
-                    <LogOut className="h-4 w-4" />
-                    Logouts
-                  </span>
+                <span className="flex items-center gap-1">
+                  <LogOut className="h-4 w-4" />
+                  Logouts
                 </span>
               </SelectItem>
             </SelectContent>
@@ -439,33 +422,39 @@ const Users = () => {
           {selectedUser && (
             <div className="space-y-4">
               <div className="flex items-center space-x-4">
-                <Avatar className="w-16 h-16">
-                  <AvatarImage
-                    src={`https://api.dicebear.com/6.x/initials/svg?seed=${selectedUser.name}`}
-                    alt={selectedUser?.name}
-                  />
+                <Avatar>
+                  {selectedUser?.pictureUrl ? (
+                    <img
+                      src={selectedUser.pictureUrl}
+                      alt={selectedUser.firstName}
+                      className="object-cover rounded-full"
+                    />
+                  ) : (
+                    <AvatarImage
+                      src={`https://api.dicebear.com/6.x/initials/svg?seed=${selectedUser.firstName}`}
+                      alt={selectedUser.firstName}
+                      className="object-cover"
+                    />
+                  )}
                   <AvatarFallback>
-                    {selectedUser?.name
+                    {selectedUser?.firstName
                       ?.split(" ")
-                      ?.map((n) => n[0])
+                      .map((n) => n[0])
                       .join("")
                       .toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div>
                   <h3 className="text-lg font-semibold">
-                    {selectedUser?.name}
+                    {selectedUser?.firstName}
                   </h3>
-                  <p className="text-sm text-gray-500">{selectedUser?.email}</p>
+                  <p className="text-sm text-gray-500">{selectedUser?.phone}</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>User Type</Label>
-                  <p>
-                    {selectedUser?.type?.charAt(0).toUpperCase() +
-                      selectedUser?.type?.slice(1)}
-                  </p>
+                  <p>{selectedUser?.role}</p>
                 </div>
                 <div>
                   <Label>Status</Label>
@@ -475,92 +464,30 @@ const Users = () => {
                   </p>
                 </div>
                 <div>
-                  <Label>Join Date</Label>
-                  <p>{selectedUser.joinDate}</p>
-                </div>
-                <div>
                   <Label>Last Active</Label>
-                  <p>{selectedUser.lastActive}</p>
+                  <p>
+                    {formatDateTime(
+                      selectedUser.updatedAt
+                        ? selectedUser.updatedAt
+                        : selectedUser.createdAt
+                    )}
+                  </p>
                 </div>
-              </div>
-              <div>
-                <Label>Permissions</Label>
-                <ul className="list-disc list-inside">
-                  {selectedUser?.permissions?.map((permission) => (
-                    <li key={permission}>
-                      {allPermissions.find((p) => p.id === permission)?.label}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Permissions Dialog */}
-      <Dialog
-        open={isEditPermissionsOpen}
-        onOpenChange={setIsEditPermissionsOpen}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit User Permissions</DialogTitle>
-          </DialogHeader>
-          {selectedUser && (
-            <div className="space-y-4">
-              <div className="flex items-center space-x-4">
-                <Avatar>
-                  <AvatarImage
-                    src={`https://api.dicebear.com/6.x/initials/svg?seed=${selectedUser.name}`}
-                    alt={selectedUser.name}
-                  />
-                  <AvatarFallback>
-                    {selectedUser?.name
-                      ?.split(" ")
-                      ?.map((n) => n[0])
-                      .join("")
-                      .toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
                 <div>
-                  <h3 className="text-lg font-semibold">{selectedUser.name}</h3>
-                  <p className="text-sm text-gray-500">{selectedUser.email}</p>
+                  <Label>Join Date</Label>
+                  <p>{formatDateTime(selectedUser.createdAt)}</p>
                 </div>
-              </div>
-              <div className="space-y-2">
-                {allPermissions?.map((permission) => (
-                  <div
-                    key={permission.id}
-                    className="flex items-center space-x-2"
-                  >
-                    <Checkbox
-                      id={permission.id}
-                      checked={editedPermissions?.includes(permission.id)}
-                      onCheckedChange={() =>
-                        handlePermissionChange(permission.id)
-                      }
-                    />
-                    <label
-                      htmlFor={permission.id}
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      {permission.label}
-                    </label>
-                  </div>
-                ))}
+                <div>
+                  <Label>Last Login Device</Label>
+                  <p>{selectedUser?.lastLoginDevice?.device?.model}</p>
+                </div>
+                <div>
+                  <Label>Register Device</Label>
+                  <p>{selectedUser?.registerDevice?.device?.model}</p>
+                </div>
               </div>
             </div>
           )}
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsEditPermissionsOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button onClick={handleSavePermissions}>Save Changes</Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

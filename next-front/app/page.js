@@ -7,7 +7,7 @@ export default async function Main() {
   const data = await getPackages({ limit: 1000 });
 
   return (
-    <main className="w-full">
+    <main>
       <Suspense fallback={<LoadingComponent />}>
         <Home data={data} />
       </Suspense>
