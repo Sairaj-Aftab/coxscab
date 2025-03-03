@@ -11,10 +11,20 @@ import {
   BriefcaseBusiness,
   Notebook,
   HelpCircle,
+  Info,
 } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
-const MobileMenu = ({ isOpen, menuItems, onClose }) => {
+const MobileMenu = ({ isOpen, menuItems, onClose, currentPath }) => {
+  const isMenuItemActive = (itemPath) => {
+    // Special case for home route
+    if (itemPath === "/") {
+      return currentPath === "/";
+    }
+    // For other routes, check if current path starts with the item path
+    return currentPath.startsWith(itemPath);
+  };
   return (
     <div
       className={`fixed inset-0 bg-gray-800 bg-opacity-75 z-50 transition-opacity duration-300 ease-in-out ${
@@ -33,17 +43,26 @@ const MobileMenu = ({ isOpen, menuItems, onClose }) => {
             <X className="h-6 w-6" />
           </button>
           <div className="mt-8 space-y-4">
-            {menuItems.map((item) => (
-              <Link
-                key={item.label}
-                href={item.path}
-                onClick={onClose}
-                className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50 transition duration-300 ease-in-out"
-              >
-                {item.icon}
-                <span className="ml-2">{item.label}</span>
-              </Link>
-            ))}
+            {menuItems.map((item) => {
+              const isActive = isMenuItemActive(item.path);
+              return (
+                <Link
+                  key={item.label}
+                  href={item.path}
+                  onClick={onClose}
+                  className={`flex items-center px-3 py-2 rounded-md text-base font-medium transition duration-300 ease-in-out ${
+                    isActive
+                      ? "text-primary bg-gray-50 font-semibold"
+                      : "text-gray-700 hover:text-primary hover:bg-gray-50"
+                  }`}
+                >
+                  <span className={isActive ? "text-primary" : ""}>
+                    {item.icon}
+                  </span>
+                  <span className="ml-2">{item.label}</span>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -53,6 +72,17 @@ const MobileMenu = ({ isOpen, menuItems, onClose }) => {
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const currentPath = usePathname();
+
+  // Function to check if a menu item is active
+  const isMenuItemActive = (itemPath) => {
+    // Special case for home route
+    if (itemPath === "/") {
+      return currentPath === "/";
+    }
+    // For other routes, check if current path starts with the item path
+    return currentPath.startsWith(itemPath);
+  };
 
   const menuItems = [
     { label: "Ride", path: "/", icon: <Car className="w-5 h-5" /> },
@@ -61,6 +91,11 @@ const Header = () => {
       label: "Popular Destination",
       path: "/popular-destination",
       icon: <MapPinned className="w-5 h-5" />,
+    },
+    {
+      label: "Lost & Found",
+      path: "/lost-and-found",
+      icon: <Info className="w-5 h-5" />,
     },
     {
       label: "Business",
@@ -96,17 +131,25 @@ const Header = () => {
           {/* Desktop menu */}
           <div className="hidden md:flex items-center">
             <div className="flex space-x-4">
-              {menuItems.map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.path}
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-primary hover:bg-gray-50"
-                >
-                  {item.icon}
-                  <span className="ml-2">{item.label}</span>
-                </Link>
-              ))}
+              {menuItems.map((item) => {
+                const isActive = isMenuItemActive(item.path);
+                return (
+                  <Link
+                    key={item.label}
+                    href={item.path}
+                    className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition duration-300 ease-in-out ${
+                      isActive
+                        ? "text-primary bg-gray-50 font-semibold"
+                        : "text-gray-700 hover:text-primary hover:bg-gray-50"
+                    }`}
+                  >
+                    <span className={isActive ? "text-primary" : ""}>
+                      {item.icon}
+                    </span>
+                    <span className="ml-2">{item.label}</span>
+                  </Link>
+                );
+              })}
             </div>
           </div>
 
@@ -123,11 +166,11 @@ const Header = () => {
       </div>
 
       {/* Mobile menu */}
-      {/* Mobile menu */}
       <MobileMenu
         isOpen={isOpen}
         menuItems={menuItems}
         onClose={() => setIsOpen(false)}
+        currentPath={currentPath}
       />
     </nav>
   );

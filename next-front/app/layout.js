@@ -1,11 +1,8 @@
-import AuthGuard from "./authGuard";
 import localFont from "next/font/local";
 import "./globals.css";
-import Providers from "./providers";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Toaster } from "@/components/ui/toaster";
-import logo from "@/public/logo.png";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",

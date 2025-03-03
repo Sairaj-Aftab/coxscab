@@ -34,13 +34,13 @@ export default function Home() {
                 variant="outline"
                 className="flex items-center justify-center text-black "
               >
-                <Image
+                {/* <Image
                   src="/google-play-logo.png"
                   alt="Google Play"
                   width={20}
                   height={20}
                   className="mr-2"
-                />
+                /> */}
                 Get it on Google Play
               </Button>
             </div>

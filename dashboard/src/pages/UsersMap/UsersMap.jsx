@@ -60,10 +60,11 @@ const UsersMap = () => {
           .map((user) => (
             <Marker
               key={user._id}
-              position={[
-                user?.location.coordinates[1],
-                user?.location.coordinates[0],
-              ]}
+              position={[21.416168436869683, 91.98431669489936]}
+              // position={[
+              //   user?.location.coordinates[1],
+              //   user?.location.coordinates[0],
+              // ]}
               icon={setIcon(
                 user?.role === "CUSTOMER" ? userIconSvg : policeUserIconSvg
               )}
@@ -71,6 +72,22 @@ const UsersMap = () => {
               <Popup>{user?.firstName || "Unknown"}</Popup>
             </Marker>
           ))}
+        <Marker
+          // key={user._id}
+          position={[21.416168436869683, 91.98431669489936]}
+          // position={[
+          //   user?.location.coordinates[1],
+          //   user?.location.coordinates[0],
+          // ]}
+          icon={setIcon(policeUserIconSvg)}
+        >
+          <Popup>
+            <div className="flex items-center gap-2">
+              <h2>Sairaj Aftab</h2>
+              <p></p>
+            </div>
+          </Popup>
+        </Marker>
       </MapContainer>
     </div>
   );

@@ -134,3 +134,18 @@ img {
     transform: translateX(calc(100vw + 100px));
   }
 }
+
+/* Wave for coxscab animation */
+@keyframes wave {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+.animate-wave {
+  animation: wave 1.5s ease-in-out infinite;
+}
