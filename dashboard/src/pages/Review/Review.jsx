@@ -131,9 +131,14 @@ const Review = () => {
   }, [updateError, updatedData]);
 
   const columns = [
+    // {
+    //   name: "#",
+    //   selector: (data, index) => calculateItemIndex(page, limit, index),
+    //   width: "60px",
+    // },
     {
-      name: "#",
-      selector: (data, index) => calculateItemIndex(page, limit, index),
+      name: "ID",
+      selector: (data) => data.reviewId,
       width: "60px",
     },
     {
@@ -157,11 +162,11 @@ const Review = () => {
       ),
       sortable: true,
     },
-    {
-      name: "Reviewee",
-      selector: (row) => row.driver?.name,
-      sortable: true,
-    },
+    // {
+    //   name: "Reviewee",
+    //   selector: (row) => row.driver?.name,
+    //   sortable: true,
+    // },
     {
       name: "Driver ID",
       cell: (row) => (
@@ -176,15 +181,24 @@ const Review = () => {
     },
     {
       name: "Rating",
-      selector: (row) => row.managerName,
+      selector: (data) => data.rating,
+      sortable: true,
       cell: (row) => (
-        <div className="flex items-center">
-          {row.rating}
-          <Star className="w-4 h-4 ml-1 text-yellow-400" fill="currentColor" />
+        <div className="flex">
+          {[...Array(5)].map((_, i) => (
+            <Star
+              key={i}
+              className={`h-4 w-4 ${
+                i < row.rating
+                  ? "text-yellow-400 fill-yellow-400"
+                  : "text-gray-300"
+              }`}
+            />
+          ))}
+          {row.comment && <Check className="w-4 h-4 ml-1 text-primary" />}
         </div>
       ),
-      sortable: true,
-      width: "90px",
+      width: "115px",
     },
     {
       name: "Date",

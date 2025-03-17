@@ -19,8 +19,20 @@ export const createReview = async (req, res, next) => {
       coordinates,
     } = req.body;
 
+    // Get the last entry and increment the serial number
+    const lastEntry = await prisma.review.findFirst({
+      orderBy: {
+        reviewId: "desc", // Sorting by the serial number to get the last one
+      },
+      select: { reviewId: true },
+    });
+
+    // Set the new serial number (if there's no previous entry, start from 1)
+    const newReviewId = lastEntry ? lastEntry.reviewId + 1 : 1;
+
     const review = await prisma.review.create({
       data: {
+        reviewId: parseInt(newReviewId),
         type,
         rideId,
         reviewerId,
@@ -171,3 +183,26 @@ export const updateReviewStatus = async (req, res, next) => {
     return next(error);
   }
 };
+
+// export const setReviewId = async (req, res, next) => {
+//   try {
+//     const reviews = await prisma.review.findMany({
+//       orderBy: {
+//         createdAt: "asc",
+//       },
+//       select: { id: true },
+//     });
+
+//     // Update each review one by one asynchronously
+//     for (let i = 0; i < reviews.length; i++) {
+//       await prisma.review.update({
+//         where: { id: reviews[i].id },
+//         data: { reviewId: i + 1 },
+//       });
+//     }
+
+//     return res.status(200).json({ message: "Successfully updated" });
+//   } catch (error) {
+//     return next(error);
+//   }
+// };

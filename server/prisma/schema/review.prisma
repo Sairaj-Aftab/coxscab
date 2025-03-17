@@ -6,6 +6,7 @@ enum ReviewStatus {
 
 model Review {
   id             String     @id @default(auto()) @map("_id") @db.ObjectId
+  reviewId       Int @unique
   type           String
   rideId         String?     @db.ObjectId
   ride           Ride?       @relation(fields: [rideId], references: [id])

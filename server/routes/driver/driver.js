@@ -3,6 +3,7 @@ import {
   createDriver,
   deleteDriver,
   findNearbyDrivers,
+  generateDriversFrom,
   getDriver,
   getDrivers,
   updateDriver,
@@ -18,5 +19,7 @@ router.put("/:id", upload.single("picture"), updateDriver);
 router.delete("/delete/:id", deleteDriver);
 
 router.get("/get-nearby", findNearbyDrivers);
+
+// router.post("/generate", generateDriversFrom);
 
 export default router;

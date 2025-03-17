@@ -457,18 +457,18 @@ export const deleteDriver = async (req, res, next) => {
 };
 export const generateDriversFrom = async (req, res, next) => {
   try {
-    const totalDrivers = 1000; // Total drivers you want to generate
-    const batchSize = 1000; // Process 100 drivers in the first batch
+    const startId = 5751; // Start from 5001
+    const endId = 6000; // End at 5010
     const drivers = [];
 
-    // Start generating drivers from 107 up to 107 + batchSize
-    for (let i = 4000; i < 4000 + batchSize; i++) {
-      const coxscabId = String(i + 1).padStart(4, "0");
+    // Generate drivers from 5001 to 5010
+    for (let i = startId; i <= endId; i++) {
+      const coxscabId = String(i).padStart(4, "0");
 
       drivers.push({
         coxscabId,
-        name: `Name${i + 1}`,
-        nameBn: `নাম${i + 1}`,
+        name: `Name${i}`,
+        nameBn: `নাম${i}`,
         nidDob: null,
         driverActivitiesId: null,
         driverStatusId: null,

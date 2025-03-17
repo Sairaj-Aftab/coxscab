@@ -11,4 +11,6 @@ router.post("/", createReview);
 router.get("/all", getReviews);
 router.put("/status/:id", updateReviewStatus);
 
+// router.patch("/setid", setReviewId);
+
 export default router;
