@@ -125,27 +125,27 @@ const QrInfoPage = ({ driver, totalReviewCount, averageRating }) => {
             <InfoItem
               icon={Car}
               label="Vehicle Type"
-              value={driver.vehicleType?.name || "N/A"}
+              value={driver?.vehicleType?.name || "N/A"}
             />
             <InfoItem
               icon={FileText}
               label="Vehicle Reg. No."
-              value={driver.vehicle?.registrationNo || "N/A"}
+              value={driver?.vehicle?.registrationNo || "N/A"}
             />
             <InfoItem
               icon={Activity}
               label="Status"
-              value={driver.driverStatus?.name || "N/A"}
+              value={driver?.driverStatus?.name || "N/A"}
             />
             <InfoItem
               icon={IdCard}
               label="Driver License"
               value={
                 driver?.drivingLicenseNo
-                  ? `${driver.drivingLicenseNo.slice(
+                  ? `${driver?.drivingLicenseNo?.slice(
                       0,
                       2
-                    )}********${driver.drivingLicenseNo.slice(-2)}`
+                    )}********${driver?.drivingLicenseNo?.slice(-2)}`
                   : "N/A"
               }
             />
@@ -167,22 +167,22 @@ const QrInfoPage = ({ driver, totalReviewCount, averageRating }) => {
                   <InfoItem
                     icon={MapPin}
                     label="Village"
-                    value={driver.currentAddress?.village || "N/A"}
+                    value={driver?.currentAddress?.village || "N/A"}
                   />
                   <InfoItem
                     icon={MapPin}
                     label="Ward No"
-                    value={driver.currentAddress?.wardNo || "N/A"}
+                    value={driver?.currentAddress?.wardNo || "N/A"}
                   />
                   <InfoItem
                     icon={MapPin}
                     label="Thana"
-                    value={driver.currentAddress?.thana || "N/A"}
+                    value={driver?.currentAddress?.thana || "N/A"}
                   />
                   <InfoItem
                     icon={MapPin}
                     label="District"
-                    value={driver.currentAddress?.district || "N/A"}
+                    value={driver?.currentAddress?.district || "N/A"}
                   />
                 </div>
               </div>
@@ -202,22 +202,22 @@ const QrInfoPage = ({ driver, totalReviewCount, averageRating }) => {
                     <InfoItem
                       icon={MapPin}
                       label="Village"
-                      value={driver.permanentAddress?.village || "N/A"}
+                      value={driver?.permanentAddress?.village || "N/A"}
                     />
                     <InfoItem
                       icon={MapPin}
                       label="PO"
-                      value={driver.permanentAddress?.po || "N/A"}
+                      value={driver?.permanentAddress?.po || "N/A"}
                     />
                     <InfoItem
                       icon={MapPin}
                       label="Thana"
-                      value={driver.permanentAddress?.thana || "N/A"}
+                      value={driver?.permanentAddress?.thana || "N/A"}
                     />
                     <InfoItem
                       icon={MapPin}
                       label="District"
-                      value={driver.permanentAddress?.district || "N/A"}
+                      value={driver?.permanentAddress?.district || "N/A"}
                     />
                   </div>
                 </div>
