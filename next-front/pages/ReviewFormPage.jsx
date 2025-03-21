@@ -154,164 +154,146 @@ const ReviewFormPage = ({ driver }) => {
 
   return (
     <>
-      <Card className="w-[93%] max-w-lg mx-auto my-5">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold">Rate Your Trip</CardTitle>
-          <CardDescription>
-            How was your ride with {driver?.name}?
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-2">
-              {!user && (
-                <>
-                  {/* Name */}
-                  <FormField
-                    control={control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Your name" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  {/* Phone */}
-                  <FormField
-                    control={control}
-                    name="reviewerPhone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Phone</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Your phone number" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </>
-              )}
-              {/* Rating */}
+      <Form {...form}>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-2">
+          {!user && (
+            <>
+              {/* Name */}
               <FormField
                 control={control}
-                name="rating"
+                name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Overall Rating</FormLabel>
+                    <FormLabel>Name</FormLabel>
                     <FormControl>
-                      <div className="flex items-center">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star
-                            key={star}
-                            className={`w-8 h-8 cursor-pointer transition-colors ${
-                              star <= (hoverRating || field.value)
-                                ? "text-yellow-400 fill-yellow-400"
-                                : "text-gray-300"
-                            }`}
-                            onMouseEnter={() => setHoverRating(star)}
-                            onMouseLeave={() => setHoverRating(0)}
-                            onClick={() => field.onChange(star)}
-                          />
-                        ))}
-                      </div>
+                      <Input placeholder="Your name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              {/* Comment */}
+              {/* Phone */}
               <FormField
                 control={control}
-                name="comment"
+                name="reviewerPhone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Additional Comments</FormLabel>
+                    <FormLabel>Phone</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder="Tell us about your experience..."
-                        className="resize-none"
-                        {...field}
+                      <Input placeholder="Your phone number" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </>
+          )}
+          {/* Rating */}
+          <FormField
+            control={control}
+            name="rating"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Overall Rating</FormLabel>
+                <FormControl>
+                  <div className="flex items-center">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        className={`w-8 h-8 cursor-pointer transition-colors ${
+                          star <= (hoverRating || field.value)
+                            ? "text-yellow-400 fill-yellow-400"
+                            : "text-gray-300"
+                        }`}
+                        onMouseEnter={() => setHoverRating(star)}
+                        onMouseLeave={() => setHoverRating(0)}
+                        onClick={() => field.onChange(star)}
                       />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {/* Aspects */}
-              <FormField
-                control={control}
-                name="aspects"
-                render={() => (
-                  <FormItem>
-                    <FormLabel>What went well?</FormLabel>
-                    <FormControl>
-                      <div className="flex flex-wrap gap-2">
-                        <Controller
-                          name="aspects.friendliness"
-                          control={control}
-                          render={({ field }) => (
-                            <Button
-                              type="button"
-                              variant={
-                                aspects.friendliness ? "default" : "outline"
-                              }
-                              onClick={() => field.onChange(!field.value)}
-                              className="flex items-center"
-                            >
-                              <ThumbsUp className="w-4 h-4 mr-2" />
-                              Friendly
-                            </Button>
-                          )}
-                        />
-                        <Controller
-                          name="aspects.timeliness"
-                          control={control}
-                          render={({ field }) => (
-                            <Button
-                              type="button"
-                              variant={
-                                aspects.timeliness ? "default" : "outline"
-                              }
-                              onClick={() => field.onChange(!field.value)}
-                              className="flex items-center"
-                            >
-                              <Clock className="w-4 h-4 mr-2" />
-                              On Time
-                            </Button>
-                          )}
-                        />
-                        <Controller
-                          name="aspects.navigation"
-                          control={control}
-                          render={({ field }) => (
-                            <Button
-                              type="button"
-                              variant={
-                                aspects.navigation ? "default" : "outline"
-                              }
-                              onClick={() => field.onChange(!field.value)}
-                              className="flex items-center"
-                            >
-                              <Navigation2 className="w-4 h-4 mr-2" />
-                              Great Route
-                            </Button>
-                          )}
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </form>
-          </Form>
-        </CardContent>
-        <CardFooter>
+                    ))}
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* Comment */}
+          <FormField
+            control={control}
+            name="comment"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Additional Comments</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Tell us about your experience..."
+                    className="resize-none"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* Aspects */}
+          <FormField
+            control={control}
+            name="aspects"
+            render={() => (
+              <FormItem>
+                <FormLabel>What went well?</FormLabel>
+                <FormControl>
+                  <div className="flex flex-wrap gap-2">
+                    <Controller
+                      name="aspects.friendliness"
+                      control={control}
+                      render={({ field }) => (
+                        <Button
+                          type="button"
+                          variant={aspects.friendliness ? "default" : "outline"}
+                          onClick={() => field.onChange(!field.value)}
+                          className="flex items-center"
+                        >
+                          <ThumbsUp className="w-4 h-4 mr-2" />
+                          Friendly
+                        </Button>
+                      )}
+                    />
+                    <Controller
+                      name="aspects.timeliness"
+                      control={control}
+                      render={({ field }) => (
+                        <Button
+                          type="button"
+                          variant={aspects.timeliness ? "default" : "outline"}
+                          onClick={() => field.onChange(!field.value)}
+                          className="flex items-center"
+                        >
+                          <Clock className="w-4 h-4 mr-2" />
+                          On Time
+                        </Button>
+                      )}
+                    />
+                    <Controller
+                      name="aspects.navigation"
+                      control={control}
+                      render={({ field }) => (
+                        <Button
+                          type="button"
+                          variant={aspects.navigation ? "default" : "outline"}
+                          onClick={() => field.onChange(!field.value)}
+                          className="flex items-center"
+                        >
+                          <Navigation2 className="w-4 h-4 mr-2" />
+                          Great Route
+                        </Button>
+                      )}
+                    />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <Button
             onClick={handleSubmit(onSubmit)}
             disabled={loader}
@@ -320,8 +302,8 @@ const ReviewFormPage = ({ driver }) => {
             {loader && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Submit
             Review
           </Button>
-        </CardFooter>
-      </Card>
+        </form>
+      </Form>
       <AlertDialog open={showAlertDialog} onOpenChange={setShowAlertDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>

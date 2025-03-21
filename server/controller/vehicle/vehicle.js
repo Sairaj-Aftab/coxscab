@@ -46,6 +46,7 @@ export const createVehicle = async (req, res, next) => {
       vehicleTypeId,
       vehicleConditionId,
       registrationNo,
+      fcExpire,
       engineChassisNo,
       ownerName,
       ownerMobileNo,
@@ -87,6 +88,7 @@ export const createVehicle = async (req, res, next) => {
           : undefined,
         registrationNo,
         engineChassisNo,
+        fcExpire,
         ownerName,
         ownerMobileNo,
         ownerNidNo,
@@ -158,6 +160,7 @@ export const updateVehicle = async (req, res, next) => {
       vehicleTypeId,
       vehicleConditionId,
       registrationNo,
+      fcExpire,
       engineChassisNo,
       ownerName,
       ownerMobileNo,
@@ -174,7 +177,6 @@ export const updateVehicle = async (req, res, next) => {
       garageId,
       driverIds,
     } = req.body;
-    console.log(driverIds);
 
     let queryConditions = [];
 
@@ -215,6 +217,7 @@ export const updateVehicle = async (req, res, next) => {
           ? String(vehicleConditionId)
           : null,
         registrationNo,
+        fcExpire: fcExpire ? new Date(fcExpire).toISOString() : null,
         engineChassisNo,
         ownerName,
         ownerMobileNo,

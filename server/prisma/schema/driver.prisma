@@ -49,6 +49,7 @@ model Driver {
   user                   User[]   @relation("DriverToUser")
   ride                   Ride[]    @relation("DriverRides")
   reviewsReceived        Review[]  @relation("RevieweeReviews")
+  reportsReceived        Report[]  @relation("DriverReports")
   status                 Boolean   @default(true)
   trash                  Boolean   @default(false)
   createdAt              DateTime  @default(now())

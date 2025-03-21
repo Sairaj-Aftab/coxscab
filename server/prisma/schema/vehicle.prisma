@@ -34,6 +34,7 @@ model Vehicle {
   vehicleCondition    VehicleCondition? @relation(fields: [vehicleConditionId], references: [id], onDelete: Cascade)
   vehicleConditionId  String? @db.ObjectId
   registrationNo      String
+  fcExpire            DateTime?
   engineChassisNo     String?
   qrCode              String?
   ownerName           String?

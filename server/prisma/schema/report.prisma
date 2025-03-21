@@ -1,0 +1,26 @@
+model Report {
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  reportId       Int          @unique
+  reviewId       String?       @db.ObjectId
+  review         Review?       @relation(fields: [reviewId], references: [id])
+  rideId         String?     @db.ObjectId
+  ride           Ride?       @relation(fields: [rideId], references: [id])
+  reporterId     String?     @db.ObjectId //Passenger ID like User ID
+  reporter       User?       @relation("ReporterReports", fields: [reporterId], references: [id])
+  driverId       String     @db.ObjectId // Driver ID
+  driver         Driver     @relation(fields: [driverId], references: [id], name: "DriverReports")
+  reason         String
+  description    String?      // Additional details about the report
+  status         ReportStatus @default(PENDING)
+  ipAddress      String?      // IP address of the reporter
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime  @updatedAt
+  resolution     String?      // Notes on how the report was resolved
+}
+
+enum ReportStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  RESOLVED
+}

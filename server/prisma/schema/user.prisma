@@ -53,6 +53,7 @@ model User {
   updatedAt      DateTime   @updatedAt
   paymentMethods Payment[]   @relation("UserPayments")
   reviewsGiven   Review[]   @relation("ReviewerReviews")
+  reportsGiven   Report[]   @relation("ReporterReports")
   reviewsReceived Review[] @relation("RevieweeReviews")
   ride           Ride[]     @relation("PassengerRides")
 }

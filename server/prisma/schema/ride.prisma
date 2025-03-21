@@ -15,5 +15,6 @@ model Ride {
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
   reviews        Review[]   // Associated reviews
+  reports        Report[]   // Associated reviews
   payment        Payment?
 }

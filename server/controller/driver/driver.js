@@ -223,6 +223,20 @@ export const getDriver = async (req, res, next) => {
         driverStatus: true,
       },
     });
+    // Aggregate review stats
+    const reviewStats = await prisma.review.aggregate({
+      _count: true,
+      _avg: {
+        rating: true,
+      },
+      where: {
+        driverId: String(id),
+      },
+    });
+
+    // Extract the aggregated data
+    const totalReviewCount = reviewStats._count;
+    const averageRating = reviewStats._avg.rating;
     if (!driver) {
       return next(createError(400, "Driver not found!"));
     }
@@ -230,7 +244,9 @@ export const getDriver = async (req, res, next) => {
       driver.pictureUrl = await getObjectSignedUrl(driver.picture);
     }
 
-    return res.status(200).json({ driver, success: true });
+    return res
+      .status(200)
+      .json({ driver, totalReviewCount, averageRating, success: true });
   } catch (error) {
     return next(error);
   }

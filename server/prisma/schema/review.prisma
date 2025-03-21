@@ -27,4 +27,9 @@ model Review {
   isAnonymous    Boolean    @default(true)
   status         ReviewStatus @default(PENDING)
   createdAt      DateTime   @default(now())
+  updatedAt      DateTime?  @updatedAt
+
+  // Report-related fields
+  isReported     Boolean      @default(false)
+  report        Report[]     // Relation to reports
 }

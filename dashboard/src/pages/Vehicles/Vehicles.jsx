@@ -53,6 +53,21 @@ import { getGarages } from "@/service/garage.service";
 import useVehicleCondition from "@/store/useVehicleCondition";
 import useVehicleType from "@/store/useVehicleType";
 
+const formatDate = (dateString) => {
+  if (!dateString) return "N/A";
+  return new Date(dateString).toLocaleDateString("ko-KR");
+};
+
+// Add the InfoItem component before the Vehicles component
+const InfoItem = ({ label, value, fullWidth = false, customStyle = {} }) => (
+  <div className={fullWidth ? "col-span-2" : ""}>
+    <p className="text-sm font-medium text-gray-500">{label}</p>
+    <p className="mt-1 text-sm text-gray-900" style={customStyle}>
+      {value || "N/A"}
+    </p>
+  </div>
+);
+
 const FormSchema = z.object({
   vehicleTypeId: z.string().min(2, {
     message: "Type is required.",
@@ -60,6 +75,7 @@ const FormSchema = z.object({
   registrationNo: z.string().min(2, {
     message: "Registration number is required.",
   }),
+  fcExpire: z.string().optional(),
   vehicleConditionId: z.string().optional(), // Optional field
   engineChassisNo: z.string().optional(), // Optional field
   ownerName: z.string().optional(), // Optional field
@@ -85,6 +101,7 @@ const Vehicles = () => {
     defaultValues: {
       vehicleTypeId: "",
       registrationNo: "",
+      fcExpire: "",
       vehicleConditionId: "",
       engineChassisNo: "",
       ownerName: "",
@@ -283,6 +300,7 @@ const Vehicles = () => {
     form.setValue("vehicleConditionId", data.vehicleConditionId || "");
     form.setValue("registrationNo", data.registrationNo || "");
     form.setValue("engineChassisNo", data.engineChassisNo || "");
+    form.setValue("fcExpire", data.fcExpire ? data.fcExpire.split("T")[0] : "");
 
     // Set form values for owner details
     form.setValue("ownerName", data.ownerName || "");
@@ -407,6 +425,7 @@ const Vehicles = () => {
       style: {
         paddingLeft: "0",
       },
+      width: "170px",
     },
     {
       name: "QR",
@@ -425,6 +444,27 @@ const Vehicles = () => {
         padding: "0",
       },
     },
+    {
+      name: "FC Expire",
+      selector: (data) => data.fcExpire,
+      sortable: true,
+      cell: (data) => {
+        const currentDate = new Date();
+        const fcExpireDate = new Date(data?.fcExpire);
+        const isExpired = fcExpireDate < currentDate;
+
+        return (
+          <span
+            style={{
+              color: isExpired ? "red" : "inherit",
+              textDecoration: isExpired ? "line-through" : "none",
+            }}
+          >
+            {data.fcExpire && fcExpireDate.toLocaleDateString("ko-KR")}
+          </span>
+        );
+      },
+    },
 
     // {
     //   name: "Eng. Chass. No.",
@@ -435,6 +475,7 @@ const Vehicles = () => {
       name: "Owner Name",
       selector: (row) => row.ownerName,
       sortable: true,
+      width: "200px",
     },
     {
       name: "Father Name",
@@ -676,6 +717,31 @@ const Vehicles = () => {
                   )}
                 />
               </div>
+              {/* Fitness Expires Date */}
+              <FormField
+                control={form.control}
+                name="fcExpire"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel
+                      className={`${
+                        (createLoading || updateLoading) &&
+                        "cursor-not-allowed text-gray-400"
+                      }`}
+                    >
+                      FC Expiry Date
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="date"
+                        {...field}
+                        disabled={createLoading || updateLoading}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               {/* Owner Name and Mobile No */}
               <div className="flex flex-col md:flex-row gap-2">
                 <FormField
@@ -1218,7 +1284,7 @@ const Vehicles = () => {
       </div>
       {/* View details */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="sm:max-w-[625px]">
+        <DialogContent className="max-h-[95vh] sm:max-w-[625px] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Vehicle Details</DialogTitle>
             <DialogDescription>
@@ -1226,68 +1292,119 @@ const Vehicles = () => {
             </DialogDescription>
           </DialogHeader>
           {selectedVehicle && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              <div className="flex flex-col gap-2 border p-2 rounded-md">
-                <Label>Owner name</Label>
-                <p>{selectedVehicle.ownerName}</p>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <InfoItem
+                  label="Registration No"
+                  value={selectedVehicle.registrationNo}
+                />
+                <InfoItem
+                  label="Vehicle Type"
+                  value={selectedVehicle.vehicleType?.name}
+                />
+
+                {selectedVehicle.fcExpire && (
+                  <InfoItem
+                    label="FC Expire"
+                    value={formatDate(selectedVehicle.fcExpire)}
+                    customStyle={{
+                      color:
+                        new Date(selectedVehicle.fcExpire) < new Date()
+                          ? "red"
+                          : "inherit",
+                      textDecoration:
+                        new Date(selectedVehicle.fcExpire) < new Date()
+                          ? "line-through"
+                          : "none",
+                    }}
+                  />
+                )}
+
+                <InfoItem
+                  label="Vehicle Condition"
+                  value={selectedVehicle.vehicleCondition?.name}
+                />
+
+                <InfoItem
+                  label="Owner Name"
+                  value={selectedVehicle.ownerName}
+                />
+
+                <InfoItem
+                  label="Father's Name"
+                  value={selectedVehicle.fatherName}
+                />
+
+                <InfoItem
+                  label="Mobile Number"
+                  value={selectedVehicle.ownerMobileNo}
+                />
+
+                <InfoItem
+                  label="NID Number"
+                  value={selectedVehicle.ownerNidNo}
+                />
+
+                <InfoItem
+                  label="Engine/Chassis No"
+                  value={selectedVehicle.engineChassisNo}
+                />
+
+                <InfoItem
+                  label="Updated At"
+                  value={formatDate(selectedVehicle.updatedAt)}
+                />
+
+                <InfoItem
+                  label="Entry Date"
+                  value={formatDate(selectedVehicle.createdAt)}
+                />
               </div>
-              <div className="flex flex-col gap-2 border p-2 rounded-md">
-                <Label>Address</Label>
-                <p>
-                  {[
+
+              <div className="space-y-2">
+                <InfoItem
+                  label="Address"
+                  value={[
                     selectedVehicle?.ownerAddress?.village,
                     selectedVehicle?.ownerAddress?.holdingNo,
                     selectedVehicle?.ownerAddress?.wardNo,
                     selectedVehicle?.ownerAddress?.thana,
                     selectedVehicle?.ownerAddress?.district,
                   ]
-                    .filter(Boolean) // Filter out falsy values (e.g., null, undefined, "")
-                    .join(", ")}{" "}
-                  {/* Join with ", " */}
-                </p>
-              </div>
-              {selectedVehicle?.ownerMobileNo && (
-                <div className="flex flex-col gap-2 border p-2 rounded-md">
-                  <Label>Mobile number</Label>
-                  <p>{selectedVehicle?.ownerMobileNo}</p>
-                </div>
-              )}
-              {selectedVehicle?.engineChassisNo && (
-                <div className="flex flex-col gap-2 border p-2 rounded-md">
-                  <Label>Chesis No.</Label>
-                  <p>{selectedVehicle?.engineChassisNo}</p>
-                </div>
-              )}
-              {selectedVehicle?.drivers?.length > 0 && (
-                <div className="flex flex-col gap-2 border p-2 rounded-md">
-                  <Label>Driver ID</Label>
-                  <p>
-                    {selectedVehicle?.drivers
-                      ?.map((d) => d.coxscabId)
+                    .filter(Boolean)
+                    .join(", ")}
+                  fullWidth
+                />
+
+                {selectedVehicle.followUpByAuthority && (
+                  <InfoItem
+                    label="Report"
+                    value={selectedVehicle.followUpByAuthority}
+                    fullWidth
+                  />
+                )}
+
+                {selectedVehicle?.drivers?.length > 0 && (
+                  <InfoItem
+                    label="Drivers"
+                    value={selectedVehicle?.drivers
+                      ?.map((d) => `${d.coxscabId} - ${d.name}`)
                       .join(", ")}
-                  </p>
-                </div>
-              )}
-              {selectedVehicle?.drivers?.length > 0 && (
-                <div className="flex flex-col gap-2 border p-2 rounded-md">
-                  <Label>Driver name</Label>
-                  <p>
-                    {selectedVehicle?.drivers?.map((d) => d.name).join(", ")}
-                  </p>
-                </div>
-              )}
-              {selectedVehicle?.vehicleCondition && (
-                <div className="flex flex-col gap-2 border p-2 rounded-md">
-                  <Label>Vehicle condition</Label>
-                  <p>{selectedVehicle?.vehicleCondition?.name}</p>
-                </div>
-              )}
-              {selectedVehicle?.followUpByAuthority && (
-                <div className="flex flex-col gap-2 border p-2 rounded-md">
-                  <Label>Report</Label>
-                  <p>{selectedVehicle?.followUpByAuthority}</p>
-                </div>
-              )}
+                    fullWidth
+                  />
+                )}
+              </div>
+
+              <div className="flex justify-center">
+                <img
+                  src={
+                    selectedVehicle.qrCode ||
+                    "/placeholder.svg?height=128&width=128"
+                  }
+                  alt="QR Code"
+                  className="w-32 h-32"
+                />
+              </div>
             </div>
           )}
           <DialogFooter>
