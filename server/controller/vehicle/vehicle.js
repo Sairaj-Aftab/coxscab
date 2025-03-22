@@ -88,7 +88,7 @@ export const createVehicle = async (req, res, next) => {
           : undefined,
         registrationNo,
         engineChassisNo,
-        fcExpire,
+        fcExpire: fcExpire ? new Date(fcExpire).toISOString() : null,
         ownerName,
         ownerMobileNo,
         ownerNidNo,
