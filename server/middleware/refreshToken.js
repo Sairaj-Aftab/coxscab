@@ -46,7 +46,7 @@ export const refreshToken = async (req, res) => {
         .json({ success: false, message: "Invalid or expired refresh token." });
     }
 
-    const newAccessToken = createToken({ id: user.id });
+    const newAccessToken = createToken({ id: user.id }, "1d");
     const newRefreshToken = createRefreshToken({ id: user.id }, "1y");
     // console.log(isValidToken);
     // const ref = await prisma.userRefreshToken.update({

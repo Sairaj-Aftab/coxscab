@@ -80,8 +80,20 @@ export const createDriver = async (req, res, next) => {
       }
     }
 
+    // Get the last entry and increment the serial number
+    const lastEntry = await prisma.driver.findFirst({
+      orderBy: {
+        coxscabId: "desc", // Sorting by the serial number to get the last one
+      },
+      select: { coxscabId: true },
+    });
+
+    // Set the new serial number (if there's no previous entry, start from 1)
+    const newReviewId = lastEntry ? parseInt(lastEntry.coxscabId) + 1 : 1;
+
     const driver = await prisma.driver.create({
       data: {
+        coxscabId: String(newReviewId),
         name,
         nameBn,
         fatherName,
